@@ -41,11 +41,11 @@ class API(object):
         data = r.json()
         if data:
             if u'error' in data:
-                return None, data[u'error']
+                raise MyGeotabException(data[u'error'])
             if u'result' in data:
-                return data[u'result'], None
-            return data, None
-        return None, None
+                return data[u'result']
+            return data
+        return None
 
     def call(self, method, parameters):
         if method is None:
@@ -54,34 +54,37 @@ class API(object):
             parameters = {}
         if self.credentials is None:
             self.authenticate()
-        if not 'credentials' in parameters:
-            parameters['credentials'] = self.credentials
+        if not 'credentials' in parameters and self.credentials.session_id:
+            parameters['credentials'] = self.credentials.get_param()
 
-        result, error = self._call_base(method, parameters)
-        if result is not None:
-            self._reauthorize_count = 0
-            return result, error
-        else:
-            if self._reauthorize_count == 0 \
-                    and len(error[u'errors']) > 0 and error[u'errors'][0][u'name'] == 'InvalidUserException':
+        try:
+            result = self._call_base(method, parameters)
+            if result is not None:
+                self._reauthorize_count = 0
+                return result
+        except MyGeotabException as exception:
+            if exception.name == 'InvalidUserException':
                 self._reauthorize_count += 1
                 self.authenticate()
                 return self.call(method, parameters)
-            return None, error
+            raise exception
+        return None
 
     def authenticate(self):
         auth_data = dict(database=self.database, userName=self.username, password=self.password)
         auth_data['global'] = True
-        result, error = self._call_base('Authenticate', auth_data)
-        if result:
-            server = result[u'path']
-            if server != 'ThisServer':
-                self.server = server
-            creds = result[u'credentials']
-            self.credentials = Credentials(creds[u'userName'], creds[u'sessionId'], creds[u'database'], self.server)
-            self.password = None
-            return self.credentials
-        raise AuthenticationException("Cannot authenticate '{0}@{1}': {2}".format(self.username, self.database, error))
+        try:
+            result = self._call_base('Authenticate', auth_data)
+            if result:
+                server = result[u'path']
+                if server != 'ThisServer':
+                    self.server = server
+                creds = result[u'credentials']
+                self.credentials = Credentials(creds[u'userName'], creds[u'sessionId'], creds[u'database'], self.server)
+                self.password = None
+                return self.credentials
+        except MyGeotabException as exception:
+            raise AuthenticationException(self.username, self.database, exception)
 
 
 class Credentials(object):
@@ -96,5 +99,23 @@ class Credentials(object):
         return json.dumps(dict(userName=self.username, sessionId=self.session_id, database=self.database))
 
 
+class MyGeotabException(Exception):
+    def __init__(self, full_error):
+        self._full_error = full_error
+        main_error = full_error[u'errors'][0]
+        self.name = main_error[u'name']
+        self.message = main_error[u'message']
+        self.stack_trace = main_error[u'stackTrace']
+
+    def __str__(self):
+        return '{0}\n\t{1}\n\nStack:\n\t{2}'.format(self.name, self.message, self.stack_trace)
+
+
 class AuthenticationException(Exception):
-    pass
+    def __init__(self, username, database, base_exception):
+        self.username = username
+        self.database = database
+        self.base_exception = base_exception
+
+    def __str__(self):
+        return 'Cannot authenticate \'{0}@{1}\'\n\n{2}'.format(self.username, self.database, self.base_exception)
