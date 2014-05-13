@@ -16,6 +16,7 @@ setup(
         'click'
     ],
     test_suite="tests",
+    include_package_data=True,
     packages=find_packages(),
     entry_points='''
         [console_scripts]

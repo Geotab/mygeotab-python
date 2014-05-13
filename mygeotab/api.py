@@ -95,6 +95,9 @@ class Credentials(object):
         self.server = server
         self.password = password
 
+    def __str__(self):
+        return '{0} @ {1}/{2}'.format(self.username, self.server, self.database)
+
     def get_param(self):
         return json.dumps(dict(userName=self.username, sessionId=self.session_id, database=self.database))
 
