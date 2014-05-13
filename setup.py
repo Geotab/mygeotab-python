@@ -12,8 +12,13 @@ setup(
     url='https://my.geotab.com/sdk',
     long_description=open('README.rst').read(),
     install_requires=[
-        'requests'
+        'requests',
+        'click'
     ],
     test_suite="tests",
     packages=find_packages(),
+    entry_points='''
+        [console_scripts]
+        mygeotab=mygeotab.cli:main
+    ''',
 )
