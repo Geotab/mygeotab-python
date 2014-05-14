@@ -39,11 +39,11 @@ class Session(object):
         sys.exit(0)
 
 
-@click.command()
+@click.command(help='Log in to a MyGeotab server')
 @click.argument('username')
 @click.password_option()
-@click.option('--database', default=None)
-@click.option('--server', default=None)
+@click.option('--database', default=None, help='The company name or database name')
+@click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
 @click.pass_obj
 def login(session, username, password, database, server):
     session.login(username, password, database, server)
@@ -51,16 +51,16 @@ def login(session, username, password, database, server):
         click.echo('%s' % session.api.credentials)
 
 
-@click.command()
+@click.command(help='Log out from a MyGeotab server')
 @click.pass_obj
 def logout(session):
     session.logout()
 
-@click.command()
+@click.command(help="Launch a MyGeotab console")
 @click.pass_obj
 def play(session):
     if not session.api:
-        click.echo("Not logged in. Please login using the `mygeotab login` command")
+        click.echo("Not logged in. Please login using the `login` command to set up this console")
         sys.exit(1)
     methods = dict(api=session.api)
     code.interact(
@@ -74,6 +74,13 @@ def play(session):
 @click.group()
 @click.pass_context
 def main(ctx):
+    """An interactive Python API console for MyGeotab
+
+    First, please use the `login` command to login and store credentials
+
+    Then, you can use `play` to use the console. The credentials are stored on your filesystem, so there's no need to
+    login each time you want to use the console.
+    """
     try:
         ctx.obj = pickle.load(open(Session.get_save_path()))
     except IOError:
