@@ -1,4 +1,7 @@
-import code
+try:
+    from IPython import embed as interact
+except ImportError:
+    from code import interact
 import os.path
 import pickle
 import sys
@@ -68,7 +71,13 @@ def play(session):
     python_version = 'Python {0} on {1}'.format(sys.version.replace('\n', ''), sys.platform)
     has_credentials = session.api and session.api.credentials
     auth_line = ('Logged in as: %s' % session.api.credentials) if has_credentials else 'Not logged in'
-    code.interact('\n'.join([mygeotab_version, python_version, auth_line]), local=methods)
+    banner = '\n'.join([mygeotab_version, python_version, auth_line])
+    try:
+        from IPython import embed
+        embed(banner1=banner, user_ns=methods)
+    except ImportError:
+        import code
+        code.interact(banner, local=methods)
 
 
 @click.group()
