@@ -47,7 +47,7 @@ class API(object):
             return data
         return None
 
-    def call(self, method, parameters=None):
+    def call(self, method, **parameters):
         if method is None:
             raise Exception("Must specify a method name")
         if parameters is None:

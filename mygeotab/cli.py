@@ -56,6 +56,7 @@ def login(session, username, password, database, server):
 def logout(session):
     session.logout()
 
+
 @click.command(help="Launch a MyGeotab console")
 @click.pass_obj
 def play(session):
@@ -63,12 +64,11 @@ def play(session):
         click.echo("Not logged in. Please login using the `login` command to set up this console")
         sys.exit(1)
     methods = dict(api=session.api)
-    code.interact(
-        'MyGeotab Python Library {0}\nPython {1} on {2}\n{3}'.format(mygeotab.__version__,
-                                                                     sys.version.replace('\n', ''),
-                                                                     sys.platform,
-                                                                     session.api.credentials if session.api and session.api.credentials else 'Not logged in'),
-        local=methods)
+    mygeotab_version = 'MyGeotab Python Library {0}'.format(mygeotab.__version__)
+    python_version = 'Python {0} on {1}'.format(sys.version.replace('\n', ''), sys.platform)
+    has_credentials = session.api and session.api.credentials
+    auth_line = ('Logged in as: %s' % session.api.credentials) if has_credentials else 'Not logged in'
+    code.interact('\n'.join([mygeotab_version, python_version, auth_line]), local=methods)
 
 
 @click.group()
