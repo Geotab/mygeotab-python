@@ -47,7 +47,7 @@ class API(object):
             return data
         return None
 
-    def call(self, method, parameters):
+    def call(self, method, parameters=None):
         if method is None:
             raise Exception("Must specify a method name")
         if parameters is None:
@@ -99,7 +99,7 @@ class Credentials(object):
         return '{0} @ {1}/{2}'.format(self.username, self.server, self.database)
 
     def get_param(self):
-        return json.dumps(dict(userName=self.username, sessionId=self.session_id, database=self.database))
+        return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
 
 class MyGeotabException(Exception):
