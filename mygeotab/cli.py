@@ -1,7 +1,3 @@
-try:
-    from IPython import embed as interact
-except ImportError:
-    from code import interact
 import os.path
 import pickle
 import sys
@@ -49,9 +45,12 @@ class Session(object):
 @click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
 @click.pass_obj
 def login(session, username, password, database, server):
-    session.login(username, password, database, server)
-    if session.api:
-        click.echo('%s' % session.api.credentials)
+    try:
+        session.login(username, password, database, server)
+        if session.api:
+            click.echo('Logged in as: %s' % session.api.credentials)
+    except mygeotab.api.AuthenticationException:
+        click.echo('Incorrect credentials. Please try again.')
 
 
 @click.command(help='Log out from a MyGeotab server')
@@ -74,9 +73,11 @@ def play(session):
     banner = '\n'.join([mygeotab_version, python_version, auth_line])
     try:
         from IPython import embed
+
         embed(banner1=banner, user_ns=methods)
     except ImportError:
         import code
+
         code.interact(banner, local=methods)
 
 
@@ -85,10 +86,10 @@ def play(session):
 def main(ctx):
     """An interactive Python API console for MyGeotab
 
-    First, please use the `login` command to login and store credentials
+    First, please run the `login` command to log in and store credentials.
 
-    Then, you can use `play` to use the console. The credentials are stored on your filesystem, so there's no need to
-    login each time you want to use the console.
+    Then use `play` to use the console. The credentials are stored on your filesystem, so there's no need to
+    log in each time you want to use the console.
     """
     try:
         ctx.obj = pickle.load(open(Session.get_save_path()))

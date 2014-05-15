@@ -37,7 +37,7 @@ class API(object):
     def _call_base(self, method, parameters):
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        r = requests.post(self._get_server(), data=json.dumps(params), headers=headers, allow_redirects=True)
+        r = requests.post(self._get_server(), data=json.dumps(params), headers=headers, allow_redirects=True, verify=False)
         data = r.json()
         if data:
             if u'error' in data:
@@ -79,12 +79,16 @@ class API(object):
                 server = result[u'path']
                 if server != 'ThisServer':
                     self.server = server
-                creds = result[u'credentials']
-                self.credentials = Credentials(creds[u'userName'], creds[u'sessionId'], creds[u'database'], self.server)
+                c = result[u'credentials']
+                self.credentials = Credentials(c[u'userName'], c[u'sessionId'], c[u'database'], self.server)
                 self.password = None
                 return self.credentials
         except MyGeotabException as exception:
-            raise AuthenticationException(self.username, self.database, exception)
+            if exception.name == 'InvalidUserException':
+                database_name = self.credentials.database if self.credentials else self.database
+                server_name = self.credentials.server if self.credentials else self.server
+                raise AuthenticationException(self.username, database_name, server_name)
+            raise exception
 
 
 class Credentials(object):
@@ -115,10 +119,10 @@ class MyGeotabException(Exception):
 
 
 class AuthenticationException(Exception):
-    def __init__(self, username, database, base_exception):
+    def __init__(self, username, database, server):
         self.username = username
         self.database = database
-        self.base_exception = base_exception
+        self.server = server
 
     def __str__(self):
-        return 'Cannot authenticate \'{0}@{1}\'\n\n{2}'.format(self.username, self.database, self.base_exception)
+        return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server, self.database)
