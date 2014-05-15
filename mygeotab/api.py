@@ -23,8 +23,10 @@ class API(object):
 
     @staticmethod
     def load(credentials):
-        return API(username=credentials.username, session_id=credentials.session_id, database=credentials.database,
-                   server=credentials.server)
+        api = API(username=credentials.username, session_id=credentials.session_id, database=credentials.database,
+                  server=credentials.server)
+        api.credentials = credentials
+        return api
 
     def _get_server(self):
         if not self.server:
@@ -94,8 +96,8 @@ class API(object):
 
 
 class Credentials(object):
-    def __init__(self, user_name, session_id, database, server, password=None):
-        self.username = user_name
+    def __init__(self, username, session_id, database, server, password=None):
+        self.username = username
         self.session_id = session_id
         self.database = database
         self.server = server
