@@ -47,11 +47,13 @@ class API(object):
             return data
         return None
 
-    def call(self, method, **parameters):
+    def call(self, method, type_name=None, **parameters):
         if method is None:
             raise Exception("Must specify a method name")
         if parameters is None:
             parameters = {}
+        if type_name:
+            parameters['typeName'] = type_name
         if self.credentials is None:
             self.authenticate()
         if not 'credentials' in parameters and self.credentials.session_id:
