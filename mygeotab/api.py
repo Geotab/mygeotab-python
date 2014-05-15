@@ -37,7 +37,7 @@ class API(object):
     def _call_base(self, method, parameters):
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        r = requests.post(self._get_server(), data=json.dumps(params), headers=headers, allow_redirects=True, verify=False)
+        r = requests.post(self._get_server(), data=json.dumps(params), headers=headers, allow_redirects=True)
         data = r.json()
         if data:
             if u'error' in data:
