@@ -30,7 +30,7 @@ class Session(object):
             config.set('credentials', 'session_id', self.credentials.session_id)
             config.set('credentials', 'database', self.credentials.database)
             config.set('credentials', 'server', self.credentials.server)
-            with open(self.get_config_file(), 'wb') as configfile:
+            with open(self.get_config_file(), 'w', encoding='utf8') as configfile:
                 config.write(configfile)
 
     def load(self):
@@ -45,12 +45,12 @@ class Session(object):
 
     def get_api(self):
         if self.credentials:
-            return mygeotab.api.API.load(self.credentials)
+            return mygeotab.api.API(credentials=self.credentials)
         return None
 
     def login(self, username, password=None, database=None, server=None):
         if server:
-            api = mygeotab.api.API(username, password, database, None, server)
+            api = mygeotab.api.API(username, password, database, server)
         else:
             api = mygeotab.api.API(username, password, database)
         self.credentials = api.authenticate()
