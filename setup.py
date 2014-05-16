@@ -16,7 +16,7 @@ setup(
         'click'
     ],
     extras_require = {
-        'ipython_cli': ['ipython']
+        'ipy': ['ipython']
     },
     test_suite="tests",
     include_package_data=True,

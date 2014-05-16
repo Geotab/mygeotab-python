@@ -29,12 +29,13 @@ class Session(object):
 
     def load(self):
         config = ConfigParser.ConfigParser()
-        config.read(self.get_config_file())
-        username = config.get('credentials', 'username')
-        session_id = config.get('credentials', 'session_id')
-        database = config.get('credentials', 'database')
-        server = config.get('credentials', 'server')
-        self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
+        data = config.read(self.get_config_file())
+        if len(data) > 0:
+            username = config.get('credentials', 'username')
+            session_id = config.get('credentials', 'session_id')
+            database = config.get('credentials', 'database')
+            server = config.get('credentials', 'server')
+            self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
 
     def get_api(self):
         if self.credentials:
@@ -78,12 +79,12 @@ def logout(session):
 
 @click.command(help="Launch a MyGeotab console")
 @click.pass_obj
-def play(session):
+def console(session):
     if not session.credentials:
         click.echo("Not logged in. Please login using the `login` command to set up this console")
         sys.exit(1)
     methods = dict(api=session.get_api())
-    mygeotab_version = 'MyGeotab Python Library {0}'.format(mygeotab.__version__)
+    mygeotab_version = 'MyGeotab Python Console {0}'.format(mygeotab.__version__)
     python_version = 'Python {0} on {1}'.format(sys.version.replace('\n', ''), sys.platform)
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
     banner = '\n'.join([mygeotab_version, python_version, auth_line])
@@ -114,7 +115,7 @@ def main(ctx):
         pass
 
 
-main.add_command(play)
+main.add_command(console)
 main.add_command(login)
 main.add_command(logout)
 
