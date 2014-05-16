@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import urlparse
+from __future__ import unicode_literals
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 import json
 
 import requests
@@ -31,7 +36,7 @@ class API(object):
     def _get_server(self):
         if not self.server:
             self.server = 'my.geotab.com'
-        parsed = urlparse.urlparse(self.server)
+        parsed = urlparse(self.server)
         base_url = parsed.netloc if parsed.netloc else parsed.path
         base_url.replace('/', '')
         return 'https://' + base_url + '/apiv1'
@@ -42,10 +47,10 @@ class API(object):
         r = requests.post(self._get_server(), data=json.dumps(params), headers=headers, allow_redirects=True)
         data = r.json()
         if data:
-            if u'error' in data:
-                raise MyGeotabException(data[u'error'])
-            if u'result' in data:
-                return data[u'result']
+            if 'error' in data:
+                raise MyGeotabException(data['error'])
+            if 'result' in data:
+                return data['result']
             return data
         return None
 
@@ -80,11 +85,11 @@ class API(object):
         try:
             result = self._call_base('Authenticate', auth_data)
             if result:
-                server = result[u'path']
+                server = result['path']
                 if server != 'ThisServer':
                     self.server = server
-                c = result[u'credentials']
-                self.credentials = Credentials(c[u'userName'], c[u'sessionId'], c[u'database'], self.server)
+                c = result['credentials']
+                self.credentials = Credentials(c['userName'], c['sessionId'], c['database'], self.server)
                 self.password = None
                 return self.credentials
         except MyGeotabException as exception:
@@ -113,10 +118,10 @@ class Credentials(object):
 class MyGeotabException(Exception):
     def __init__(self, full_error):
         self._full_error = full_error
-        main_error = full_error[u'errors'][0]
-        self.name = main_error[u'name']
-        self.message = main_error[u'message']
-        self.stack_trace = main_error[u'stackTrace']
+        main_error = full_error['errors'][0]
+        self.name = main_error['name']
+        self.message = main_error['message']
+        self.stack_trace = main_error['stackTrace']
 
     def __str__(self):
         return '{0}\n\t{1}\n\nStack:\n\t{2}'.format(self.name, self.message, self.stack_trace)

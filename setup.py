@@ -15,7 +15,7 @@ setup(
         'requests',
         'click'
     ],
-    extras_require = {
+    extras_require={
         'ipy': ['ipython']
     },
     test_suite="tests",

@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import os.path
-import ConfigParser
+
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 import sys
 
 import click
@@ -18,7 +24,7 @@ class Session(object):
 
     def save(self):
         if self.credentials:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.add_section('credentials')
             config.set('credentials', 'username', self.credentials.username)
             config.set('credentials', 'session_id', self.credentials.session_id)
@@ -28,7 +34,7 @@ class Session(object):
                 config.write(configfile)
 
     def load(self):
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         data = config.read(self.get_config_file())
         if len(data) > 0:
             username = config.get('credentials', 'username')
