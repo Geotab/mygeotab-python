@@ -14,25 +14,33 @@ import requests
 class API(object):
     _reauthorize_count = 0
 
-    def __init__(self, username=None, password=None, database=None, server='my.geotab.com', credentials=None):
+    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com'):
         """
         Creates a new instance of this simple Pythonic wrapper for the MyGeotab API.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
         :param password: The password associated with the username. Optional if `session_id` is provided.
         :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+        :param session_id: A session ID, assigned by the server.
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
-        :param credentials: Create the API from an existing Credential object.
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
-        if credentials:
-            self.credentials = credentials
-        else:
-            if username is None:
-                raise Exception('`username` cannot be None')
-            if password is None and session_id is None:
-                raise Exception('`password` and `session_id` must not both be None')
-            self.credentials = Credentials(username, None, database, server, password)
+        if username is None:
+            raise Exception('`username` cannot be None')
+        if password is None and session_id is None:
+            raise Exception('`password` and `session_id` must not both be None')
+        self.credentials = Credentials(username, session_id, database, server, password)
+
+    @staticmethod
+    def from_credentials(credentials):
+        """
+        Returns a new API object from an existing Credentials object
+
+        :param credentials: The existing saved credentials
+        :return: A new API object populated with MyGeotab credentials
+        """
+        return API(username=credentials.username, password=credentials.password, database=credentials.database,
+                   session_id=credentials.session_id, server=credentials.server)
 
     def _get_api_url(self):
         """

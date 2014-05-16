@@ -19,7 +19,7 @@ class Session(object):
         self.credentials = None
 
     @staticmethod
-    def get_config_file():
+    def _get_config_file():
         return os.path.join(os.path.expanduser('~'), '.mygeotabsession')
 
     def save(self):
@@ -30,14 +30,14 @@ class Session(object):
             config.set('credentials', 'session_id', self.credentials.session_id)
             config.set('credentials', 'database', self.credentials.database)
             config.set('credentials', 'server', self.credentials.server)
-            with open(self.get_config_file(), 'w', encoding='utf8') as configfile:
+            with open(self._get_config_file(), 'w') as configfile:
                 config.write(configfile)
         else:
-            open(self.get_config_file(), 'w').close()
+            open(self._get_config_file(), 'w').close()
 
     def load(self):
         config = configparser.ConfigParser()
-        config.read(self.get_config_file())
+        config.read(self._get_config_file())
         try:
             username = config.get('credentials', 'username')
             session_id = config.get('credentials', 'session_id')
@@ -49,7 +49,7 @@ class Session(object):
 
     def get_api(self):
         if self.credentials:
-            return mygeotab.api.API(credentials=self.credentials)
+            return mygeotab.api.API.from_credentials(self.credentials)
         return None
 
     def login(self, username, password=None, database=None, server=None):
@@ -133,6 +133,7 @@ def console(session):
 
 
 @click.group()
+@click.version_option()
 @click.pass_context
 def main(ctx):
     """MyGeotab Python SDK command line tools
