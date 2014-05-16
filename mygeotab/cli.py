@@ -32,16 +32,20 @@ class Session(object):
             config.set('credentials', 'server', self.credentials.server)
             with open(self.get_config_file(), 'w', encoding='utf8') as configfile:
                 config.write(configfile)
+        else:
+            open(self.get_config_file(), 'w').close()
 
     def load(self):
         config = configparser.ConfigParser()
-        data = config.read(self.get_config_file())
-        if len(data) > 0:
+        config.read(self.get_config_file())
+        try:
             username = config.get('credentials', 'username')
             session_id = config.get('credentials', 'session_id')
             database = config.get('credentials', 'database')
             server = config.get('credentials', 'server')
             self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
+        except configparser.NoSectionError:
+            self.credentials = None
 
     def get_api(self):
         if self.credentials:
@@ -63,14 +67,23 @@ class Session(object):
 
 
 @click.command(help='Log in to a MyGeotab server')
-@click.argument('username')
+@click.option('--user', '-u', prompt='Username')
 @click.password_option()
 @click.option('--database', default=None, help='The company name or database name')
 @click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
 @click.pass_obj
-def login(session, username, password, database, server):
+def login(session, user, password, database, server):
+    """
+    Logs into a MyGeotab server and stores the returned credentials
+
+    :param session: The current Session object
+    :param username: The username used for MyGeotab servers. Usually an email address.
+    :param password: The password associated with the username. Optional if `session_id` is provided.
+    :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+    :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+    """
     try:
-        session.login(username, password, database, server)
+        session.login(user, password, database, server)
         if session.credentials:
             click.echo('Logged in as: %s' % session.credentials)
     except mygeotab.api.AuthenticationException:
@@ -80,12 +93,27 @@ def login(session, username, password, database, server):
 @click.command(help='Log out from a MyGeotab server')
 @click.pass_obj
 def logout(session):
+    """
+    Logs out from a MyGeotab server, removing the saved credentials
+
+    :param session: The current Session object
+    """
     session.logout()
 
 
-@click.command(help="Launch a MyGeotab console")
+@click.command(help="Launch an interactive MyGeotab console")
 @click.pass_obj
 def console(session):
+    """An interactive Python API console for MyGeotab
+
+    After logging in via the `login` command, the console automatically populates a variable, `api` with an instance
+    of the MyGeotab API object. The credentials are stored on your filesystem, so there's no need to log in each time
+    you use the console.
+
+    If IPython is installed, it will launch an interactive IPython console instead of the built-in Python console. The
+    IPython console has numerous advantages over the stock Python console, including: colors, pretty printing,
+    command auto-completion, and more
+    """
     if not session.credentials:
         click.echo("Not logged in. Please login using the `login` command to set up this console")
         sys.exit(1)
@@ -107,12 +135,9 @@ def console(session):
 @click.group()
 @click.pass_context
 def main(ctx):
-    """An interactive Python API console for MyGeotab
+    """MyGeotab Python SDK command line tools
 
-    First, please run the `login` command to log in and store credentials.
-
-    Then use `play` to use the console. The credentials are stored on your filesystem, so there's no need to
-    log in each time you want to use the console.
+    You must first `login` if this is your first time using these tools.
     """
     ctx.obj = Session()
     try:

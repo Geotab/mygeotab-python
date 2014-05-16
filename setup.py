@@ -23,6 +23,6 @@ setup(
     packages=find_packages(),
     entry_points='''
         [console_scripts]
-        mygeotab=mygeotab.cli:main
+        myg=mygeotab.cli:main
     ''',
 )
