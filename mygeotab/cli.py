@@ -54,9 +54,9 @@ class Session(object):
 
     def login(self, username, password=None, database=None, server=None):
         if server:
-            api = mygeotab.api.API(username, password, database, server)
+            api = mygeotab.api.API(username=username, password=password, database=database, server=server)
         else:
-            api = mygeotab.api.API(username, password, database)
+            api = mygeotab.api.API(username=username, password=password, database=database)
         self.credentials = api.authenticate()
         self.save()
 
