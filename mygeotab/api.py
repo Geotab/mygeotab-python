@@ -118,7 +118,7 @@ class API(object):
         :return: The JSON result (decoded into a dictionary) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        formatted_calls = [dict(call[0], call[1]) for call in calls]
+        formatted_calls = [dict(method=call[0], params=call[1]) for call in calls]
         return self.call('ExecuteMultiCall', calls=formatted_calls)
 
     def authenticate(self):
