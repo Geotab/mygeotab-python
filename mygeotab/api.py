@@ -84,7 +84,7 @@ class API(object):
         :param method: The method name.
         :param type_name: The type of data returned for generic methods (for example, 'Get')
         :param parameters: Additional parameters to send.
-        :return: The JSON-decoded result from the server
+        :return: The JSON result (decoded into a dictionary) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         if method is None:
@@ -110,6 +110,16 @@ class API(object):
                 return self.call(method, parameters)
             raise
         return None
+
+    def multi_call(self, *calls):
+        """
+        Performs a multi-call to the API
+        :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
+        :return: The JSON result (decoded into a dictionary) from the server
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        formatted_calls = [dict(call[0], call[1]) for call in calls]
+        return self.call('ExecuteMultiCall', calls=formatted_calls)
 
     def authenticate(self):
         """
