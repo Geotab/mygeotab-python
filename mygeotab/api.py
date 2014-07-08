@@ -190,10 +190,9 @@ class MyGeotabException(Exception):
         self.name = main_error['name']
         self.message = main_error['message']
         self.stack_trace = main_error['stackTrace']
-        print(self.stack_trace)
 
     def __str__(self):
-        return '{0}\n{1}\n\nStack:\n{2}'.format(self.name, self.message, self.stack_trace)
+        return '{0}\n{1}\n\nStacktrace:\n{2}'.format(self.name, self.message, self.stack_trace)
 
 
 class AuthenticationException(Exception):

@@ -115,9 +115,18 @@ def console(session):
     command auto-completion, and more
     """
     if not session.credentials:
-        click.echo("Not logged in. Please login using the `login` command to set up this console")
+        click.echo('Not logged in. Please login using the `login` command to set up this console')
         sys.exit(1)
-    methods = dict(api=session.get_api())
+    api = session.get_api()
+
+    try:
+        api.call('Get', 'User', search=dict(name=session.credentials.username))
+    except mygeotab.api.AuthenticationException:
+        click.echo('Your session has expired. Please login again using the `login` command')
+        session.logout()
+        sys.exit(1)
+
+    methods = dict(api=api)
     mygeotab_version = 'MyGeotab Python Console {0}'.format(mygeotab.__version__)
     python_version = 'Python {0} on {1}'.format(sys.version.replace('\n', ''), sys.platform)
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
