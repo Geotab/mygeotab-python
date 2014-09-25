@@ -67,7 +67,9 @@ class API(object):
         """
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        r = requests.post(self._get_api_url(), data=json.dumps(params), headers=headers, allow_redirects=True)
+        url = self._get_api_url()
+        is_live = not any(s in url for s in ['127.0.0.1', 'localhost'])
+        r = requests.post(url, data=json.dumps(params), headers=headers, allow_redirects=True, verify=is_live)
         data = r.json()
         if data:
             if 'error' in data:
