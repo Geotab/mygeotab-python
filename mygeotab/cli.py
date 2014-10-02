@@ -85,7 +85,7 @@ def login(session, user, password, database, server):
     try:
         session.login(user, password, database, server)
         if session.credentials:
-            click.echo('Logged in as: %s' % session.credentials)
+            click.echo('Logged in as: %s\n\nUse `myg console` to access the console.' % session.credentials)
     except mygeotab.api.AuthenticationException:
         click.echo('Incorrect credentials. Please try again.')
 
