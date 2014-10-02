@@ -6,7 +6,11 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
-import json
+
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 import requests
 
@@ -84,9 +88,9 @@ class API(object):
         Makes a call to the API.
 
         :param method: The method name.
-        :param type_name: The type of data returned for generic methods (for example, 'Get')
-        :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dictionary) from the server
+        :param type_name: The type of entity for generic methods (for example, 'Get')
+        :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
+        :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         if method is None:
@@ -117,11 +121,53 @@ class API(object):
         """
         Performs a multi-call to the API
         :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
-        :return: The JSON result (decoded into a dictionary) from the server
+        :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         formatted_calls = [dict(method=call[0], params=call[1]) for call in calls]
         return self.call('ExecuteMultiCall', calls=formatted_calls)
+
+    def get(self, type_name, **parameters):
+        """
+        Gets entities using the API. Shortcut for using call() with the 'Get' method.
+
+        :param type_name: The type of entity
+        :param parameters: Additional parameters to send.
+        :return: The JSON result (decoded into a dict) from the server
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        return self.call('Get', type_name, **parameters)
+
+    def add(self, type_name, entity):
+        """
+        Adds an entity using the API. Shortcut for using call() with the 'Add' method.
+
+        :param type_name: The type of entity
+        :param entity: The entity to add
+        :return: The id of the object added
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        return self.call('Add', type_name, entity=entity)
+
+    def set(self, type_name, entity):
+        """
+        Sets an entity using the API. Shortcut for using call() with the 'Set' method.
+
+        :param type_name: The type of entity
+        :param entity: The entity to set
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        return self.call('Set', type_name, entity=entity)
+
+    def remove(self, type_name, entity):
+        """
+        Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
+
+        :param type_name: The type of entity
+        :param entity: The entity to remove
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        return self.call('Remove', type_name, entity=entity)
 
     def authenticate(self):
         """
