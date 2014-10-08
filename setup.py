@@ -3,12 +3,10 @@
 
 from setuptools import setup, find_packages
 
-import mygeotab
-
 setup(
     name='mygeotab',
     author='Aaron Toth',
-    version=mygeotab.__version__,
+    version='0.1.1',
     url='https://my.geotab.com/sdk',
     long_description=open('README.rst').read(),
     install_requires=[
