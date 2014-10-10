@@ -6,12 +6,18 @@ try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
+import re
 import sys
 
 import click
 
 import mygeotab
 import mygeotab.api
+
+
+def get_federation_name(server):
+    m = re.match(r'^([a-zA-Z])[0-9]\.', server)
+    return m.group(0)
 
 
 class Session(object):
@@ -23,26 +29,39 @@ class Session(object):
         return os.path.join(os.path.expanduser('~'), '.mygeotabsession')
 
     def save(self):
-        if self.credentials:
-            config = configparser.ConfigParser()
-            config.add_section('credentials')
-            config.set('credentials', 'username', self.credentials.username)
-            config.set('credentials', 'session_id', self.credentials.session_id)
-            config.set('credentials', 'database', self.credentials.database)
-            config.set('credentials', 'server', self.credentials.server)
-            with open(self._get_config_file(), 'w') as configfile:
-                config.write(configfile)
-        else:
-            open(self._get_config_file(), 'w').close()
+        if not self.credentials:
+            return
+        config = configparser.ConfigParser()
+        config.read(self._get_config_file())
+        federation = get_federation_name(self.credentials.server)
+        section_name = federation + '/' + self.credentials.server
 
-    def load(self):
+        if federation not in config.sections():
+            config.add_section(section_name)
+        config.set(section_name, 'username', self.credentials.username)
+        config.set(section_name, 'session_id', self.credentials.session_id)
+        config.set(section_name, 'database', self.credentials.database)
+        config.set(section_name, 'server', self.credentials.server)
+
+        config.set('_mygeotab', 'last', section_name)
+
+        with open(self._get_config_file(), 'w') as configfile:
+            config.write(configfile)
+
+    def load(self, name=None):
         config = configparser.ConfigParser()
         config.read(self._get_config_file())
         try:
-            username = config.get('credentials', 'username')
-            session_id = config.get('credentials', 'session_id')
-            database = config.get('credentials', 'database')
-            server = config.get('credentials', 'server')
+            if name is None:
+                name = config.get('_mygeotab', 'last')
+            elif '\\' in name:
+                name = name.replace('\\', '/')
+            elif '/' not in name:
+                name = 'my/' + name
+            username = config.get(name, 'username')
+            session_id = config.get(name, 'session_id')
+            database = config.get(name, 'database')
+            server = config.get(name, 'server')
             self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
         except configparser.NoSectionError:
             self.credentials = None
@@ -102,8 +121,9 @@ def logout(session):
 
 
 @click.command(help="Launch an interactive MyGeotab console")
+@click.argument('name', nargs=1)
 @click.pass_obj
-def console(session):
+def console(session, name=None):
     """An interactive Python API console for MyGeotab
 
     After logging in via the `login` command, the console automatically populates a variable, `api` with an instance
