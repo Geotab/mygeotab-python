@@ -68,6 +68,16 @@ class Session(object):
         except configparser.NoSectionError:
             self.credentials = None
 
+    def get_sessions(self):
+        config = configparser.ConfigParser()
+        config.read(self._get_config_file())
+        active_sessions = []
+        if config:
+            for session in config.sections():
+                if session is not '_config':
+                    active_sessions.append(session)
+        return active_sessions
+
     def get_api(self):
         if self.credentials:
             return mygeotab.api.API.from_credentials(self.credentials)
@@ -109,6 +119,13 @@ def login(session, user, password, database, server):
             click.echo('Logged in as: %s\n\nUse `mygeotab console` to access the console.' % session.credentials)
     except mygeotab.api.AuthenticationException:
         click.echo('Incorrect credentials. Please try again.')
+
+
+@click.command(help='Lists active sessions')
+@click.pass_obj
+def sessions(session):
+    for active_session in session.get_sessions():
+        click.echo(active_session)
 
 
 @click.command(help='Log out from a MyGeotab server')
@@ -182,6 +199,7 @@ def main(ctx):
 main.add_command(console)
 main.add_command(login)
 main.add_command(logout)
+main.add_command(sessions)
 
 if __name__ == '__main__':
     main()
