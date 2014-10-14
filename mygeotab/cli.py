@@ -16,8 +16,8 @@ import mygeotab.api
 
 
 def get_federation_name(server):
-    m = re.match(r'^([a-zA-Z])[0-9]\.', server)
-    return m.group(0)
+    m = re.match(r'^([a-zA-Z]+)[0-9].', server)
+    return m.group(1)
 
 
 class Session(object):
@@ -34,7 +34,11 @@ class Session(object):
         config = configparser.ConfigParser()
         config.read(self._get_config_file())
         federation = get_federation_name(self.credentials.server)
-        section_name = federation + '/' + self.credentials.server
+        section_name = federation + '/' + self.credentials.database
+
+        if '_config' not in config.sections():
+            config.add_section('_config')
+        config.set('_config', 'last', section_name)
 
         if federation not in config.sections():
             config.add_section(section_name)
@@ -42,8 +46,6 @@ class Session(object):
         config.set(section_name, 'session_id', self.credentials.session_id)
         config.set(section_name, 'database', self.credentials.database)
         config.set(section_name, 'server', self.credentials.server)
-
-        config.set('_mygeotab', 'last', section_name)
 
         with open(self._get_config_file(), 'w') as configfile:
             config.write(configfile)
@@ -53,7 +55,7 @@ class Session(object):
         config.read(self._get_config_file())
         try:
             if name is None:
-                name = config.get('_mygeotab', 'last')
+                name = config.get('_config', 'last')
             elif '\\' in name:
                 name = name.replace('\\', '/')
             elif '/' not in name:
@@ -121,7 +123,7 @@ def logout(session):
 
 
 @click.command(help="Launch an interactive MyGeotab console")
-@click.argument('name', nargs=1)
+@click.argument('name', nargs=1, required=False)
 @click.pass_obj
 def console(session, name=None):
     """An interactive Python API console for MyGeotab
@@ -137,6 +139,7 @@ def console(session, name=None):
     if not session.credentials:
         click.echo('Not logged in. Please login using the `login` command to set up this console')
         sys.exit(1)
+    session.load(name)
     api = session.get_api()
 
     try:
