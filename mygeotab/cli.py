@@ -6,18 +6,12 @@ try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
-import re
 import sys
 
 import click
 
 import mygeotab
 import mygeotab.api
-
-
-def get_federation_name(server):
-    m = re.match(r'^([a-zA-Z]+)[0-9].', server)
-    return m.group(1)
 
 
 class Session(object):
@@ -33,19 +27,18 @@ class Session(object):
             return
         config = configparser.ConfigParser()
         config.read(self._get_config_file())
-        federation = get_federation_name(self.credentials.server)
-        section_name = federation + '/' + self.credentials.database
+        database = self.credentials.database
 
         if '_config' not in config.sections():
             config.add_section('_config')
-        config.set('_config', 'last', section_name)
+        config.set('_config', 'last', database)
 
-        if federation not in config.sections():
-            config.add_section(section_name)
-        config.set(section_name, 'username', self.credentials.username)
-        config.set(section_name, 'session_id', self.credentials.session_id)
-        config.set(section_name, 'database', self.credentials.database)
-        config.set(section_name, 'server', self.credentials.server)
+        if database not in config.sections():
+            config.add_section(database)
+        config.set(database, 'username', self.credentials.username)
+        config.set(database, 'session_id', self.credentials.session_id)
+        config.set(database, 'database', self.credentials.database)
+        config.set(database, 'server', self.credentials.server)
 
         with open(self._get_config_file(), 'w') as configfile:
             config.write(configfile)
@@ -56,10 +49,6 @@ class Session(object):
         try:
             if name is None:
                 name = config.get('_config', 'last')
-            elif '\\' in name:
-                name = name.replace('\\', '/')
-            elif '/' not in name:
-                name = 'my/' + name
             username = config.get(name, 'username')
             session_id = config.get(name, 'session_id')
             database = config.get(name, 'database')
@@ -74,7 +63,7 @@ class Session(object):
         active_sessions = []
         if config:
             for session in config.sections():
-                if session is not '_config':
+                if session != '_config':
                     active_sessions.append(session)
         return active_sessions
 
@@ -99,7 +88,7 @@ class Session(object):
 
 @click.command(help='Log in to a MyGeotab server')
 @click.option('--user', '-u', prompt='Username')
-@click.password_option()
+@click.option('--password', '-p', prompt='Password', hide_input=True)
 @click.option('--database', default=None, help='The company name or database name')
 @click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
 @click.pass_obj
