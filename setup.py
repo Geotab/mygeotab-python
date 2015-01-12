@@ -21,7 +21,7 @@ setup(
     test_suite="tests",
     include_package_data=True,
     packages=find_packages(),
-    package_data={'': ['LICENSE', 'NOTICE']},
+    package_data={'': ['LICENSE']},
     package_dir={'mygeotab': 'mygeotab'},
     license='Apache 2.0',
     entry_points='''
