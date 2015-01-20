@@ -20,7 +20,22 @@ class Session(object):
 
     @staticmethod
     def _get_config_file():
-        return os.path.join(os.path.expanduser('~'), '.mygeotabsession')
+        return os.path.join(os.path.expanduser('~'), '.mygeotab')
+
+    @staticmethod
+    def _section_name(database):
+        return 'session:{0}'.format(database)
+
+    @staticmethod
+    def session_names(config):
+        if not config:
+            return []
+        names = []
+        section_names = config.sections()
+        for name in section_names:
+            if ':' in name:
+                names.append(name.split(':')[-1])
+        return names
 
     def save(self):
         if not self.credentials:
@@ -29,16 +44,17 @@ class Session(object):
         config.read(self._get_config_file())
         database = self.credentials.database
 
-        if '_config' not in config.sections():
-            config.add_section('_config')
-        config.set('_config', 'last', database)
+        if 'session' not in config.sections():
+            config.add_section('session')
+        config.set('session', 'last_database', database)
 
-        if database not in config.sections():
-            config.add_section(database)
-        config.set(database, 'username', self.credentials.username)
-        config.set(database, 'session_id', self.credentials.session_id)
-        config.set(database, 'database', self.credentials.database)
-        config.set(database, 'server', self.credentials.server)
+        section_name = self._section_name(database)
+        if section_name not in config.sections():
+            config.add_section(section_name)
+        config.set(section_name, 'username', self.credentials.username)
+        config.set(section_name, 'session_id', self.credentials.session_id)
+        config.set(section_name, 'database', self.credentials.database)
+        config.set(section_name, 'server', self.credentials.server)
 
         with open(self._get_config_file(), 'w') as configfile:
             config.write(configfile)
@@ -48,11 +64,12 @@ class Session(object):
         config.read(self._get_config_file())
         try:
             if name is None:
-                name = config.get('_config', 'last')
-            username = config.get(name, 'username')
-            session_id = config.get(name, 'session_id')
-            database = config.get(name, 'database')
-            server = config.get(name, 'server')
+                name = config.get('session', 'last_database')
+            section_name = self._section_name(name)
+            username = config.get(section_name, 'username')
+            session_id = config.get(section_name, 'session_id')
+            database = config.get(section_name, 'database')
+            server = config.get(section_name, 'server')
             self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
         except configparser.NoSectionError:
             self.credentials = None
@@ -60,12 +77,7 @@ class Session(object):
     def get_sessions(self):
         config = configparser.ConfigParser()
         config.read(self._get_config_file())
-        active_sessions = []
-        if config:
-            for session in config.sections():
-                if session != '_config':
-                    active_sessions.append(session)
-        return active_sessions
+        return self.session_names(config)
 
     def get_api(self):
         if self.credentials:
@@ -81,8 +93,17 @@ class Session(object):
         self.save()
 
     def logout(self):
+        if self.credentials:
+            database = self.credentials.database
+            section_name = self._section_name(database)
+            config = configparser.ConfigParser()
+            config.read(self._get_config_file())
+            if config.get('session', 'last_database') == database:
+                config.remove_option('session', 'last_database')
+            config.remove_section(section_name)
+            with open(self._get_config_file(), 'w') as configfile:
+                config.write(configfile)
         self.credentials = None
-        self.save()
         sys.exit(0)
 
 
@@ -113,25 +134,37 @@ def login(session, user, password, database, server):
 @click.command(help='Lists active sessions')
 @click.pass_obj
 def sessions(session):
-    for active_session in session.get_sessions():
+    """
+    Shows the current logged in sessions
+
+    :param session: The current Session object
+    """
+    active_sessions = session.get_sessions()
+    if len(active_sessions) == 0:
+        click.echo('(No active sessions)')
+        return
+    for active_session in active_sessions:
         click.echo(active_session)
 
 
 @click.command(help='Log out from a MyGeotab server')
+@click.argument('database', nargs=1, required=False)
 @click.pass_obj
-def logout(session):
+def logout(session, database=None):
     """
     Logs out from a MyGeotab server, removing the saved credentials
 
     :param session: The current Session object
+    :param database: The database name to log out from
     """
+    session.load(database)
     session.logout()
 
 
 @click.command(help="Launch an interactive MyGeotab console")
-@click.argument('name', nargs=1, required=False)
+@click.argument('database', nargs=1, required=False)
 @click.pass_obj
-def console(session, name=None):
+def console(session, database=None):
     """An interactive Python API console for MyGeotab
 
     After logging in via the `login` command, the console automatically populates a variable, `api` with an instance
@@ -140,12 +173,17 @@ def console(session, name=None):
 
     If IPython is installed, it will launch an interactive IPython console instead of the built-in Python console. The
     IPython console has numerous advantages over the stock Python console, including: colors, pretty printing,
-    command auto-completion, and more
+    command auto-completion, and more.
+
+    By default, all library objects are available as locals in the console, with api
+
+    :param session: The current Session object
+    :param database: The database name to open a console to
     """
     if not session.credentials:
         click.echo('Not logged in. Please login using the `login` command to set up this console')
         sys.exit(1)
-    session.load(name)
+    session.load(database)
     api = session.get_api()
 
     try:
