@@ -21,3 +21,10 @@ Credentials & Authentication
    :members:
 
 .. autoclass:: AuthenticationException
+
+Helpers
+-------
+
+.. currentmodule:: mygeotab.helpers
+
+.. autofunction:: parse_date_string
