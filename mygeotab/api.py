@@ -75,7 +75,8 @@ class API(object):
         headers = {'Content-type': 'application/json; charset=UTF-8'}
         url = self._get_api_url()
         is_live = not any(s in url for s in ['127.0.0.1', 'localhost'])
-        r = requests.post(url, data=json.dumps(params), headers=headers, allow_redirects=True, verify=is_live)
+        r = requests.post(url, data=json.dumps(params, default=custom_serializer), headers=headers,
+                          allow_redirects=True, verify=is_live)
         data = r.json()
         if data:
             if 'error' in data:
@@ -261,6 +262,10 @@ class AuthenticationException(Exception):
 
     def __str__(self):
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server, self.database)
+
+
+def custom_serializer(obj):
+    return obj.isoformat() if hasattr(obj, 'isoformat') else obj
 
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
