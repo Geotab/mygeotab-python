@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from mygeotab.api import API
+from mygeotab.api import *
 
 __title__ = 'mygeotab'
 __author__ = 'Aaron Toth'

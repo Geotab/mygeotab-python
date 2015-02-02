@@ -13,6 +13,7 @@ except ImportError:
     import json
 
 import requests
+
 requests.packages.urllib3.disable_warnings()
 
 
@@ -102,7 +103,7 @@ class API(object):
             parameters['typeName'] = type_name
         if self.credentials is None:
             self.authenticate()
-        if not 'credentials' in parameters and self.credentials.session_id:
+        if 'credentials' not in parameters and self.credentials.session_id:
             parameters['credentials'] = self.credentials.get_param()
 
         try:
@@ -121,6 +122,7 @@ class API(object):
     def multi_call(self, *calls):
         """
         Performs a multi-call to the API
+
         :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
@@ -259,3 +261,6 @@ class AuthenticationException(Exception):
 
     def __str__(self):
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server, self.database)
+
+
+__all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']

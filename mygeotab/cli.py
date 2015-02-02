@@ -193,7 +193,7 @@ def console(session, database=None):
         session.logout()
         sys.exit(1)
 
-    methods = dict(api=api)
+    methods = dict(api=api, mygeotab=mygeotab)
     mygeotab_version = 'MyGeotab Python Console {0}'.format(mygeotab.__version__)
     python_version = 'Python {0} on {1}'.format(sys.version.replace('\n', ''), sys.platform)
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
