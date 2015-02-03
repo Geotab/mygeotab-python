@@ -7,10 +7,7 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-try:
-    import ujson as json
-except ImportError:
-    import json
+import json
 
 import requests
 
