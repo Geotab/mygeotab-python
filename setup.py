@@ -19,7 +19,8 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         'requests',
-        'click'
+        'click',
+        'pytz'
     ],
     extras_require={
         'ipy': ['ipython']

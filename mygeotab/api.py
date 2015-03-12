@@ -11,6 +11,8 @@ import json
 
 import requests
 
+import mygeotab.helpers
+
 requests.packages.urllib3.disable_warnings()
 
 
@@ -262,7 +264,7 @@ class AuthenticationException(Exception):
 
 
 def custom_serializer(obj):
-    return obj.isoformat() if hasattr(obj, 'isoformat') else obj
+    return mygeotab.helpers.date_to_iso_str(obj) if hasattr(obj, 'isoformat') else obj
 
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
