@@ -33,7 +33,7 @@ setup(
     license='Apache 2.0',
     entry_points='''
         [console_scripts]
-        mygeotab=mygeotab.cli:main
+        myg=mygeotab.cli:main
     ''',
     classifiers=(
         'Development Status :: 3 - Alpha',

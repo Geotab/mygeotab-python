@@ -44,10 +44,6 @@ class Session(object):
         config.read(self._get_config_file())
         database = self.credentials.database
 
-        if 'session' not in config.sections():
-            config.add_section('session')
-        config.set('session', 'last_database', database)
-
         section_name = self._section_name(database)
         if section_name not in config.sections():
             config.add_section(section_name)
@@ -64,14 +60,21 @@ class Session(object):
         config.read(self._get_config_file())
         try:
             if name is None:
-                name = config.get('session', 'last_database')
-            section_name = self._section_name(name)
+                sections = config.sections()
+                if len(sections) < 1:
+                    self.credentials = None
+                    return
+                section_name = sections[-1]
+            else:
+                section_name = self._section_name(name)
             username = config.get(section_name, 'username')
             session_id = config.get(section_name, 'session_id')
             database = config.get(section_name, 'database')
             server = config.get(section_name, 'server')
             self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
         except configparser.NoSectionError:
+            self.credentials = None
+        except configparser.NoOptionError:
             self.credentials = None
 
     def get_sessions(self):
@@ -98,8 +101,6 @@ class Session(object):
             section_name = self._section_name(database)
             config = configparser.ConfigParser()
             config.read(self._get_config_file())
-            if config.get('session', 'last_database') == database:
-                config.remove_option('session', 'last_database')
             config.remove_section(section_name)
             with open(self._get_config_file(), 'w') as configfile:
                 config.write(configfile)
@@ -107,13 +108,7 @@ class Session(object):
         sys.exit(0)
 
 
-@click.command(help='Log in to a MyGeotab server')
-@click.option('--user', '-u', prompt='Username')
-@click.option('--password', '-p', prompt='Password', hide_input=True)
-@click.option('--database', default=None, help='The company name or database name')
-@click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
-@click.pass_obj
-def login(session, user, password, database, server):
+def login(session, user, password, database=None, server=None):
     """
     Logs into a MyGeotab server and stores the returned credentials
 
@@ -123,12 +118,19 @@ def login(session, user, password, database, server):
     :param database: The database or company name. Optional as this usually gets resolved upon authentication.
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
+    if not user:
+        user = click.prompt("Username", type=str)
+    if not password:
+        password = click.prompt("Password", hide_input=True, type=str)
     try:
         session.login(user, password, database, server)
         if session.credentials:
-            click.echo('Logged in as: %s\n\nUse `mygeotab console` to access the console.' % session.credentials)
+            click.echo('Logged in as: %s' % session.credentials)
+            session.load(database)
+        return session.get_api()
     except mygeotab.api.AuthenticationException:
         click.echo('Incorrect credentials. Please try again.')
+        sys.exit(0)
 
 
 @click.command(help='Lists active sessions')
@@ -150,9 +152,9 @@ def sessions(session):
 @click.command(help='Log out from a MyGeotab server')
 @click.argument('database', nargs=1, required=False)
 @click.pass_obj
-def logout(session, database=None):
+def forget(session, database=None):
     """
-    Logs out from a MyGeotab server, removing the saved credentials
+    Forgets a session from a MyGeotab server by removing the saved credentials
 
     :param session: The current Session object
     :param database: The database name to log out from
@@ -163,13 +165,12 @@ def logout(session, database=None):
 
 @click.command(help="Launch an interactive MyGeotab console")
 @click.argument('database', nargs=1, required=False)
+@click.option('--user', '-u')
+@click.option('--password', '-p')
+@click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
 @click.pass_obj
-def console(session, database=None):
+def console(session, database=None, user=None, password=None, server=None):
     """An interactive Python API console for MyGeotab
-
-    After logging in via the `login` command, the console automatically populates a variable, `api` with an instance
-    of the MyGeotab API object. The credentials are stored on your filesystem, so there's no need to log in each time
-    you use the console.
 
     If IPython is installed, it will launch an interactive IPython console instead of the built-in Python console. The
     IPython console has numerous advantages over the stock Python console, including: colors, pretty printing,
@@ -179,19 +180,23 @@ def console(session, database=None):
 
     :param session: The current Session object
     :param database: The database name to open a console to
+    :param username: The username used for MyGeotab servers. Usually an email address.
+    :param password: The password associated with the username. Optional if `session_id` is provided.
+    :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
     if not session.credentials:
-        click.echo('Not logged in. Please login using the `login` command to set up this console')
-        sys.exit(1)
+        login(session, user, password, database, server)
     session.load(database)
     api = session.get_api()
-
+    if not api:
+        # This DB hasn't been logged into before
+        api = login(session, user, password, database, server)
     try:
         api.call('Get', 'User', search=dict(name=session.credentials.username))
     except mygeotab.api.AuthenticationException:
-        click.echo('Your session has expired. Please login again using the `login` command')
-        session.logout()
-        sys.exit(1)
+        # Credentials expired, try logging in again
+        click.echo('Your session has expired. Please login again.')
+        api = login(session, user, password, database, server)
 
     methods = dict(api=api, mygeotab=mygeotab)
     mygeotab_version = 'MyGeotab Python Console {0}'.format(mygeotab.__version__)
@@ -214,7 +219,7 @@ def console(session, database=None):
 def main(ctx):
     """MyGeotab Python SDK command line tools
 
-    You must first `login` if this is your first time using these tools.
+    You probably want to use the `console` command
     """
     ctx.obj = Session()
     try:
@@ -224,8 +229,7 @@ def main(ctx):
 
 
 main.add_command(console)
-main.add_command(login)
-main.add_command(logout)
+main.add_command(forget)
 main.add_command(sessions)
 
 if __name__ == '__main__':
