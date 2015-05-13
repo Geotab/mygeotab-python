@@ -245,7 +245,7 @@ class MyGeotabException(Exception):
     def __str__(self):
         error_str = '{0}\n{1}'.format(self.name, self.message)
         if self.stack_trace:
-            error_str = error_str + '\n\nStacktrace:\n{2}'.format(self.stack_trace)
+            error_str = error_str + '\n\nStacktrace:\n{0}'.format(self.stack_trace)
         return error_str
 
 
