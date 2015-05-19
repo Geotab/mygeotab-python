@@ -141,6 +141,22 @@ class API(object):
         """
         return self.call('Get', type_name, **parameters)
 
+    def search(self, type_name, **parameters):
+        """
+        Searches for entities using the API. Shortcut for using get() with a search.
+        :param type_name: The type of entity
+        :param parameters: Additional parameters to send.
+        :return: The JSON result (decoded into a dict) from the server
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        if parameters:
+            results_limit = parameters.get('resultsLimit', None)
+            if results_limit is not None:
+                del parameters['resultsLimit']
+            parameters = dict(search=parameters)
+            return self.call('Get', type_name, resultsLimit=results_limit, **parameters)
+        return self.get(type_name)
+
     def add(self, type_name, entity):
         """
         Adds an entity using the API. Shortcut for using call() with the 'Add' method.

@@ -18,9 +18,9 @@ setup(
     description='An unofficial Python client for the MyGeotab API',
     long_description=open('README.rst').read(),
     install_requires=[
-        'requests',
-        'click',
-        'pytz'
+        'requests>=2.6',
+        'click>=3.3',
+        'pytz>=2014.7'
     ],
     extras_require={
         'ipy': ['ipython']
