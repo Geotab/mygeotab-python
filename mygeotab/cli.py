@@ -122,7 +122,9 @@ def login(session, user, password, database=None, server=None):
     if not password:
         password = click.prompt("Password", hide_input=True, type=str)
     try:
-        session.login(user, password, database, server)
+        with click.progressbar(length=1, label="Logging in...") as bar:
+            session.login(user, password, database, server)
+            bar.update(1)
         if session.credentials:
             click.echo('Logged in as: %s' % session.credentials)
             session.load(database)
