@@ -2,14 +2,14 @@ MyGeotab
 ========
 An Apache2 Licensed, unofficial Python client for the MyGeotab API.
 
-Also bundled is the "mygeotab" command line tool, which is a sandboxed console for quickly querying and operating on
+Also bundled is the "myg" command line tool, which is a sandboxed console for quickly querying and operating on
 MyGeotab data.
 
 
 Features
 --------
 
-- Automatic serializing and deserializing of JSON results
+- Automatic serializing and de-serializing of JSON results
 - Clean, Pythonic API for querying data
 - Cross-platform and compatible with Python 2.7.6 and Python 3.4
 
@@ -22,7 +22,7 @@ Usage
     >>> import mygeotab
     >>> api = mygeotab.API(username='hello@example.com', password='mypass', database='DemoDB')
     >>> api.authenticate()
-    >>> api.call('Get', 'Device', search=dict(name='%Test Dev%'))
+    >>> api.get('Device', search=dict(name='%Test Dev%'))
     [{'maxSecondsBetweenLogs': 200.0,
       'activeTo': '2050-01-01',
       'minAccidentSpeed': 3.0,
