@@ -1,5 +1,10 @@
 MyGeotab
 ========
+
+.. image:: https://travis-ci.org/aaront/mygeotab-python.svg
+    :target: https://travis-ci.org/aaront/mygeotab-python
+
+
 An Apache2 Licensed, unofficial Python client for the MyGeotab API.
 
 Also bundled is the "myg" command line tool, which is a sandboxed console for quickly querying and operating on
