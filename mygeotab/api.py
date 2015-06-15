@@ -144,6 +144,7 @@ class API(object):
     def search(self, type_name, **parameters):
         """
         Searches for entities using the API. Shortcut for using get() with a search.
+
         :param type_name: The type of entity
         :param parameters: Additional parameters to send.
         :return: The JSON result (decoded into a dict) from the server

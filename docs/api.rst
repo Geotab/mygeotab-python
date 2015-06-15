@@ -27,4 +27,4 @@ Helpers
 
 .. currentmodule:: mygeotab.helpers
 
-.. autofunction:: parse_date_string
+.. autofunction:: parse_date
