@@ -3,6 +3,10 @@ MyGeotab
 
 .. image:: https://travis-ci.org/aaront/mygeotab-python.svg
     :target: https://travis-ci.org/aaront/mygeotab-python
+    
+.. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
+    :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
+    :alt: Documentation Status
 
 
 An Apache2 Licensed, unofficial Python client for the MyGeotab API.
