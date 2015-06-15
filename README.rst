@@ -39,4 +39,4 @@ To install the MyGeotab library and command line tool:
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/aaront/mygeotab
+    $ pip install git+https://github.com/aaront/mygeotab-python
