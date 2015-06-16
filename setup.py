@@ -14,7 +14,7 @@ setup(
     name='mygeotab',
     author='Aaron Toth',
     version=version,
-    url='https://github.com/aaront/mygeotab',
+    url='https://github.com/geotab/mygeotab-python',
     description='An unofficial Python client for the MyGeotab API',
     long_description=open('README.rst').read(),
     install_requires=[
