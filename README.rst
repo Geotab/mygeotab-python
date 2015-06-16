@@ -8,12 +8,10 @@ MyGeotab
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
     :alt: Documentation Status
 
-
 An Apache2 Licensed, unofficial Python client for the MyGeotab API.
 
 Also bundled is the "myg" command line tool, which is a sandboxed console for quickly querying and operating on
 MyGeotab data.
-
 
 Features
 --------
@@ -21,7 +19,6 @@ Features
 - Automatic serializing and de-serializing of JSON results
 - Clean, Pythonic API for querying data
 - Cross-platform and compatible with Python 2.7.6 and Python 3.4
-
 
 Usage
 -----
@@ -40,7 +37,6 @@ Usage
       'idleMinutes': 3.0,
       ......
 
-
 Installation
 ------------
 
@@ -55,3 +51,8 @@ or for the bleeding-edge version:
 .. code-block:: bash
 
     $ pip install git+https://github.com/geotab/mygeotab-python
+
+Documentation
+-------------
+
+Read the docs at `<http://mygeotab-python.readthedocs.org>`_
