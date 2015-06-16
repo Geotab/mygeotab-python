@@ -13,6 +13,7 @@ import click
 import mygeotab
 import mygeotab.api
 
+
 class Session(object):
     def __init__(self):
         self.credentials = None

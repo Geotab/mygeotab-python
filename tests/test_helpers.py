@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+from datetime import datetime
 
 import pytz
-
-from datetime import datetime
 
 from mygeotab import helpers
 
@@ -44,6 +43,7 @@ class TestGetUtcDate(unittest.TestCase):
         self.assertEqual(utc_date.month, check_date.month)
         self.assertEqual(utc_date.day, check_date.day)
         self.assertEqual(utc_date.hour, check_date.hour)
+
 
 if __name__ == '__main__':
     unittest.main()
