@@ -1,8 +1,8 @@
 MyGeotab
 ========
 
-.. image:: https://travis-ci.org/aaront/mygeotab-python.svg
-    :target: https://travis-ci.org/aaront/mygeotab-python
+.. image:: https://travis-ci.org/Geotab/mygeotab-python.svg?branch=master
+    :target: https://travis-ci.org/Geotab/mygeotab-python
     
 .. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
@@ -54,4 +54,4 @@ or for the bleeding-edge version:
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/aaront/mygeotab-python
+    $ pip install git+https://github.com/geotab/mygeotab-python
