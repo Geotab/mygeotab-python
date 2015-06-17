@@ -12,6 +12,7 @@ import click
 
 import mygeotab
 import mygeotab.api
+import mygeotab.utils
 
 
 class Session(object):
@@ -200,11 +201,10 @@ def console(session, database=None, user=None, password=None, server=None):
         click.echo('Your session has expired. Please login again.')
         api = login(session, user, password, database, server)
 
-    methods = dict(my=api, mygeotab=mygeotab)
-    mygeotab_version = 'MyGeotab Python Console {0}'.format(mygeotab.__version__)
-    python_version = 'Python {0} on {1}'.format(sys.version.replace('\n', ''), sys.platform)
+    methods = dict(my=api, mygeotab=mygeotab, utils=mygeotab.utils)
+    version = 'MyGeotab Console {0} [Python {1}]'.format(mygeotab.__version__, sys.version.replace('\n', ''))
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
-    banner = '\n'.join([mygeotab_version, python_version, auth_line])
+    banner = '\n'.join([version, auth_line])
     try:
         from IPython import embed
 

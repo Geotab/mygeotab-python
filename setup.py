@@ -22,7 +22,8 @@ setup(
         'click>=3.3',
         'pytz>=2014.7',
         'python-dateutil>=2.4',
-        'six>=1.9'
+        'six>=1.9',
+        'tzlocal>=1.2'
     ],
     extras_require={
         'ipy': ['ipython']

@@ -5,11 +5,11 @@ import re
 import six
 from dateutil import parser
 
-import mygeotab.helpers
+import mygeotab.utils
 
 
 def object_serializer(obj):
-    return mygeotab.helpers.date_to_iso_str(obj) if hasattr(obj, 'isoformat') else obj
+    return mygeotab.utils.date_to_iso_str(obj) if hasattr(obj, 'isoformat') else obj
 
 
 def object_deserializer(obj):

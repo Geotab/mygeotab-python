@@ -28,3 +28,5 @@ Helpers
 .. currentmodule:: mygeotab.helpers
 
 .. autofunction:: parse_date
+
+.. autofunction:: localize_date

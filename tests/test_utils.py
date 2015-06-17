@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytz
 
-from mygeotab import helpers
+from mygeotab import utils
 
 
 class TestGetUtcDate(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestGetUtcDate(unittest.TestCase):
 
     def test_naive_datetime_to_utc(self):
         date = datetime(2015, 3, 12, 2, 45, 34)
-        utc_date = helpers.get_utc_date(date)
+        utc_date = utils.get_utc_date(date)
         self.assertIsNotNone(utc_date.tzinfo)
         self.assertIs(utc_date.tzinfo, pytz.utc)
         self.assertEqual(utc_date.year, date.year)
@@ -24,7 +24,7 @@ class TestGetUtcDate(unittest.TestCase):
 
     def test_utc_datetime_to_utc(self):
         date = datetime(2015, 3, 12, 2, 45, 34, tzinfo=pytz.utc)
-        utc_date = helpers.get_utc_date(date)
+        utc_date = utils.get_utc_date(date)
         self.assertIsNotNone(utc_date.tzinfo)
         self.assertIs(utc_date.tzinfo, pytz.utc)
         self.assertEqual(utc_date.year, date.year)
@@ -35,7 +35,7 @@ class TestGetUtcDate(unittest.TestCase):
     def test_zoned_datetime_to_utc(self):
         tz = pytz.timezone('US/Eastern')
         date = tz.localize(datetime(2015, 3, 12, 2, 45, 34))
-        utc_date = helpers.get_utc_date(date)
+        utc_date = utils.get_utc_date(date)
         check_date = date.astimezone(pytz.utc)
         self.assertIsNotNone(utc_date.tzinfo)
         self.assertIs(utc_date.tzinfo, pytz.utc)
