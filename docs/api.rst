@@ -22,10 +22,10 @@ Credentials & Authentication
 
 .. autoclass:: AuthenticationException
 
-Helpers
--------
+Utils
+-----
 
-.. currentmodule:: mygeotab.helpers
+.. currentmodule:: mygeotab.utils
 
 .. autofunction:: parse_date
 
