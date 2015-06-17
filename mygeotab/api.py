@@ -11,7 +11,7 @@ import json
 
 import requests
 
-import mygeotab.helpers
+import mygeotab.serializers
 
 requests.packages.urllib3.disable_warnings()
 
@@ -74,9 +74,9 @@ class API(object):
         headers = {'Content-type': 'application/json; charset=UTF-8'}
         url = self._get_api_url()
         is_live = not any(s in url for s in ['127.0.0.1', 'localhost'])
-        r = requests.post(url, data=json.dumps(params, default=custom_serializer), headers=headers,
+        r = requests.post(url, data=json.dumps(params, default=mygeotab.serializers.object_serializer), headers=headers,
                           allow_redirects=True, verify=is_live)
-        data = r.json()
+        data = r.json(object_hook=mygeotab.serializers.object_deserializer)
         if data:
             if 'error' in data:
                 raise MyGeotabException(data['error'])
@@ -281,10 +281,6 @@ class AuthenticationException(Exception):
 
     def __str__(self):
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server, self.database)
-
-
-def custom_serializer(obj):
-    return mygeotab.helpers.date_to_iso_str(obj) if hasattr(obj, 'isoformat') else obj
 
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
