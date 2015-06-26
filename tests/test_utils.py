@@ -23,7 +23,7 @@ class TestGetUtcDate(unittest.TestCase):
         self.assertEqual(utc_date.hour, date.hour)
 
     def test_utc_datetime_to_utc(self):
-        date = datetime(2015, 3, 12, 2, 45, 34, tzinfo=pytz.utc)
+        date = pytz.utc.localize(datetime(2015, 3, 12, 2, 45, 34))
         utc_date = utils.get_utc_date(date)
         self.assertIsNotNone(utc_date.tzinfo)
         self.assertIs(utc_date.tzinfo, pytz.utc)

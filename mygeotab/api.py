@@ -61,6 +61,23 @@ class API(object):
         base_url.replace('/', '')
         return 'https://' + base_url + '/apiv1'
 
+    @staticmethod
+    def _process(data):
+        """
+        Processes the returned JSON from the server.
+
+        :param data: The JSON data in dict form
+        :return: The result dict
+        :raise MyGeotabException: Raises when a server exception was encountered
+        """
+        if data:
+            if 'error' in data:
+                raise MyGeotabException(data['error'])
+            if 'result' in data:
+                return data['result']
+            return data
+        return None
+
     def _query(self, method, parameters):
         """
         Formats and performs the query against the API
@@ -76,14 +93,7 @@ class API(object):
         is_live = not any(s in url for s in ['127.0.0.1', 'localhost'])
         r = requests.post(url, data=json.dumps(params, default=mygeotab.serializers.object_serializer), headers=headers,
                           allow_redirects=True, verify=is_live)
-        data = r.json(object_hook=mygeotab.serializers.object_deserializer)
-        if data:
-            if 'error' in data:
-                raise MyGeotabException(data['error'])
-            if 'result' in data:
-                return data['result']
-            return data
-        return None
+        return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
 
     def call(self, method, type_name=None, **parameters):
         """
