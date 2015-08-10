@@ -44,10 +44,12 @@ class API(object):
         :param credentials: The existing saved credentials
         :return: A new API object populated with MyGeotab credentials
         """
-        return API(username=credentials.username, password=credentials.password, database=credentials.database,
-                   session_id=credentials.session_id, server=credentials.server)
+        return API(username=credentials.username, password=credentials.password,
+                   database=credentials.database, session_id=credentials.session_id,
+                   server=credentials.server)
 
-    def _get_api_url(self):
+    @property
+    def _api_url(self):
         """
         Formats the server URL properly in order to query the API.
 
@@ -89,10 +91,11 @@ class API(object):
         """
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        url = self._get_api_url()
-        is_live = not any(s in url for s in ['127.0.0.1', 'localhost'])
-        r = requests.post(url, data=json.dumps(params, default=mygeotab.serializers.object_serializer), headers=headers,
-                          allow_redirects=True, verify=is_live)
+        is_live = not any(s in self._api_url for s in ['127.0.0.1', 'localhost'])
+        r = requests.post(self._api_url,
+                          data=json.dumps(params,
+                                          default=mygeotab.serializers.object_serializer),
+                          headers=headers, allow_redirects=True, verify=is_live)
         return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
 
     def call(self, method, type_name=None, **parameters):
@@ -218,11 +221,13 @@ class API(object):
                 if new_server != 'ThisServer':
                     server = new_server
                 c = result['credentials']
-                self.credentials = Credentials(c['userName'], c['sessionId'], c['database'], server)
+                self.credentials = Credentials(c['userName'], c['sessionId'], c['database'],
+                                               server)
                 return self.credentials
         except MyGeotabException as exception:
             if exception.name == 'InvalidUserException':
-                raise AuthenticationException(self.credentials.username, self.credentials.database,
+                raise AuthenticationException(self.credentials.username,
+                                              self.credentials.database,
                                               self.credentials.server)
             raise
 
@@ -290,7 +295,8 @@ class AuthenticationException(Exception):
         self.server = server
 
     def __str__(self):
-        return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server, self.database)
+        return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
+                                                              self.database)
 
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']

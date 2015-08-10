@@ -90,7 +90,8 @@ class Session(object):
 
     def login(self, username, password=None, database=None, server=None):
         if server:
-            api = mygeotab.api.API(username=username, password=password, database=database, server=server)
+            api = mygeotab.api.API(username=username, password=password, database=database,
+                                   server=server)
         else:
             api = mygeotab.api.API(username=username, password=password, database=database)
         self.credentials = api.authenticate()
@@ -202,7 +203,8 @@ def console(session, database=None, user=None, password=None, server=None):
         api = login(session, user, password, database, server)
 
     methods = dict(my=api, mygeotab=mygeotab, utils=mygeotab.utils)
-    version = 'MyGeotab Console {0} [Python {1}]'.format(mygeotab.__version__, sys.version.replace('\n', ''))
+    version = 'MyGeotab Console {0} [Python {1}]'.format(mygeotab.__version__,
+                                                         sys.version.replace('\n', ''))
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
     banner = '\n'.join([version, auth_line])
     try:
