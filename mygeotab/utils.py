@@ -6,17 +6,18 @@ import pytz
 from tzlocal import get_localzone
 
 
-def get_utc_date(date):
-    if not date.tzinfo:
-        date = pytz.utc.localize(date)
-    return date.astimezone(pytz.utc)
+def datetime_to_iso8601(dt):
+    """
+    Formats the given datetime as a UTC-zoned ISO 8601 date string
 
-def date_to_iso_str(date):
-    date = get_utc_date(date)
-    return date.replace(tzinfo=None).isoformat() + 'Z'
+    :param dt: The datetime object
+    :return: The datetime object in 8601 string form
+    """
+    dt = localize_datetime(dt, pytz.utc)
+    return dt.replace(tzinfo=None).isoformat() + 'Z'
 
 
-def parse_date(iso_date):
+def parse_iso8601_datetime(iso_date):
     """
     Parses an ISO 8601 date string into a datetime object
 
@@ -26,15 +27,16 @@ def parse_date(iso_date):
     return datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
-def localize_date(date):
+def localize_datetime(dt, tz=None):
     """
-    Converts a naive or UTC-localized date into the current machine's timezone
+    Converts a naive or UTC-localized date into the provided timezone or current machine's timezone
 
-    :param date: The datetime object
-    :return: The datetime object, localized in the machine's timezone
+    :param dt: The datetime object
+    :param tz: The timezone. If blank or None, the user's native timezone is used
+    :return: The localized datetime object
     """
-    localzone = get_localzone()
-    if not date.tzinfo:
-        return localzone.localize(date)
+    tz = tz or get_localzone()
+    if not dt.tzinfo:
+        return tz.localize(dt)
     else:
-        return date.astimezone(localzone)
+        return dt.astimezone(tz)

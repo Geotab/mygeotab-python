@@ -11,7 +11,7 @@ datetime_regex = re.compile(r'^\d{4}\-\d{2}\-\d{2}')
 
 
 def object_serializer(obj):
-    return mygeotab.utils.date_to_iso_str(obj) if hasattr(obj, 'isoformat') else obj
+    return mygeotab.utils.datetime_to_iso8601(obj) if hasattr(obj, 'isoformat') else obj
 
 
 def object_deserializer(obj):
