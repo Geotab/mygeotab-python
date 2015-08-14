@@ -25,8 +25,5 @@ Credentials & Authentication
 Utils
 -----
 
-.. currentmodule:: mygeotab.utils
-
-.. autofunction:: parse_date
-
-.. autofunction:: localize_date
+.. automodule:: mygeotab.utils
+:members:
