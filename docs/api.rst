@@ -26,4 +26,4 @@ Utils
 -----
 
 .. automodule:: mygeotab.utils
-:members:
+   :members:
