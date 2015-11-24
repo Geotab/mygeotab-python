@@ -1,9 +1,16 @@
 MyGeotab
 ========
 
-.. image:: https://travis-ci.org/Geotab/mygeotab-python.svg?branch=master
+.. image:: https://img.shields.io/travis/Geotab/mygeotab-python/master.svg?style=flat
     :target: https://travis-ci.org/Geotab/mygeotab-python
-    
+    :alt: Build Status
+
+.. image:: https://img.shields.io/pypi/v/mygeotab.svg?style=flat
+    :target: https://pypi.python.org/pypi/mygeotab
+
+.. image:: https://img.shields.io/pypi/dm/mygeotab.svg?style=flat
+    :target: https://pypi.python.org/pypi/mygeotab
+
 .. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
     :alt: Documentation Status
@@ -18,7 +25,7 @@ Features
 
 - Automatic serializing and de-serializing of JSON results
 - Clean, Pythonic API for querying data
-- Cross-platform and compatible with Python 2.7.6 and Python 3.4
+- Cross-platform and compatible with Python 2.7+, 3.3+, and pypy
 
 Usage
 -----
