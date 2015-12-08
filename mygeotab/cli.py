@@ -12,7 +12,7 @@ import click
 
 import mygeotab
 import mygeotab.api
-import mygeotab.utils
+import mygeotab.dates
 
 
 class Session(object):
@@ -202,7 +202,7 @@ def console(session, database=None, user=None, password=None, server=None):
         click.echo('Your session has expired. Please login again.')
         api = login(session, user, password, database, server)
 
-    methods = dict(my=api, mygeotab=mygeotab, utils=mygeotab.utils)
+    methods = dict(my=api, mygeotab=mygeotab, dates=mygeotab.dates)
     version = 'MyGeotab Console {0} [Python {1}]'.format(mygeotab.__version__,
                                                          sys.version.replace('\n', ''))
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'

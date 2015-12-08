@@ -22,8 +22,8 @@ Credentials & Authentication
 
 .. autoclass:: AuthenticationException
 
-Utils
+Dates
 -----
 
-.. automodule:: mygeotab.utils
+.. automodule:: mygeotab.dates
    :members:

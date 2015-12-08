@@ -6,7 +6,7 @@ import pytz
 from tzlocal import get_localzone
 
 
-def datetime_to_iso8601(dt):
+def format_iso_datetime(dt):
     """
     Formats the given datetime as a UTC-zoned ISO 8601 date string
 
@@ -15,16 +15,6 @@ def datetime_to_iso8601(dt):
     """
     dt = localize_datetime(dt, pytz.utc)
     return dt.replace(tzinfo=None).isoformat() + 'Z'
-
-
-def parse_iso8601_datetime(iso_date):
-    """
-    Parses an ISO 8601 date string into a datetime object
-
-    :param iso_date: The date string
-    :return: The datetime object which represents the ISO 8601 string
-    """
-    return datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def localize_datetime(dt, tz=None):

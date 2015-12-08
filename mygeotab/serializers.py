@@ -5,13 +5,13 @@ import re
 import six
 from dateutil import parser
 
-import mygeotab.utils
+import mygeotab.dates
 
 datetime_regex = re.compile(r'^\d{4}\-\d{2}\-\d{2}')
 
 
 def object_serializer(obj):
-    return mygeotab.utils.datetime_to_iso8601(obj) if hasattr(obj, 'isoformat') else obj
+    return mygeotab.dates.format_iso_datetime(obj) if hasattr(obj, 'isoformat') else obj
 
 
 def object_deserializer(obj):
