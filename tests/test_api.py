@@ -64,7 +64,7 @@ class TestCallApi(unittest.TestCase):
         if self.username and password:
             self.api = api.API(self.username, password=password, database=self.database)
             self.api.authenticate()
-            password = None
+            del password
         else:
             self.skipTest(
                 'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
@@ -81,6 +81,11 @@ class TestCallApi(unittest.TestCase):
         user = user[0]
         self.assertEqual(user['name'], self.username)
 
+    def test_pythonic_parameters(self):
+        users = self.api.get('User')
+        count_users = self.api.call('GetCountOf', type_name='User')
+        self.assertGreaterEqual(count_users, 1)
+        self.assertEqual(count_users, len(users))
 
 if __name__ == '__main__':
     unittest.main()

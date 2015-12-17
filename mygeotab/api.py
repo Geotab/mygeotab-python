@@ -8,12 +8,16 @@ except ImportError:
     from urlparse import urlparse
 
 import json
+import re
 
 import requests
 
 import mygeotab.serializers
 
-requests.packages.urllib3.disable_warnings()
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 
 
 class API(object):
@@ -80,6 +84,23 @@ class API(object):
             return data
         return None
 
+    def _process_param_names(self, parameters):
+        """
+        Allows the use of Pythonic-style parameters with underscores instead of camel-case
+
+        :param parameters: The parameters object dict
+        :return: The processed parameters
+        """
+        for param_name in parameters:
+            value = parameters[param_name]
+            server_param_name = re.sub(r'_(\w)', lambda m: m.group(1).upper(), param_name)
+            if isinstance(value, dict):
+                value = self._process_param_names(value)
+            parameters[server_param_name] = value
+            if server_param_name != param_name:
+                del parameters[param_name]
+        return parameters
+
     def _query(self, method, parameters):
         """
         Formats and performs the query against the API
@@ -98,12 +119,11 @@ class API(object):
                           headers=headers, allow_redirects=True, verify=is_live)
         return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
 
-    def call(self, method, type_name=None, **parameters):
+    def call(self, method, **parameters):
         """
         Makes a call to the API.
 
         :param method: The method name.
-        :param type_name: The type of entity for generic methods (for example, 'Get')
         :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
@@ -112,8 +132,7 @@ class API(object):
             raise Exception("Must specify a method name")
         if parameters is None:
             parameters = {}
-        if type_name:
-            parameters['typeName'] = type_name
+        parameters = self._process_param_names(parameters)
         if self.credentials is None:
             self.authenticate()
         if 'credentials' not in parameters and self.credentials.session_id:
@@ -128,7 +147,7 @@ class API(object):
             if exception.name == 'InvalidUserException' and self._reauthorize_count == 0:
                 self._reauthorize_count += 1
                 self.authenticate()
-                return self.call(method, parameters)
+                return self.call(method, **parameters)
             raise
         return None
 
@@ -152,7 +171,7 @@ class API(object):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        return self.call('Get', type_name, **parameters)
+        return self.call('Get', type_name=type_name, **parameters)
 
     def search(self, type_name, **parameters):
         """
@@ -168,7 +187,7 @@ class API(object):
             if results_limit is not None:
                 del parameters['resultsLimit']
             parameters = dict(search=parameters)
-            return self.call('Get', type_name, resultsLimit=results_limit, **parameters)
+            return self.call('Get', type_name=type_name, resultsLimit=results_limit, **parameters)
         return self.get(type_name)
 
     def add(self, type_name, entity):
@@ -180,7 +199,7 @@ class API(object):
         :return: The id of the object added
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        return self.call('Add', type_name, entity=entity)
+        return self.call('Add', type_name=type_name, entity=entity)
 
     def set(self, type_name, entity):
         """
@@ -190,7 +209,7 @@ class API(object):
         :param entity: The entity to set
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        return self.call('Set', type_name, entity=entity)
+        return self.call('Set', type_name=type_name, entity=entity)
 
     def remove(self, type_name, entity):
         """
@@ -200,7 +219,7 @@ class API(object):
         :param entity: The entity to remove
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        return self.call('Remove', type_name, entity=entity)
+        return self.call('Remove', type_name=type_name, entity=entity)
 
     def authenticate(self):
         """
