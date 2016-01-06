@@ -196,7 +196,7 @@ def console(session, database=None, user=None, password=None, server=None):
         # This DB hasn't been logged into before
         api = login(session, user, password, database, server)
     try:
-        api.call('Get', 'User', search=dict(name=session.credentials.username))
+        api.search('User', name=session.credentials.username)
     except mygeotab.api.AuthenticationException:
         # Credentials expired, try logging in again
         click.echo('Your session has expired. Please login again.')
