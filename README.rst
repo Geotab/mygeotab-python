@@ -15,7 +15,7 @@ MyGeotab
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
     :alt: Documentation Status
 
-An Apache2 Licensed, unofficial Python client for the MyGeotab API.
+An Apache2 Licensed, unofficial Python client for the `MyGeotab SDK <http://sdk.geotab.com>`_.
 
 Also bundled is the "myg" command line tool, which is a sandboxed console for quickly querying and operating on
 MyGeotab data.
