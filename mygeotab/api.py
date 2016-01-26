@@ -21,8 +21,6 @@ except:
 
 
 class API(object):
-    _reauthorize_count = 0
-
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com'):
         """
         Creates a new instance of this simple Pythonic wrapper for the MyGeotab API.
@@ -39,6 +37,7 @@ class API(object):
         if password is None and session_id is None:
             raise Exception('`password` and `session_id` must not both be None')
         self.credentials = Credentials(username, session_id, database, server, password)
+        self.__reauthorize_count = 0
 
     @staticmethod
     def from_credentials(credentials):
@@ -66,6 +65,16 @@ class API(object):
         base_url = parsed.netloc if parsed.netloc else parsed.path
         base_url.replace('/', '')
         return 'https://' + base_url + '/apiv1'
+
+    @property
+    def _is_local(self):
+        """
+        Are calls being made against a local server.
+
+        :rtype: bool
+        :return: True if the calls are being made locally
+        """
+        return any(s in self._api_url for s in ['127.0.0.1', 'localhost'])
 
     @staticmethod
     def _process(data):
@@ -112,12 +121,14 @@ class API(object):
         """
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        is_live = not any(s in self._api_url for s in ['127.0.0.1', 'localhost'])
         r = requests.post(self._api_url,
                           data=json.dumps(params,
                                           default=mygeotab.serializers.object_serializer),
-                          headers=headers, allow_redirects=True, verify=is_live)
-        return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
+                          headers=headers, allow_redirects=True, verify=(not self._is_local))
+        try:
+            return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
+        finally:
+            r.close()
 
     def call(self, method, **parameters):
         """
@@ -141,11 +152,11 @@ class API(object):
         try:
             result = self._query(method, parameters)
             if result is not None:
-                self._reauthorize_count = 0
+                self.__reauthorize_count = 0
                 return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException' and self._reauthorize_count == 0:
-                self._reauthorize_count += 1
+            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
+                self.__reauthorize_count += 1
                 self.authenticate()
                 return self.call(method, **parameters)
             raise
