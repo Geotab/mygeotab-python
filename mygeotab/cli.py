@@ -21,7 +21,10 @@ class Session(object):
 
     @staticmethod
     def _get_config_file():
-        return os.path.join(os.path.expanduser('~'), '.mygeotab')
+        config_path = click.get_app_dir(mygeotab.__title__)
+        if not os.path.exists(config_path):
+            os.makedirs(config_path)
+        return os.path.join(config_path, 'config.ini')
 
     @staticmethod
     def _section_name(database):
