@@ -6,11 +6,13 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
-
 import json
 import re
+import ssl
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.poolmanager import PoolManager
 
 import mygeotab.serializers
 
@@ -121,14 +123,14 @@ class API(object):
         """
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        r = requests.post(self._api_url,
-                          data=json.dumps(params,
-                                          default=mygeotab.serializers.object_serializer),
-                          headers=headers, allow_redirects=True, verify=(not self._is_local))
-        try:
-            return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
-        finally:
-            r.close()
+        is_live = not any(s in self._api_url for s in ['127.0.0.1', 'localhost'])
+        with requests.Session() as s:
+            s.mount('https://', GeotabHTTPAdapter())
+            r = s.post(self._api_url,
+                       data=json.dumps(params,
+                                       default=mygeotab.serializers.object_serializer),
+                       headers=headers, allow_redirects=True, verify=(not self._is_local))
+        return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
 
     def call(self, method, **parameters):
         """
@@ -327,6 +329,15 @@ class AuthenticationException(Exception):
     def __str__(self):
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
                                                               self.database)
+
+
+class GeotabHTTPAdapter(HTTPAdapter):
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        self.poolmanager = PoolManager(num_pools=connections,
+                                       maxsize=maxsize,
+                                       block=block,
+                                       ssl_version=ssl.PROTOCOL_TLSv1_2,
+                                       **pool_kwargs)
 
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
