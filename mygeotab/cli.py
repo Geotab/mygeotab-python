@@ -118,7 +118,7 @@ def login(session, user, password, database=None, server=None):
     Logs into a MyGeotab server and stores the returned credentials
 
     :param session: The current Session object
-    :param username: The username used for MyGeotab servers. Usually an email address.
+    :param user: The username used for MyGeotab servers. Usually an email address.
     :param password: The password associated with the username. Optional if `session_id` is provided.
     :param database: The database or company name. Optional as this usually gets resolved upon authentication.
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
@@ -187,7 +187,7 @@ def console(session, database=None, user=None, password=None, server=None):
 
     :param session: The current Session object
     :param database: The database name to open a console to
-    :param username: The username used for MyGeotab servers. Usually an email address.
+    :param user: The username used for MyGeotab servers. Usually an email address.
     :param password: The password associated with the username. Optional if `session_id` is provided.
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """

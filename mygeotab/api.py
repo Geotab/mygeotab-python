@@ -123,7 +123,6 @@ class API(object):
         """
         params = dict(id=-1, method=method, params=parameters)
         headers = {'Content-type': 'application/json; charset=UTF-8'}
-        is_live = not any(s in self._api_url for s in ['127.0.0.1', 'localhost'])
         with requests.Session() as s:
             s.mount('https://', GeotabHTTPAdapter())
             r = s.post(self._api_url,
@@ -309,7 +308,7 @@ class MyGeotabException(Exception):
     def __str__(self):
         error_str = '{0}\n{1}'.format(self.name, self.message)
         if self.stack_trace:
-            error_str = error_str + '\n\nStacktrace:\n{0}'.format(self.stack_trace)
+            error_str += '\n\nStacktrace:\n{0}'.format(self.stack_trace)
         return error_str
 
 

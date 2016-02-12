@@ -6,6 +6,23 @@ import os
 from mygeotab import api
 
 
+class TestProcessParameters(unittest.TestCase):
+    def setUp(self):
+        self.api = api.API('test@example.com', session_id=123)
+
+    def test_camel_case_transformer(self):
+        params = dict(search=dict(device_search=dict(id=123),
+                                  include_overlapped_trips=True))
+        fixed_params = self.api._process_param_names(params)
+        self.assertIsNotNone(fixed_params)
+        self.assertTrue('search' in fixed_params)
+        self.assertTrue('deviceSearch' in fixed_params['search'])
+        self.assertTrue('id' in fixed_params['search']['deviceSearch'])
+        self.assertEqual(123, fixed_params['search']['deviceSearch']['id'])
+        self.assertTrue('includeOverlappedTrips' in fixed_params['search'])
+        self.assertEqual(True, fixed_params['search']['includeOverlappedTrips'])
+
+
 class TestProcessResults(unittest.TestCase):
     def setUp(self):
         self.api = api.API('test@example.com', session_id=123)
