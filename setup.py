@@ -10,13 +10,18 @@ with open('mygeotab/__init__.py', 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(
         f.read().decode('utf-8')).group(1)))
 
+with open('README.rst', 'r') as f:
+    readme = f.read()
+with open('CHANGELOG.rst', 'r') as f:
+    changelog = f.read()
+
 setup(
     name='mygeotab',
     author='Aaron Toth',
     version=version,
     url='https://github.com/geotab/mygeotab-python',
     description='An unofficial Python client for the MyGeotab API',
-    long_description=open('README.rst').read(),
+    long_description=readme + '\n\n' + changelog,
     install_requires=[
         'requests>=2.6',
         'click>=3.3',
@@ -26,7 +31,7 @@ setup(
         'tzlocal>=1.2'
     ],
     extras_require={
-        'ipy': ['ipython']
+        'console': ['ipython']
     },
     test_suite="tests",
     include_package_data=True,
