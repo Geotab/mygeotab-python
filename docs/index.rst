@@ -5,6 +5,8 @@
 
 .. include:: ../README.rst
 
+.. include:: ../CHANGELOG.rst
+
 Command Line Interface
 ----------------------
 
@@ -27,3 +29,13 @@ method, this part of the documentation is for you.
 
    api
 
+
+Extras
+------
+
+Helpers for easier querying of MyGeotab data.
+
+.. toctree::
+   :maxdepth: 2
+
+   ext

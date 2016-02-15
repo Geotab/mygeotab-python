@@ -7,6 +7,11 @@ from mygeotab import ext, API, dates
 
 class ExceptionDataFeedListener(ext.DataFeedListener):
     def __init__(self, api):
+        """
+        A simple Data Feed listener for ExceptionEvent data
+
+        :param api: The MyGeotab API object
+        """
         self.api = api
         self._devices = {}
         super(ext.DataFeedListener, self).__init__()
