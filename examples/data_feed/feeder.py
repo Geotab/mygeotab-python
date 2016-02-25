@@ -41,6 +41,11 @@ class ExceptionDataFeedListener(ext.DataFeedListener):
             entity[key] = subentity
 
     def on_data(self, data):
+        """
+        The function called when new data has arrived.
+
+        :param data: The list of data records received.
+        """
         for d in data:
             self._populate_sub_entity(d, 'Device')
             self._populate_sub_entity(d, 'Rule')
@@ -50,7 +55,15 @@ class ExceptionDataFeedListener(ext.DataFeedListener):
                                                     rule=d['rule'].get('name', '**Unknown Rule')))
 
     def on_error(self, error):
+        """
+        The function called when an error has occurred.
+
+        :rtype: bool
+        :param error:
+        :return: If True, keep listening. If False, stop the data feed.
+        """
         click.secho(error, fg='red')
+        return True
 
 
 @click.command(help="A console data feeder example")
