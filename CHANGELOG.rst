@@ -10,7 +10,7 @@ Changes
 
 - Extension for facilitating use of the MyGeotab `Data Feed <https://my.geotab.com/sdk/#/dataFeed>`_
 - Allow Pythonic underscore-separated parameters mapped to camelcase ones
-- Force the use of TLS 1.2 for `upcoming strict security requirements <https://www.geotab.com/blog/securing-mygeotab-with-tls/)>`_ in MyGeotab.
+- Force the use of TLS 1.2 for `upcoming strict security requirements <https://www.geotab.com/blog/securing-mygeotab-with-tls/>`_ in MyGeotab.
   (Note that TLS 1.2 is only supported in Python 2.7.9+ and 3.4+)
 
 **Bug Fixes**
