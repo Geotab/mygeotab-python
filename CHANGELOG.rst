@@ -3,6 +3,13 @@
 Changes
 -------
 
+0.4.1 (2016-03-16)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Use a custom User-Agent when making requests
+
 0.4 (2016-02-25)
 ++++++++++++++++
 

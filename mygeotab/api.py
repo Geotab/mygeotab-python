@@ -14,6 +14,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
 
+from . import __title__, __version__
 import mygeotab.serializers
 
 try:
@@ -122,7 +123,10 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         params = dict(id=-1, method=method, params=parameters)
-        headers = {'Content-type': 'application/json; charset=UTF-8'}
+        headers = {
+            'Content-type': 'application/json; charset=UTF-8',
+            'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
+        }
         with requests.Session() as s:
             s.mount('https://', GeotabHTTPAdapter())
             r = s.post(self._api_url,
