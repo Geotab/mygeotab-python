@@ -13,7 +13,7 @@ class TestProcessParameters(unittest.TestCase):
     def test_camel_case_transformer(self):
         params = dict(search=dict(device_search=dict(id=123),
                                   include_overlapped_trips=True))
-        fixed_params = self.api._process_param_names(params)
+        fixed_params = api._process_param_names(params)
         self.assertIsNotNone(fixed_params)
         self.assertTrue('search' in fixed_params)
         self.assertTrue('deviceSearch' in fixed_params['search'])
@@ -103,6 +103,13 @@ class TestCallApi(unittest.TestCase):
         count_users = self.api.call('GetCountOf', type_name='User')
         self.assertGreaterEqual(count_users, 1)
         self.assertEqual(count_users, len(users))
+
+
+class TestServerCallApi(unittest.TestCase):
+    def test_get_version(self):
+        version = api.API.server_call('GetVersion', server='my3.geotab.com')
+        version_split = version.split('.')
+        self.assertEqual(len(version_split), 4)
 
 if __name__ == '__main__':
     unittest.main()

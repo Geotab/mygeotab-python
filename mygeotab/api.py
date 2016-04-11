@@ -55,19 +55,10 @@ class API(object):
                    server=credentials.server)
 
     @property
-    def _api_url(self):
-        """
-        Formats the server URL properly in order to query the API.
-
-        :rtype: str
-        :return: A valid MyGeotab API request URL
-        """
+    def _server(self):
         if not self.credentials.server:
             self.credentials.server = 'my.geotab.com'
-        parsed = urlparse(self.credentials.server)
-        base_url = parsed.netloc if parsed.netloc else parsed.path
-        base_url.replace('/', '')
-        return 'https://' + base_url + '/apiv1'
+        return self.credentials.server
 
     @property
     def _is_local(self):
@@ -77,7 +68,7 @@ class API(object):
         :rtype: bool
         :return: True if the calls are being made locally
         """
-        return any(s in self._api_url for s in ['127.0.0.1', 'localhost'])
+        return any(s in _get_api_url(self._server) for s in ['127.0.0.1', 'localhost'])
 
     @staticmethod
     def _process(data):
@@ -96,44 +87,30 @@ class API(object):
             return data
         return None
 
-    def _process_param_names(self, parameters):
-        """
-        Allows the use of Pythonic-style parameters with underscores instead of camel-case
-
-        :param parameters: The parameters object dict
-        :return: The processed parameters
-        """
-        for param_name in parameters:
-            value = parameters[param_name]
-            server_param_name = re.sub(r'_(\w)', lambda m: m.group(1).upper(), param_name)
-            if isinstance(value, dict):
-                value = self._process_param_names(value)
-            parameters[server_param_name] = value
-            if server_param_name != param_name:
-                del parameters[param_name]
-        return parameters
-
-    def _query(self, method, parameters):
+    @staticmethod
+    def _query(api_endpoint, method, parameters, verify_ssl=True):
         """
         Formats and performs the query against the API
 
-        :param method: The method name.
+        :param api_endpoint: The API endpoint to query
+        :param method: The method name
         :param parameters: A dict of parameters to send
+        :param verify_ssl: Whether or not to verify SSL connections
         :return: The JSON-decoded result from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        params = dict(id=-1, method=method, params=parameters)
+        params = dict(id=-1, method=method, params=parameters or {})
         headers = {
             'Content-type': 'application/json; charset=UTF-8',
             'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
         }
         with requests.Session() as s:
             s.mount('https://', GeotabHTTPAdapter())
-            r = s.post(self._api_url,
+            r = s.post(api_endpoint,
                        data=json.dumps(params,
                                        default=mygeotab.serializers.object_serializer),
-                       headers=headers, allow_redirects=True, verify=(not self._is_local))
-        return self._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
+                       headers=headers, allow_redirects=True, verify=verify_ssl)
+        return API._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
 
     def call(self, method, **parameters):
         """
@@ -145,17 +122,15 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         if method is None:
-            raise Exception("Must specify a method name")
-        if parameters is None:
-            parameters = {}
-        parameters = self._process_param_names(parameters)
+            raise Exception("A method name must be specified")
+        parameters = _process_param_names(parameters)
         if self.credentials is None:
             self.authenticate()
         if 'credentials' not in parameters and self.credentials.session_id:
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = self._query(method, parameters)
+            result = self._query(_get_api_url(self._server), method, parameters, not self._is_local)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -249,7 +224,7 @@ class API(object):
                          password=self.credentials.password)
         auth_data['global'] = True
         try:
-            result = self._query('Authenticate', auth_data)
+            result = self._query(_get_api_url(self._server), 'Authenticate', auth_data, not self._is_local)
             if result:
                 new_server = result['path']
                 server = self.credentials.server
@@ -265,6 +240,30 @@ class API(object):
                                               self.credentials.database,
                                               self.credentials.server)
             raise
+
+    @staticmethod
+    def server_call(method, server, **parameters):
+        """
+        Makes a call to an un-authenticated method on a server
+
+        :param method: The method name
+        :param server: The MyGeotab server
+        :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
+        :return: The JSON result (decoded into a dict) from the server
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        if method is None:
+            raise Exception("A method name must be specified")
+        if server is None:
+            raise Exception("A server (eg. my3.geotab.com) must be specified")
+        parameters = _process_param_names(parameters)
+        try:
+            result = API._query(_get_api_url(server), method, parameters, True)
+            if result is not None:
+                return result
+        except MyGeotabException:
+            raise
+        return None
 
 
 class Credentials(object):
@@ -342,5 +341,37 @@ class GeotabHTTPAdapter(HTTPAdapter):
                                        ssl_version=ssl.PROTOCOL_TLSv1_2,
                                        **pool_kwargs)
 
+
+def _process_param_names(parameters):
+    """
+    Allows the use of Pythonic-style parameters with underscores instead of camel-case
+
+    :param parameters: The parameters object dict
+    :return: The processed parameters
+    """
+    if not parameters:
+        return {}
+    for param_name in parameters:
+        value = parameters[param_name]
+        server_param_name = re.sub(r'_(\w)', lambda m: m.group(1).upper(), param_name)
+        if isinstance(value, dict):
+            value = _process_param_names(value)
+        parameters[server_param_name] = value
+        if server_param_name != param_name:
+            del parameters[param_name]
+    return parameters
+
+
+def _get_api_url(server):
+    """
+    Formats the server URL properly in order to query the API.
+
+    :rtype: str
+    :return: A valid MyGeotab API request URL
+    """
+    parsed = urlparse(server)
+    base_url = parsed.netloc if parsed.netloc else parsed.path
+    base_url.replace('/', '')
+    return 'https://' + base_url + '/apiv1'
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
