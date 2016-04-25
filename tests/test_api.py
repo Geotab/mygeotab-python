@@ -6,6 +6,16 @@ import os
 from mygeotab import api
 
 
+class TestAttributes(unittest.TestCase):
+    def test_is_local(self):
+        my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com')
+        self.assertFalse(my_api._is_local)
+        my_api = api.API('test@example.com', session_id=123, server='127.0.0.1')
+        self.assertTrue(my_api._is_local)
+        my_api = api.API('test@example.com', session_id=123, server='localhost')
+        self.assertTrue(my_api._is_local)
+
+
 class TestProcessParameters(unittest.TestCase):
     def setUp(self):
         self.api = api.API('test@example.com', session_id=123)

@@ -130,7 +130,7 @@ class API(object):
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = self._query(_get_api_url(self._server), method, parameters, not self._is_local)
+            result = self._query(_get_api_url(self._server), method, parameters, verify_ssl=(not self._is_local))
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -224,7 +224,7 @@ class API(object):
                          password=self.credentials.password)
         auth_data['global'] = True
         try:
-            result = self._query(_get_api_url(self._server), 'Authenticate', auth_data, not self._is_local)
+            result = self._query(_get_api_url(self._server), 'Authenticate', auth_data, verify_ssl=(not self._is_local))
             if result:
                 new_server = result['path']
                 server = self.credentials.server
