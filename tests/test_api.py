@@ -7,13 +7,15 @@ from mygeotab import api
 
 
 class TestAttributes(unittest.TestCase):
-    def test_is_local(self):
+    def test_should_verify_ssl(self):
         my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com')
-        self.assertFalse(my_api._is_verify_ssl)
+        self.assertTrue(my_api._is_verify_ssl)
         my_api = api.API('test@example.com', session_id=123, server='127.0.0.1')
-        self.assertTrue(my_api._is_verify_ssl)
+        self.assertFalse(my_api._is_verify_ssl)
         my_api = api.API('test@example.com', session_id=123, server='localhost')
-        self.assertTrue(my_api._is_verify_ssl)
+        self.assertFalse(my_api._is_verify_ssl)
+        my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com', verify=False)
+        self.assertFalse(my_api._is_verify_ssl)
 
 
 class TestProcessParameters(unittest.TestCase):
