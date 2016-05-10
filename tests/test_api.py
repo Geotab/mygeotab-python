@@ -9,11 +9,11 @@ from mygeotab import api
 class TestAttributes(unittest.TestCase):
     def test_is_local(self):
         my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com')
-        self.assertFalse(my_api._is_local)
+        self.assertFalse(my_api._is_verify_ssl)
         my_api = api.API('test@example.com', session_id=123, server='127.0.0.1')
-        self.assertTrue(my_api._is_local)
+        self.assertTrue(my_api._is_verify_ssl)
         my_api = api.API('test@example.com', session_id=123, server='localhost')
-        self.assertTrue(my_api._is_local)
+        self.assertTrue(my_api._is_verify_ssl)
 
 
 class TestProcessParameters(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestProcessParameters(unittest.TestCase):
     def test_camel_case_transformer(self):
         params = dict(search=dict(device_search=dict(id=123),
                                   include_overlapped_trips=True))
-        fixed_params = api._process_param_names(params)
+        fixed_params = api.process_parameters(params)
         self.assertIsNotNone(fixed_params)
         self.assertTrue('search' in fixed_params)
         self.assertTrue('deviceSearch' in fixed_params['search'])

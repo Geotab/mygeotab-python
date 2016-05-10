@@ -31,7 +31,8 @@ setup(
         'tzlocal>=1.2'
     ],
     extras_require={
-        'console': ['ipython']
+        'console': ['ipython'],
+        'async': ['aiohttp']
     },
     test_suite="tests",
     include_package_data=True,

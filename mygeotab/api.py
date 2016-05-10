@@ -24,7 +24,7 @@ except:
 
 
 class API(object):
-    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com'):
+    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True):
         """
         Creates a new instance of this simple Pythonic wrapper for the MyGeotab API.
 
@@ -33,6 +33,7 @@ class API(object):
         :param database: The database or company name. Optional as this usually gets resolved upon authentication.
         :param session_id: A session ID, assigned by the server.
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :param verify: If True, verify SSL certificate. It's recommended not to modify this.
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         if username is None:
@@ -40,6 +41,7 @@ class API(object):
         if password is None and session_id is None:
             raise Exception('`password` and `session_id` must not both be None')
         self.credentials = Credentials(username, session_id, database, server, password)
+        self.__verify_ssl = verify
         self.__reauthorize_count = 0
 
     @staticmethod
@@ -61,14 +63,16 @@ class API(object):
         return self.credentials.server
 
     @property
-    def _is_local(self):
+    def _is_verify_ssl(self):
         """
-        Are calls being made against a local server.
+        Whether or not SSL be verified.
 
         :rtype: bool
         :return: True if the calls are being made locally
         """
-        return any(s in _get_api_url(self._server) for s in ['127.0.0.1', 'localhost'])
+        if not self.__verify_ssl:
+            return False
+        return not any(s in get_api_url(self._server) for s in ['127.0.0.1', 'localhost'])
 
     @staticmethod
     def _process(data):
@@ -123,14 +127,14 @@ class API(object):
         """
         if method is None:
             raise Exception("A method name must be specified")
-        parameters = _process_param_names(parameters)
+        parameters = process_parameters(parameters)
         if self.credentials is None:
             self.authenticate()
         if 'credentials' not in parameters and self.credentials.session_id:
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = self._query(_get_api_url(self._server), method, parameters, verify_ssl=(not self._is_local))
+            result = self._query(get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -224,7 +228,7 @@ class API(object):
                          password=self.credentials.password)
         auth_data['global'] = True
         try:
-            result = self._query(_get_api_url(self._server), 'Authenticate', auth_data, verify_ssl=(not self._is_local))
+            result = self._query(get_api_url(self._server), 'Authenticate', auth_data, verify_ssl=self._is_verify_ssl)
             if result:
                 new_server = result['path']
                 server = self.credentials.server
@@ -256,9 +260,9 @@ class API(object):
             raise Exception("A method name must be specified")
         if server is None:
             raise Exception("A server (eg. my3.geotab.com) must be specified")
-        parameters = _process_param_names(parameters)
+        parameters = process_parameters(parameters)
         try:
-            result = API._query(_get_api_url(server), method, parameters, True)
+            result = API._query(get_api_url(server), method, parameters, True)
             if result is not None:
                 return result
         except MyGeotabException:
@@ -342,7 +346,7 @@ class GeotabHTTPAdapter(HTTPAdapter):
                                        **pool_kwargs)
 
 
-def _process_param_names(parameters):
+def process_parameters(parameters):
     """
     Allows the use of Pythonic-style parameters with underscores instead of camel-case
 
@@ -355,14 +359,14 @@ def _process_param_names(parameters):
         value = parameters[param_name]
         server_param_name = re.sub(r'_(\w)', lambda m: m.group(1).upper(), param_name)
         if isinstance(value, dict):
-            value = _process_param_names(value)
+            value = process_parameters(value)
         parameters[server_param_name] = value
         if server_param_name != param_name:
             del parameters[param_name]
     return parameters
 
 
-def _get_api_url(server):
+def get_api_url(server):
     """
     Formats the server URL properly in order to query the API.
 

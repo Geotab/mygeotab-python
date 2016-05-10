@@ -4,10 +4,11 @@ from collections import defaultdict
 
 import click
 
-from mygeotab import ext, API, dates
+from mygeotab import API, dates
+from mygeotab.ext import feed
 
 
-class ExceptionDataFeedListener(ext.DataFeedListener):
+class ExceptionDataFeedListener(feed.DataFeedListener):
     def __init__(self, api):
         """
         A simple Data Feed listener for Exception Event data
@@ -16,7 +17,7 @@ class ExceptionDataFeedListener(ext.DataFeedListener):
         """
         self.api = api
         self._cache = defaultdict(dict)
-        super(ext.DataFeedListener, self).__init__()
+        super(feed.DataFeedListener, self).__init__()
 
     def _populate_sub_entity(self, entity, type_name):
         """
@@ -76,7 +77,7 @@ class ExceptionDataFeedListener(ext.DataFeedListener):
 def main(database, user=None, password=None, server=None, interval=60):
     api = API(database=database, username=user, password=password, server=server)
     api.authenticate()
-    ext.DataFeed(api, ExceptionDataFeedListener(api), 'ExceptionEvent', interval=interval).start()
+    feed.DataFeed(api, ExceptionDataFeedListener(api), 'ExceptionEvent', interval=interval).start()
 
 
 if __name__ == '__main__':
