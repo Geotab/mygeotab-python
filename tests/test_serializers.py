@@ -23,9 +23,9 @@ class TestSerialization(unittest.TestCase):
 
     def test_top_level_utc_datetime(self):
         data = dict(
-            dateTime=datetime(2015, 6, 5, 2, 3, 44)
+            dateTime=datetime(2015, 6, 5, 2, 3, 44, 87000)
         )
-        expected_str = '{"dateTime": "2015-06-05T02:03:44Z"}'
+        expected_str = '{"dateTime": "2015-06-05T02:03:44.087Z"}'
         data_str = json_serialize(data)
         self.assertEqual(data_str, expected_str)
 
@@ -34,7 +34,7 @@ class TestSerialization(unittest.TestCase):
         data = dict(
             dateTime=est.localize(datetime(2015, 6, 4, 3, 3, 43))
         )
-        expected_str = '{"dateTime": "2015-06-04T07:03:43Z"}'
+        expected_str = '{"dateTime": "2015-06-04T07:03:43.000Z"}'
         data_str = json_serialize(data)
         self.assertEqual(data_str, expected_str)
 

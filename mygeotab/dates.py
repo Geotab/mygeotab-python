@@ -14,13 +14,13 @@ def format_iso_datetime(dt):
     :return: The datetime object in 8601 string form
     """
     dt = localize_datetime(dt, pytz.utc)
-    return dt.replace(tzinfo=None).isoformat() + 'Z'
-
+    return dt.replace(tzinfo=None).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 def localize_datetime(dt, tz=None):
     """
     Converts a naive or UTC-localized date into the provided timezone or current machine's timezone
 
+    :rtype: datetime
     :param dt: The datetime object
     :param tz: The timezone. If blank or None, the user's native timezone is used
     :return: The localized datetime object
