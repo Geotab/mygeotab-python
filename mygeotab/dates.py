@@ -16,6 +16,7 @@ def format_iso_datetime(dt):
     dt = localize_datetime(dt, pytz.utc)
     return dt.replace(tzinfo=None).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
+
 def localize_datetime(dt, tz=None):
     """
     Converts a naive or UTC-localized date into the provided timezone or current machine's timezone
