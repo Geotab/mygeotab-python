@@ -105,6 +105,12 @@ class TestCallApi(unittest.TestCase):
         self.assertEqual(len(version_split), 4)
 
     def test_get_user(self):
+        user = self.api.get('User', name='{0}'.format(self.username))
+        self.assertEqual(len(user), 1)
+        user = user[0]
+        self.assertEqual(user['name'], self.username)
+
+    def test_get_user_search(self):
         user = self.api.search('User', name='{0}'.format(self.username))
         self.assertEqual(len(user), 1)
         user = user[0]
