@@ -9,6 +9,7 @@ except ImportError:
 import json
 import re
 import ssl
+import warnings
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -166,6 +167,11 @@ class API(object):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
+        if parameters:
+            results_limit = parameters.get('resultsLimit', None)
+            if results_limit is not None:
+                del parameters['resultsLimit']
+            parameters = dict(search=parameters, resultsLimit=results_limit)
         return self.call('Get', type_name=type_name, **parameters)
 
     def search(self, type_name, **parameters):
@@ -177,13 +183,10 @@ class API(object):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        if parameters:
-            results_limit = parameters.get('resultsLimit', None)
-            if results_limit is not None:
-                del parameters['resultsLimit']
-            parameters = dict(search=parameters)
-            return self.call('Get', type_name=type_name, resultsLimit=results_limit, **parameters)
-        return self.get(type_name)
+        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+        warnings.warn("'search()' is deprecated. Use 'get()' instead", DeprecationWarning, stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)  # turn off filter
+        return self.get(type_name=type_name, **parameters)
 
     def add(self, type_name, entity):
         """

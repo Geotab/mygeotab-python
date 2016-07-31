@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.5 (Development)
++++++++++++++++++
+
+**Enhancements**
+
+- Deprecated the 'search()' function. Replaced by folding the previous functionality into 'get()'.
+
+
 0.4.4 (2016-07-10)
 ++++++++++++++++++
 
