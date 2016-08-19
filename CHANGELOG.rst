@@ -8,8 +8,9 @@ Changes
 
 **Enhancements**
 
-- Deprecated the 'search()' function. Replaced by folding the previous functionality into 'get()'.
+- Deprecated the 'search()' and 'search_async()' functions. Replaced by folding the previous functionality into 'get()'.
 - Removed 'tzlocal' dependency. Always deal with dates in UTC by default.
+- Prefer functions instead of making static methods in classes.
 
 
 0.4.4 (2016-07-10)

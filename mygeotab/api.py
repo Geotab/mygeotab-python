@@ -45,18 +45,6 @@ class API(object):
         self.__verify_ssl = verify
         self.__reauthorize_count = 0
 
-    @staticmethod
-    def from_credentials(credentials):
-        """
-        Returns a new API object from an existing Credentials object
-
-        :param credentials: The existing saved credentials
-        :return: A new API object populated with MyGeotab credentials
-        """
-        return API(username=credentials.username, password=credentials.password,
-                   database=credentials.database, session_id=credentials.session_id,
-                   server=credentials.server)
-
     @property
     def _server(self):
         if not self.credentials.server:
@@ -74,48 +62,6 @@ class API(object):
         if not self.__verify_ssl:
             return False
         return not any(s in get_api_url(self._server) for s in ['127.0.0.1', 'localhost'])
-
-    @staticmethod
-    def _process(data):
-        """
-        Processes the returned JSON from the server.
-
-        :param data: The JSON data in dict form
-        :return: The result dict
-        :raise MyGeotabException: Raises when a server exception was encountered
-        """
-        if data:
-            if 'error' in data:
-                raise MyGeotabException(data['error'])
-            if 'result' in data:
-                return data['result']
-            return data
-        return None
-
-    @staticmethod
-    def _query(api_endpoint, method, parameters, verify_ssl=True):
-        """
-        Formats and performs the query against the API
-
-        :param api_endpoint: The API endpoint to query
-        :param method: The method name
-        :param parameters: A dict of parameters to send
-        :param verify_ssl: Whether or not to verify SSL connections
-        :return: The JSON-decoded result from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        params = dict(id=-1, method=method, params=parameters or {})
-        headers = {
-            'Content-type': 'application/json; charset=UTF-8',
-            'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
-        }
-        with requests.Session() as s:
-            s.mount('https://', GeotabHTTPAdapter())
-            r = s.post(api_endpoint,
-                       data=json.dumps(params,
-                                       default=mygeotab.serializers.object_serializer),
-                       headers=headers, allow_redirects=True, verify=verify_ssl)
-        return API._process(r.json(object_hook=mygeotab.serializers.object_deserializer))
 
     def call(self, method, **parameters):
         """
@@ -135,7 +81,7 @@ class API(object):
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = self._query(get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
+            result = _query(get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -231,7 +177,7 @@ class API(object):
                          password=self.credentials.password)
         auth_data['global'] = True
         try:
-            result = self._query(get_api_url(self._server), 'Authenticate', auth_data, verify_ssl=self._is_verify_ssl)
+            result = _query(get_api_url(self._server), 'Authenticate', auth_data, verify_ssl=self._is_verify_ssl)
             if result:
                 new_server = result['path']
                 server = self.credentials.server
@@ -247,30 +193,6 @@ class API(object):
                                               self.credentials.database,
                                               self.credentials.server)
             raise
-
-    @staticmethod
-    def server_call(method, server, **parameters):
-        """
-        Makes a call to an un-authenticated method on a server
-
-        :param method: The method name
-        :param server: The MyGeotab server
-        :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        if method is None:
-            raise Exception("A method name must be specified")
-        if server is None:
-            raise Exception("A server (eg. my3.geotab.com) must be specified")
-        parameters = process_parameters(parameters)
-        try:
-            result = API._query(get_api_url(server), method, parameters, True)
-            if result is not None:
-                return result
-        except MyGeotabException:
-            raise
-        return None
 
 
 class Credentials(object):
@@ -347,6 +269,84 @@ class GeotabHTTPAdapter(HTTPAdapter):
                                        block=block,
                                        ssl_version=ssl.PROTOCOL_TLSv1_2,
                                        **pool_kwargs)
+
+
+def _query(api_endpoint, method, parameters, verify_ssl=True):
+    """
+    Formats and performs the query against the API
+
+    :param api_endpoint: The API endpoint to query
+    :param method: The method name
+    :param parameters: A dict of parameters to send
+    :param verify_ssl: Whether or not to verify SSL connections
+    :return: The JSON-decoded result from the server
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    """
+    params = dict(id=-1, method=method, params=parameters or {})
+    headers = {
+        'Content-type': 'application/json; charset=UTF-8',
+        'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
+    }
+    with requests.Session() as s:
+        s.mount('https://', GeotabHTTPAdapter())
+        r = s.post(api_endpoint,
+                   data=json.dumps(params,
+                                   default=mygeotab.serializers.object_serializer),
+                   headers=headers, allow_redirects=True, verify=verify_ssl)
+    return _process(r.json(object_hook=mygeotab.serializers.object_deserializer))
+
+
+def _process(data):
+    """
+    Processes the returned JSON from the server.
+
+    :param data: The JSON data in dict form
+    :return: The result dict
+    :raise MyGeotabException: Raises when a server exception was encountered
+    """
+    if data:
+        if 'error' in data:
+            raise MyGeotabException(data['error'])
+        if 'result' in data:
+            return data['result']
+        return data
+    return None
+
+
+def from_credentials(credentials):
+    """
+    Returns a new API object from an existing Credentials object
+
+    :param credentials: The existing saved credentials
+    :return: A new API object populated with MyGeotab credentials
+    """
+    return API(username=credentials.username, password=credentials.password,
+               database=credentials.database, session_id=credentials.session_id,
+               server=credentials.server)
+
+
+def server_call(method, server, **parameters):
+    """
+    Makes a call to an un-authenticated method on a server
+
+    :param method: The method name
+    :param server: The MyGeotab server
+    :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
+    :return: The JSON result (decoded into a dict) from the server
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    """
+    if method is None:
+        raise Exception("A method name must be specified")
+    if server is None:
+        raise Exception("A server (eg. my3.geotab.com) must be specified")
+    parameters = process_parameters(parameters)
+    try:
+        result = _query(get_api_url(server), method, parameters, True)
+        if result is not None:
+            return result
+    except MyGeotabException:
+        raise
+    return None
 
 
 def process_parameters(parameters):

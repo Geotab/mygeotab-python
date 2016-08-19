@@ -88,7 +88,7 @@ class Session(object):
 
     def get_api(self):
         if self.credentials:
-            return mygeotab.api.API.from_credentials(self.credentials)
+            return from_credentials(self.credentials)
         return None
 
     def login(self, username, password=None, database=None, server=None):

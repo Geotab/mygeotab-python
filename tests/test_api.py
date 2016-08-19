@@ -63,7 +63,7 @@ class TestProcessResults(unittest.TestCase):
             u'"Get", "id": -1}'),
             name=u'JSONRPCError'), requestIndex=0)
         with self.assertRaises(api.MyGeotabException) as cm:
-            self.api._process(exception_response)
+            api._process(exception_response)
             ex = cm.exception
             self.assertEqual(ex.name, 'MissingMethodException')
             self.assertEqual(ex.message,
@@ -79,7 +79,7 @@ class TestProcessResults(unittest.TestCase):
                 name='test@example.com'
             )
         ]}
-        result = self.api._process(results_response)
+        result = api._process(results_response)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]['name'], 'test@example.com')
         self.assertEqual(result[0]['id'], 'b123')
@@ -125,7 +125,7 @@ class TestCallApi(unittest.TestCase):
 
 class TestServerCallApi(unittest.TestCase):
     def test_get_version(self):
-        version = api.API.server_call('GetVersion', server='my3.geotab.com')
+        version = api.server_call('GetVersion', server='my3.geotab.com')
         version_split = version.split('.')
         self.assertEqual(len(version_split), 4)
 

@@ -5,6 +5,7 @@ try:
 except ImportError:
     raise Exception("Python 3.5+ is required to use the async API")
 import json
+import warnings
 
 import aiohttp
 
@@ -28,30 +29,6 @@ class API(mygeotab.API):
         """
         super().__init__(username, password, database, session_id, server, verify)
 
-    @staticmethod
-    async def _query_async(api_endpoint, method, parameters, verify_ssl=True):
-        """
-        Formats and performs the asynchronous query against the API
-
-        :param api_endpoint: The API endpoint to query
-        :param method: The method name.
-        :param parameters: A dict of parameters to send
-        :param verify_ssl: Whether or not to verify SSL connections
-        :return: The JSON-decoded result from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        params = dict(id=-1, method=method, params=parameters)
-        headers = {'Content-type': 'application/json; charset=UTF-8'}
-        conn = aiohttp.TCPConnector(verify_ssl=verify_ssl)
-        with aiohttp.ClientSession(connector=conn) as session:
-            r = await session.post(api_endpoint,
-                                   data=json.dumps(params,
-                                                   default=mygeotab.serializers.object_serializer),
-                                   headers=headers,
-                                   allow_redirects=True)
-            body = await r.text()
-        return API._process(json.loads(body, object_hook=mygeotab.serializers.object_deserializer))
-
     async def call_async(self, method, **parameters):
         """
         Makes an async call to the API.
@@ -70,7 +47,7 @@ class API(mygeotab.API):
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = await self._query_async(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
+            result = await _query_async(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -102,6 +79,11 @@ class API(mygeotab.API):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
+        if parameters:
+            results_limit = parameters.get('resultsLimit', None)
+            if results_limit is not None:
+                del parameters['resultsLimit']
+            parameters = dict(search=parameters, resultsLimit=results_limit)
         return await self.call_async('Get', type_name=type_name, **parameters)
 
     async def search_async(self, type_name, **parameters):
@@ -113,13 +95,10 @@ class API(mygeotab.API):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        if parameters:
-            results_limit = parameters.get('resultsLimit', None)
-            if results_limit is not None:
-                del parameters['resultsLimit']
-            parameters = dict(search=parameters)
-            return await self.call_async('Get', type_name=type_name, resultsLimit=results_limit, **parameters)
-        return await self.get_async(type_name)
+        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+        warnings.warn("'search()' is deprecated. Use 'get()' instead", DeprecationWarning, stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)  # turn off filter
+        return await self.get_async(type_name, **parameters)
 
     async def add_async(self, type_name, entity):
         """
@@ -151,3 +130,27 @@ class API(mygeotab.API):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         return await self.call_async('Remove', type_name=type_name, entity=entity)
+
+
+async def _query_async(api_endpoint, method, parameters, verify_ssl=True):
+    """
+    Formats and performs the asynchronous query against the API
+
+    :param api_endpoint: The API endpoint to query
+    :param method: The method name.
+    :param parameters: A dict of parameters to send
+    :param verify_ssl: Whether or not to verify SSL connections
+    :return: The JSON-decoded result from the server
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    """
+    params = dict(id=-1, method=method, params=parameters)
+    headers = {'Content-type': 'application/json; charset=UTF-8'}
+    conn = aiohttp.TCPConnector(verify_ssl=verify_ssl)
+    with aiohttp.ClientSession(connector=conn) as session:
+        r = await session.post(api_endpoint,
+                               data=json.dumps(params,
+                                               default=mygeotab.serializers.object_serializer),
+                               headers=headers,
+                               allow_redirects=True)
+        body = await r.text()
+    return mygeotab.api._process(json.loads(body, object_hook=mygeotab.serializers.object_deserializer))
