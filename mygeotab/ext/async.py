@@ -2,8 +2,11 @@
 
 try:
     import asyncio
+    import typing
+    import types
+    import itertools
 except ImportError:
-    raise Exception("Python 3.5+ is required to use the async API")
+    raise Exception('Python 3.5+ is required to use the async API')
 import json
 import warnings
 
@@ -15,7 +18,7 @@ import mygeotab.serializers
 
 
 class API(mygeotab.API):
-    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True):
+    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True, loop=None):
         """
         Creates a new instance of this simple asynchronous Pythonic wrapper for the MyGeotab API.
 
@@ -25,8 +28,10 @@ class API(mygeotab.API):
         :param session_id: A session ID, assigned by the server.
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
         :param verify: If True, verify SSL certificate. It's recommended not to modify this.
+        :param loop: The asyncio event loop
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
+        self.loop = loop
         super().__init__(username, password, database, session_id, server, verify)
 
     async def call_async(self, method, **parameters):
@@ -47,7 +52,7 @@ class API(mygeotab.API):
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query_async(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
+            result = await _query_async(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -132,7 +137,14 @@ class API(mygeotab.API):
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
 
-async def _query_async(api_endpoint, method, parameters, verify_ssl=True):
+def get_all(tasks: typing.List[types.CoroutineType], loop: asyncio.BaseEventLoop=None):
+    if not loop:
+        loop = asyncio.get_event_loop()
+    futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
+    return loop.run_until_complete(asyncio.gather(*futures))
+
+
+async def _query_async(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.BaseEventLoop=None):
     """
     Formats and performs the asynchronous query against the API
 
@@ -145,8 +157,8 @@ async def _query_async(api_endpoint, method, parameters, verify_ssl=True):
     """
     params = dict(id=-1, method=method, params=parameters)
     headers = {'Content-type': 'application/json; charset=UTF-8'}
-    conn = aiohttp.TCPConnector(verify_ssl=verify_ssl)
-    with aiohttp.ClientSession(connector=conn) as session:
+    conn = aiohttp.TCPConnector(verify_ssl=verify_ssl, loop=loop)
+    with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         r = await session.post(api_endpoint,
                                data=json.dumps(params,
                                                default=mygeotab.serializers.object_serializer),
