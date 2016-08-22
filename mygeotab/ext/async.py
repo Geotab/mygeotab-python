@@ -100,7 +100,7 @@ class API(mygeotab.API):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("'search()' is deprecated. Use 'get()' instead", DeprecationWarning, stacklevel=2)
+        warnings.warn("'search_async()' is deprecated. Use 'get_async()' instead", DeprecationWarning, stacklevel=2)
         warnings.simplefilter('default', DeprecationWarning)  # turn off filter
         return await self.get_async(type_name, **parameters)
 
@@ -136,7 +136,7 @@ class API(mygeotab.API):
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
 
-def get_all(tasks: typing.List[types.CoroutineType], loop: asyncio.BaseEventLoop=None):
+def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.BaseEventLoop=None):
     if not loop:
         loop = asyncio.get_event_loop()
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]

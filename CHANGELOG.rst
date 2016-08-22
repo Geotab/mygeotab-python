@@ -8,9 +8,10 @@ Changes
 
 **Enhancements**
 
-- Deprecated the 'search()' and 'search_async()' functions. Replaced by folding the previous functionality into 'get()'.
+- Deprecated the 'search()' and 'search_async()' functions. Replaced by folding the previous functionality into 'run()'.
 - Removed 'tzlocal' dependency. Always deal with dates in UTC by default.
 - Prefer functions instead of making static methods in classes.
+- Added helper to run async calls and collect their results
 
 
 0.4.4 (2016-07-10)
