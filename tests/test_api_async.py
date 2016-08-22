@@ -1,9 +1,9 @@
-import os
+import sys
 import unittest
-try:
-    import asyncio
-except ImportError:
+if sys.version_info < (3, 5):
     raise unittest.SkipTest('Python 3.5+ is required to run the async API tests.')
+import os
+import asyncio
 
 from mygeotab.ext.async import API, get_all
 

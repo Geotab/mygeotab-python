@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-try:
-    import asyncio
-    import typing
-    import types
-    import itertools
-except ImportError:
+import sys
+if sys.version_info < (3, 5):
     raise Exception('Python 3.5+ is required to use the async API')
+import asyncio
 import json
+import typing
+import types
 import warnings
 
 import aiohttp
