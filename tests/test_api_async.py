@@ -16,7 +16,7 @@ class TestAsyncCallApi(unittest.TestCase):
         password = os.environ.get('MYGEOTAB_PASSWORD')
         self.database = os.environ.get('MYGEOTAB_DATABASE')
         if self.username and password:
-            self.api = API(self.username, password=password, database=self.database, loop=self.loop)
+            self.api = API(self.username, password=password, database=self.database, loop=self.loop, verify=False)
             self.api.authenticate()
             del password
         else:
