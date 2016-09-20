@@ -12,6 +12,7 @@ Changes
 - Removed 'tzlocal' dependency. Always deal with dates in UTC by default.
 - Prefer functions instead of making static methods in classes.
 - Added helper to run async calls and collect their results
+- Add ability to quickly run simple python scripts from the 'myg' console with no need for any authentication handling. Similar to 'console', but for running scripts rather than creating an interactive console.
 
 
 0.4.4 (2016-07-10)

@@ -88,7 +88,7 @@ class Session(object):
 
     def get_api(self):
         if self.credentials:
-            return from_credentials(self.credentials)
+            return mygeotab.api.from_credentials(self.credentials)
         return None
 
     def login(self, username, password=None, database=None, server=None):
@@ -183,7 +183,7 @@ def console(session, database=None, user=None, password=None, server=None):
     IPython console has numerous advantages over the stock Python console, including: colors, pretty printing,
     command auto-completion, and more.
 
-    By default, all library objects are available as locals in the console, with api
+    By default, all library objects are available as locals in the script, with 'myg' being the active API object
 
     :param session: The current Session object
     :param database: The database name to open a console to
@@ -191,21 +191,7 @@ def console(session, database=None, user=None, password=None, server=None):
     :param password: The password associated with the username. Optional if `session_id` is provided.
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
-    if not session.credentials:
-        login(session, user, password, database, server)
-    session.load(database)
-    api = session.get_api()
-    if not api:
-        # This DB hasn't been logged into before
-        api = login(session, user, password, database, server)
-    try:
-        api.search('User', name=session.credentials.username)
-    except mygeotab.api.AuthenticationException:
-        # Credentials expired, try logging in again
-        click.echo('Your session has expired. Please login again.')
-        api = login(session, user, password, database, server)
-
-    methods = dict(my=api, mygeotab=mygeotab, dates=mygeotab.dates)
+    local_vars = _populate_locals(database, password, server, session, user)
     version = 'MyGeotab Console {0} [Python {1}]'.format(mygeotab.__version__,
                                                          sys.version.replace('\n', ''))
     auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
@@ -213,12 +199,36 @@ def console(session, database=None, user=None, password=None, server=None):
     try:
         from IPython import embed
 
-        embed(banner1=banner, user_ns=methods)
+        embed(banner1=banner, user_ns=local_vars)
     except ImportError:
         import code
 
-        code.interact(banner, local=methods)
+        code.interact(banner, local=local_vars)
 
+
+@click.command(help="Run a Python script with the user credentials already populated")
+@click.argument('script', nargs=1, required=True, type=click.Path(exists=True))
+@click.argument('database', nargs=1, required=False)
+@click.option('--user', '-u')
+@click.option('--password', '-p')
+@click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
+@click.pass_obj
+def run(session, script=None, database=None, user=None, password=None, server=None):
+    """Runs a script with pre-populated saved credentials
+
+    By default, all library objects are available as locals in the script, with 'myg' being the active API object
+
+    :param session: The current Session object
+    :param script: The script file to execute
+    :param database: The database name to open a console to
+    :param user: The username used for MyGeotab servers. Usually an email address.
+    :param password: The password associated with the username. Optional if `session_id` is provided.
+    :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+    """
+    local_vars = _populate_locals(database, password, server, session, user)
+    with open(script) as f:
+        compiled_script = compile(f.read(), script, 'exec')
+        exec(compiled_script, globals(), local_vars)
 
 @click.group()
 @click.version_option()
@@ -234,8 +244,24 @@ def main(ctx):
     except IOError:
         pass
 
+def _populate_locals(database, password, server, session, user):
+    if not session.credentials:
+        login(session, user, password, database, server)
+    session.load(database)
+    api = session.get_api()
+    if not api:
+        # This DB hasn't been logged into before
+        api = login(session, user, password, database, server)
+    try:
+        api.get('User', name=session.credentials.username)
+    except mygeotab.api.AuthenticationException:
+        # Credentials expired, try logging in again
+        click.echo('Your session has expired. Please login again.')
+        api = login(session, user, password, database, server)
+    return dict(myg=api, mygeotab=mygeotab, dates=mygeotab.dates)
 
 main.add_command(console)
+main.add_command(run)
 main.add_command(forget)
 main.add_command(sessions)
 
