@@ -34,7 +34,7 @@ class ExceptionDataFeedListener(feed.DataFeedListener):
         cache = self._cache[key]
         subentity = cache.get(entity[key]['id'])
         if not subentity:
-            subentities = self.api.search(type_name, id=entity[key]['id'], results_limit=1)
+            subentities = self.api.get(type_name, id=entity[key]['id'], results_limit=1)
             if len(subentities) > 0:
                 subentity = subentities[0]
                 entity[key] = subentity
