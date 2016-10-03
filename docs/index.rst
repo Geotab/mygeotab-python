@@ -7,35 +7,24 @@
 
 .. include:: ../CHANGELOG.rst
 
-Command Line Interface
-----------------------
+User Guide
+----------
 
-Installing this package also installs a command line tool `mygeotab` that provides a console for quickly
-querying and interacting with data.
+How to use this library, and more information about bundled tools and examples.
 
 .. toctree::
    :maxdepth: 2
 
+   usage
    commandline
+   ext
 
 API Reference
 -------------
 
-If you are looking for information on a specific function, class, or
-method, this part of the documentation is for you.
+The full API reference for all public classes and functions.
 
 .. toctree::
    :maxdepth: 2
 
    api
-
-
-Extras
-------
-
-Helpers for easier querying of MyGeotab data.
-
-.. toctree::
-   :maxdepth: 2
-
-   ext

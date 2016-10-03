@@ -3,11 +3,10 @@ API
 
 .. module:: mygeotab
 
-This part of the documentation lists the full API reference of all public
-classes and functions.
+The full API reference for all public classes and functions.
 
-Querying
---------
+Querying Data
+-------------
 
 .. autoclass:: API
    :members:
@@ -22,8 +21,8 @@ Credentials & Authentication
 
 .. autoclass:: AuthenticationException
 
-Dates
------
+Date Helpers
+------------
 
 .. automodule:: mygeotab.dates
    :members:

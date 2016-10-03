@@ -4,13 +4,13 @@ Extras
 .. module:: mygeotab.ext
 
 Extras for easier querying of the MyGeotab API. Note that these are currently experimental, and likely to change at any
-time.
+time without notice.
 
 Data Feed
 ---------
 
-.. autoclass:: DataFeed
+.. autoclass:: mygeotab.ext.feed.DataFeed
    :members:
 
-.. autoclass:: DataFeedListener
+.. autoclass:: mygeotab.ext.feed.DataFeedListener
    :members:
