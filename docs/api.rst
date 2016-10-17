@@ -26,3 +26,15 @@ Date Helpers
 
 .. automodule:: mygeotab.dates
    :members:
+
+Extras
+------
+
+Data Feed
+~~~~~~~~~
+
+.. autoclass:: mygeotab.ext.feed.DataFeed
+   :members:
+
+.. autoclass:: mygeotab.ext.feed.DataFeedListener
+   :members:

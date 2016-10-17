@@ -114,30 +114,81 @@ From the `MyGeotab API Concepts documentation <https://my.geotab.com/sdk/#/conce
 .. pull-quote::
     All objects in the MyGeotab system are called entities. Entities have an ID property that is used to uniquely identify that object in the database.
 
+To see all available entities, refer to the `API _MyGeotab API Reference <https://my.geotab.com/sdk/#/api>`_.
+
+.. note::
+    To see which objects are entities in the SDK, type in "search" into the search box of the API reference page.
+
+    .. image:: ./_static/usage_search_api.png
+
+    For example, the "Device" object has a corresponding "DeviceSearch", and the "User" object has a corresponding "UserSearch" object.
+
 There are several helper methods added in this SDK library that do some wrapping around the :func:`call() <mygeotab.API.call>` method to make it more Pythonic
 and easier to work with.
 
-To re-use the above example vehicle of getting all vehicles:
+Getting
+~~~~~~~
 
-.. code-block:: python
-
-    api.call('Get', typeName='Device')
-
-A :func:`get() <mygeotab.API.get>` method was introduced, so it could be written as such:
+To re-use the above example vehicle of getting all vehicles, the :func:`get() <mygeotab.API.get>` method is much more concise:
 
 .. code-block:: python
 
     api.get('Device')
 
-And in a similar fashion, the call for the vehicle with the specified serial number:
-
-.. code-block:: python
-
-    api.call('Get', typeName='Device', search={'serialNumber': 'GTA9000003EA'})
-
-The "search" parameter was abstracted out, so that it could be written as:
+This also simplifies the filtering down to the specific vehicle:
 
 .. code-block:: python
 
     api.get('Device', serialNumber='GTA9000003EA')
 
+.. note::
+    Because the "search" parameter is common in a call, the library brings all parameters that can be passed
+    into a search to the top level parameters for the :func:`get() <mygeotab.API.get>` method.
+
+Adding
+~~~~~~
+
+To add an entity, use the :func:`add() <mygeotab.API.add>` method:
+
+.. code-block:: python
+
+    api.add('Device', {
+        'serialNumber': 'GTA9000003EA',
+        'name': 'My Vehicle'
+    })
+
+Setting
+~~~~~~~
+
+To modify an entity, first get the full entity:
+
+.. code-block:: python
+
+    devices = api.get('Device', serialNumber='GTA9000003EA', resultsLimit=1)
+    device = devices[0]
+
+.. note::
+    The the :func:`get() <mygeotab.API.get>` method always returns a list of entities, even when querying on a specific
+    serial number or VIN, etc.
+
+Then modify a property:
+
+.. code-block:: python
+
+    device['name'] = 'My New Vehicle'
+
+And then call :func:`set() <mygeotab.API.set>`:
+
+.. code-block:: python
+
+    api.set('Device', device)
+
+Removing
+~~~~~~~~
+
+To remove the entity, once again get the full entity, as above in Setting_, and then call the
+:func:`remove() <mygeotab.API.remove>` method:
+
+.. code-block:: python
+
+    api.remove('Device', device)
