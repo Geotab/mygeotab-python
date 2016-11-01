@@ -51,7 +51,7 @@ class API(mygeotab.API):
             parameters['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query_async(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl, loop=self.loop)
+            result = await _query(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -143,7 +143,32 @@ def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.BaseEventLoop=No
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-async def _query_async(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.BaseEventLoop=None):
+async def server_call(method, server, loop: asyncio.BaseEventLoop=None, **parameters):
+    """
+    Makes an asynchronous call to an un-authenticated method on a server
+
+    :param method: The method name
+    :param server: The MyGeotab server
+    :param loop: The asyncio loop
+    :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
+    :return: The JSON result (decoded into a dict) from the server
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    """
+    if method is None:
+        raise Exception("A method name must be specified")
+    if server is None:
+        raise Exception("A server (eg. my3.geotab.com) must be specified")
+    parameters = mygeotab.api.process_parameters(parameters)
+    try:
+        result = await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=True, loop=loop)
+        if result is not None:
+            return result
+    except mygeotab.MyGeotabException:
+        raise
+    return None
+
+
+async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.BaseEventLoop=None):
     """
     Formats and performs the asynchronous query against the API
 
