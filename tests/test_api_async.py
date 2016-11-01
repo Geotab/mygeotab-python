@@ -46,10 +46,10 @@ class TestAsyncCallApi(unittest.TestCase):
 
     def test_pythonic_parameters(self):
         users = self.api.get('User')
-        count_users = run(self.api.call_async('GetCountOf', type_name='User'), loop=self.loop)
+        count_users = run(self.api.call_async('Get', type_name='User'), loop=self.loop)
         self.assertEqual(len(count_users), 1)
-        self.assertGreaterEqual(count_users[0], 1)
-        self.assertEqual(count_users[0], len(users))
+        self.assertGreaterEqual(len(count_users[0]), 1)
+        self.assertEqual(len(count_users[0]), len(users))
 
 
 if __name__ == '__main__':

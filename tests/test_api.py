@@ -118,9 +118,9 @@ class TestCallApi(unittest.TestCase):
 
     def test_pythonic_parameters(self):
         users = self.api.get('User')
-        count_users = self.api.call('GetCountOf', type_name='User')
-        self.assertGreaterEqual(count_users, 1)
-        self.assertEqual(count_users, len(users))
+        count_users = self.api.call('Get', type_name='User')
+        self.assertGreaterEqual(len(count_users), 1)
+        self.assertEqual(len(count_users), len(users))
 
 
 class TestServerCallApi(unittest.TestCase):
