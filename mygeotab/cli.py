@@ -140,7 +140,7 @@ def login(session, user, password, database=None, server=None):
         sys.exit(0)
 
 
-@click.command(help='Lists active sessions')
+@click.group(invoke_without_command=True, help='Lists active sessions')
 @click.pass_obj
 def sessions(session):
     """
@@ -157,11 +157,11 @@ def sessions(session):
 
 
 @click.command(help='Log out from a MyGeotab server')
-@click.argument('database', nargs=1, required=False)
+@click.argument('database', nargs=1, required=True)
 @click.pass_obj
-def forget(session, database=None):
+def remove(session, database):
     """
-    Forgets a session from a MyGeotab server by removing the saved credentials
+    Removes a session from the saved credentials
 
     :param session: The current Session object
     :param database: The database name to log out from
@@ -262,7 +262,7 @@ def _populate_locals(database, password, server, session, user):
 
 main.add_command(console)
 main.add_command(run)
-main.add_command(forget)
+sessions.add_command(remove)
 main.add_command(sessions)
 
 if __name__ == '__main__':
