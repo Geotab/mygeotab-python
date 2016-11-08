@@ -6,6 +6,7 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
+import copy
 import json
 import re
 import ssl
@@ -74,14 +75,14 @@ class API(object):
         """
         if method is None:
             raise Exception("A method name must be specified")
-        parameters = process_parameters(parameters)
+        params = process_parameters(parameters)
         if self.credentials is None:
             self.authenticate()
-        if 'credentials' not in parameters and self.credentials.session_id:
-            parameters['credentials'] = self.credentials.get_param()
+        if 'credentials' not in params and self.credentials.session_id:
+            params['credentials'] = self.credentials.get_param()
 
         try:
-            result = _query(get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl)
+            result = _query(get_api_url(self._server), method, params, verify_ssl=self._is_verify_ssl)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -91,9 +92,8 @@ class API(object):
                 self.authenticate()
                 return self.call(method, **parameters)
             raise
-        return None
 
-    def multi_call(self, *calls):
+    def multi_call(self, calls):
         """
         Performs a multi-call to the API
 
@@ -101,7 +101,7 @@ class API(object):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        formatted_calls = [dict(method=call[0], params=call[1]) for call in calls]
+        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return self.call('ExecuteMultiCall', calls=formatted_calls)
 
     def get(self, type_name, **parameters):
@@ -165,17 +165,18 @@ class API(object):
         """
         return self.call('Remove', type_name=type_name, entity=entity)
 
-    def authenticate(self):
+    def authenticate(self, is_global=True):
         """
         Authenticates against the API server.
 
+        :param is_global: If True, authenticate globally. Local login if False.
         :return: A Credentials object with a session ID created by the server
         :raise AuthenticationException: Raises if there was an issue with authenticating or logging in
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         auth_data = dict(database=self.credentials.database, userName=self.credentials.username,
                          password=self.credentials.password)
-        auth_data['global'] = True
+        auth_data['global'] = is_global
         try:
             result = _query(get_api_url(self._server), 'Authenticate', auth_data, verify_ssl=self._is_verify_ssl)
             if result:
@@ -340,13 +341,7 @@ def server_call(method, server, **parameters):
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = process_parameters(parameters)
-    try:
-        result = _query(get_api_url(server), method, parameters, True)
-        if result is not None:
-            return result
-    except MyGeotabException:
-        raise
-    return None
+    return _query(get_api_url(server), method, parameters, True)
 
 
 def process_parameters(parameters):
@@ -358,15 +353,16 @@ def process_parameters(parameters):
     """
     if not parameters:
         return {}
+    params = copy.copy(parameters)
     for param_name in parameters:
         value = parameters[param_name]
         server_param_name = re.sub(r'_(\w)', lambda m: m.group(1).upper(), param_name)
         if isinstance(value, dict):
             value = process_parameters(value)
-        parameters[server_param_name] = value
+        params[server_param_name] = value
         if server_param_name != param_name:
-            del parameters[param_name]
-    return parameters
+            del params[param_name]
+    return params
 
 
 def get_api_url(server):

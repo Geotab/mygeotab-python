@@ -3,7 +3,6 @@ python:
   - "2.7"
   - "3.4"
   - "3.5"
-  - "nightly"
   - "pypy"
 
 branches:
@@ -25,6 +24,8 @@ install:
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
       fi
   -  if [[ $TRAVIS_PYTHON_VERSION == 'nightly' || $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry pip install aiohttp; fi
+  - travis_retry pip install coveralls
+  - travis_retry pip install coverage
   - travis_retry pip install nose
   - travis_retry pip install .
 
@@ -33,4 +34,8 @@ cache:
     - $HOME/.cache/pip
     - $HOME/.pyenv
 
-script: nosetests
+script:
+  - nosetests --with-coverage
+
+after_success:
+  - coveralls

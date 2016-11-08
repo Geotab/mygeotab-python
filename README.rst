@@ -5,15 +5,23 @@ MyGeotab
     :target: https://travis-ci.org/Geotab/mygeotab-python
     :alt: Build Status
 
+.. image:: https://img.shields.io/coveralls/Geotab/mygeotab-python/master.svg?style=flat
+    :target: https://coveralls.io/github/Geotab/mygeotab-python
+    :alt: Code Coverage
+
 .. image:: https://img.shields.io/pypi/v/mygeotab.svg?style=flat
     :target: https://pypi.python.org/pypi/mygeotab
+    :alt: PyPI Version
 
 .. image:: https://img.shields.io/pypi/dm/mygeotab.svg?style=flat
     :target: https://pypi.python.org/pypi/mygeotab
+    :alt: PyPI Downloads
 
 .. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
     :alt: Documentation Status
+
+
 
 An Apache2 Licensed, unofficial Python client for the `MyGeotab SDK <http://sdk.geotab.com>`_.
 

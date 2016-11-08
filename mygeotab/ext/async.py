@@ -38,20 +38,20 @@ class API(mygeotab.API):
         Makes an async call to the API.
 
         :param method: The method name.
-        :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
+        :param params: Additional parameters to send (for example, search=dict(id='b123') )
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         if method is None:
             raise Exception("Must specify a method name")
-        parameters = mygeotab.api.process_parameters(parameters)
+        params = mygeotab.api.process_parameters(parameters)
         if self.credentials is None:
             self.authenticate()
-        if 'credentials' not in parameters and self.credentials.session_id:
-            parameters['credentials'] = self.credentials.get_param()
+        if 'credentials' not in params and self.credentials.session_id:
+            params['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query(mygeotab.api.get_api_url(self._server), method, parameters, verify_ssl=self._is_verify_ssl, loop=self.loop)
+            result = await _query(mygeotab.api.get_api_url(self._server), method, params, verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
                 return result
@@ -63,7 +63,7 @@ class API(mygeotab.API):
             raise
         return None
 
-    async def multi_call_async(self, *calls):
+    async def multi_call_async(self, calls):
         """
         Performs an async multi-call to the API
 
@@ -71,7 +71,7 @@ class API(mygeotab.API):
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        formatted_calls = [dict(method=call[0], params=call[1]) for call in calls]
+        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return await self.call_async('ExecuteMultiCall', calls=formatted_calls)
 
     async def get_async(self, type_name, **parameters):
@@ -137,11 +137,23 @@ class API(mygeotab.API):
 
 
 def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.BaseEventLoop=None):
-    if not loop:
-        loop = asyncio.get_event_loop()
+    loop = loop or asyncio.get_event_loop()
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
+
+def from_credentials(credentials, loop: asyncio.BaseEventLoop=None):
+    """
+    Returns a new async API object from an existing Credentials object
+
+    :param credentials: The existing saved credentials
+    :param loop: The asyncio loop
+    :return: A new API object populated with MyGeotab credentials
+    """
+    loop = loop or asyncio.get_event_loop()
+    return API(username=credentials.username, password=credentials.password,
+               database=credentials.database, session_id=credentials.session_id,
+               server=credentials.server, loop=loop)
 
 async def server_call(method, server, loop: asyncio.BaseEventLoop=None, **parameters):
     """
