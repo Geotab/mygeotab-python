@@ -157,13 +157,14 @@ def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
                database=credentials.database, session_id=credentials.session_id,
                server=credentials.server, loop=loop)
 
-async def server_call(method, server, loop: asyncio.AbstractEventLoop=None, **parameters):
+async def server_call(method, server, loop: asyncio.AbstractEventLoop=None, verify=True, **parameters):
     """
     Makes an asynchronous call to an un-authenticated method on a server
 
     :param method: The method name
     :param server: The MyGeotab server
     :param loop: The asyncio loop
+    :param verify: If True, verify SSL certificate. It's recommended not to modify this.
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
     :return: The JSON result (decoded into a dict) from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
@@ -174,7 +175,7 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop=None, **pa
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = mygeotab.api.process_parameters(parameters)
     try:
-        result = await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=True, loop=loop)
+        result = await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
         if result is not None:
             return result
     except mygeotab.MyGeotabException:

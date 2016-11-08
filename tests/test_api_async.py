@@ -19,7 +19,7 @@ class TestAsyncCallApi(unittest.TestCase):
         cls.password = os.environ.get('MYGEOTAB_PASSWORD')
         cls.database = os.environ.get('MYGEOTAB_DATABASE')
         if cls.username and cls.password:
-            cls.api = API(cls.username, password=cls.password, database=cls.database, loop=cls.loop, verify=True)
+            cls.api = API(cls.username, password=cls.password, database=cls.database, loop=cls.loop, verify=False)
             cls.api.authenticate()
         else:
             raise unittest.SkipTest(
@@ -76,6 +76,7 @@ class TestAsyncCallApi(unittest.TestCase):
 
     def test_api_from_credentials(self):
         new_api = from_credentials(self.api.credentials, loop=self.loop)
+        new_api.__verify_ssl = False
         users = run(new_api.get_async('User'), loop=self.loop)
         self.assertGreaterEqual(len(users), 1)
 
@@ -88,6 +89,7 @@ class TestAsyncCallApi(unittest.TestCase):
         credentials.password = self.password
         credentials.session_id = 'abc123'
         test_api = from_credentials(credentials, loop=self.loop)
+        test_api.__verify_ssl = False
         users = run(test_api.get_async('User'), loop=self.loop)
         self.assertGreaterEqual(len(users), 1)
 
@@ -97,7 +99,7 @@ class TestAsyncServerCallApi(unittest.TestCase):
         self.loop = asyncio.get_event_loop()
 
     def test_get_version(self):
-        results = run(server_call('GetVersion', server='my3.geotab.com', loop=self.loop), loop=self.loop)
+        results = run(server_call('GetVersion', server='my.geotab.com', loop=self.loop, verify=False), loop=self.loop)
         version_split = results[0].split('.')
         self.assertEqual(len(version_split), 4)
 
