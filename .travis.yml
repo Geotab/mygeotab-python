@@ -38,4 +38,4 @@ script:
   - nosetests --with-coverage
 
 after_success:
-  - coveralls
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then coveralls; fi
