@@ -23,7 +23,7 @@ class TestAsyncCallApi(AsyncTestCase):
         self.password = os.environ.get('MYGEOTAB_PASSWORD')
         self.database = os.environ.get('MYGEOTAB_DATABASE')
         if self.username and self.password:
-            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=False)
+            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=True)
             self.api.authenticate()
         else:
             self.skipTest(
