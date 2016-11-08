@@ -87,8 +87,12 @@ class TestAsyncCallApi(unittest.TestCase):
 
 
 class TestAsyncServerCallApi(unittest.TestCase):
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+
     def test_get_version(self):
-        version = run(server_call('GetVersion', server='my3.geotab.com'))
+        version = run(server_call('GetVersion', server='my3.geotab.com'), loop=self.loop)
         version_split = version.split('.')
         self.assertEqual(len(version_split), 4)
 
