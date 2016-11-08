@@ -4,9 +4,13 @@ branch = True
 source = mygeotab
 omit =
     */python?.?/*
+    */lib-python/?.?/*.py
+    */lib_pypy/_*.py
+    */site-packages/ordereddict.py
     */site-packages/nose/*
+    */unittest2/*
     *__init__*
-    mygeotab/cli.py
+    */tests/*
 
 [report]
 # Regexes for lines to exclude from consideration

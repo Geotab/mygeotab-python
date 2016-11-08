@@ -137,7 +137,8 @@ class API(mygeotab.API):
 
 
 def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.BaseEventLoop=None):
-    loop = loop or asyncio.get_event_loop()
+    if not loop:
+        loop = asyncio.get_event_loop()
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
@@ -150,7 +151,8 @@ def from_credentials(credentials, loop: asyncio.BaseEventLoop=None):
     :param loop: The asyncio loop
     :return: A new API object populated with MyGeotab credentials
     """
-    loop = loop or asyncio.get_event_loop()
+    if not loop:
+        loop = asyncio.get_event_loop()
     return API(username=credentials.username, password=credentials.password,
                database=credentials.database, session_id=credentials.session_id,
                server=credentials.server, loop=loop)
