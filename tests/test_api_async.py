@@ -10,15 +10,20 @@ import asyncio
 from mygeotab.ext.async import API, run, from_credentials, server_call
 
 
-class TestAsyncCallApi(unittest.TestCase):
+class AsyncTestCase(unittest.TestCase):
+    def __init__(self, methodName='runTest', loop=None):
+        self.loop = loop or asyncio.get_event_loop()
+        self._function_cache = {}
+        super().__init__(methodName=methodName)
+
+
+class TestAsyncCallApi(AsyncTestCase):
     def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
         self.username = os.environ.get('MYGEOTAB_USERNAME')
         self.password = os.environ.get('MYGEOTAB_PASSWORD')
         self.database = os.environ.get('MYGEOTAB_DATABASE')
         if self.username and self.password:
-            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop)
+            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=False)
             self.api.authenticate()
         else:
             self.skipTest(
@@ -86,21 +91,17 @@ class TestAsyncCallApi(unittest.TestCase):
         self.assertGreaterEqual(len(users), 1)
 
 
-class TestAsyncServerCallApi(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-
+class TestAsyncServerCallApi(AsyncTestCase):
     def test_get_version(self):
-        version = run(server_call('GetVersion', server='my3.geotab.com'), loop=self.loop)
-        version_split = version.split('.')
+        results = run(server_call('GetVersion', server='my3.geotab.com', loop=self.loop), loop=self.loop)
+        version_split = results[0].split('.')
         self.assertEqual(len(version_split), 4)
 
     def test_invalid_server_call(self):
         with self.assertRaises(Exception) as cm1:
-            run(server_call(None, None))
+            run(server_call(None, None, loop=self.loop), loop=self.loop)
         with self.assertRaises(Exception) as cm2:
-            run(server_call('GetVersion', None))
+            run(server_call('GetVersion', None, loop=self.loop), loop=self.loop)
         self.assertTrue('method' in str(cm1.exception))
         self.assertTrue('server' in str(cm2.exception))
 

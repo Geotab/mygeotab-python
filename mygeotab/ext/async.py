@@ -196,7 +196,7 @@ async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asynci
     params = dict(id=-1, method=method, params=parameters)
     headers = {'Content-type': 'application/json; charset=UTF-8'}
     conn = aiohttp.TCPConnector(verify_ssl=verify_ssl, loop=loop)
-    with aiohttp.ClientSession(connector=conn, loop=loop) as session:
+    async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         r = await session.post(api_endpoint,
                                data=json.dumps(params,
                                                default=mygeotab.serializers.object_serializer),
