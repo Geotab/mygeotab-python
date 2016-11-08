@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import os
+import unittest
+import warnings
 
 from mygeotab import api
 
@@ -90,15 +91,16 @@ class TestProcessResults(unittest.TestCase):
 
 
 class TestCallApi(unittest.TestCase):
-    def setUp(self):
-        self.username = os.environ.get('MYGEOTAB_USERNAME')
-        self.password = os.environ.get('MYGEOTAB_PASSWORD')
-        self.database = os.environ.get('MYGEOTAB_DATABASE')
-        if self.username and self.password:
-            self.api = api.API(self.username, password=self.password, database=self.database, server=None)
-            self.api.authenticate()
+    @classmethod
+    def setUpClass(cls):
+        cls.username = os.environ.get('MYGEOTAB_USERNAME')
+        cls.password = os.environ.get('MYGEOTAB_PASSWORD')
+        cls.database = os.environ.get('MYGEOTAB_DATABASE')
+        if cls.username and cls.password:
+            cls.api = api.API(cls.username, password=cls.password, database=cls.database, server=None)
+            cls.api.authenticate()
         else:
-            self.skipTest(
+            raise unittest.SkipTest(
                 'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
                 'variables being set')
 
@@ -114,7 +116,12 @@ class TestCallApi(unittest.TestCase):
         self.assertEqual(user['name'], self.username)
 
     def test_get_user_search(self):
-        user = self.api.search('User', name='{0}'.format(self.username))
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            user = self.api.search('User', name='{0}'.format(self.username))
+        self.assertEqual(len(w), 1)
+        self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+        self.assertTrue('search()' in str(w[-1].message))
         self.assertEqual(len(user), 1)
         user = user[0]
         self.assertEqual(user['name'], self.username)

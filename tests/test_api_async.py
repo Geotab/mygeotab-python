@@ -4,29 +4,25 @@ import sys
 import unittest
 if sys.version_info < (3, 5):
     raise unittest.SkipTest('Python 3.5+ is required to run the async API tests.')
-import os
 import asyncio
+import os
+import warnings
 
 from mygeotab.ext.async import API, run, from_credentials, server_call
 
 
-class AsyncTestCase(unittest.TestCase):
-    def __init__(self, methodName='runTest', loop=None):
-        self.loop = loop or asyncio.get_event_loop()
-        self._function_cache = {}
-        super().__init__(methodName=methodName)
-
-
-class TestAsyncCallApi(AsyncTestCase):
-    def setUp(self):
-        self.username = os.environ.get('MYGEOTAB_USERNAME')
-        self.password = os.environ.get('MYGEOTAB_PASSWORD')
-        self.database = os.environ.get('MYGEOTAB_DATABASE')
-        if self.username and self.password:
-            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=True)
-            self.api.authenticate()
+class TestAsyncCallApi(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+        cls.username = os.environ.get('MYGEOTAB_USERNAME')
+        cls.password = os.environ.get('MYGEOTAB_PASSWORD')
+        cls.database = os.environ.get('MYGEOTAB_DATABASE')
+        if cls.username and cls.password:
+            cls.api = API(cls.username, password=cls.password, database=cls.database, loop=cls.loop, verify=True)
+            cls.api.authenticate()
         else:
-            self.skipTest(
+            raise unittest.SkipTest(
                 'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
                 'variables being set')
 
@@ -44,7 +40,12 @@ class TestAsyncCallApi(AsyncTestCase):
         self.assertEqual(user['name'], self.username)
 
     def test_get_user_search(self):
-        user = run(self.api.search_async('User', name='{0}'.format(self.username)), loop=self.loop)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            user = run(self.api.search_async('User', name='{0}'.format(self.username)), loop=self.loop)
+        self.assertEqual(len(w), 1)
+        self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+        self.assertTrue('search_async()' in str(w[-1].message))
         self.assertEqual(len(user), 1)
         self.assertEqual(len(user[0]), 1)
         user = user[0][0]
@@ -91,7 +92,10 @@ class TestAsyncCallApi(AsyncTestCase):
         self.assertGreaterEqual(len(users), 1)
 
 
-class TestAsyncServerCallApi(AsyncTestCase):
+class TestAsyncServerCallApi(unittest.TestCase):
+    def setUp(self):
+        self.loop = asyncio.get_event_loop()
+
     def test_get_version(self):
         results = run(server_call('GetVersion', server='my3.geotab.com', loop=self.loop), loop=self.loop)
         version_split = results[0].split('.')
