@@ -135,8 +135,7 @@ class API(mygeotab.API):
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
 
-def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop=None):
-    loop = loop or asyncio.get_event_loop()
+def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
@@ -149,12 +148,11 @@ def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
     :param loop: The asyncio loop
     :return: A new API object populated with MyGeotab credentials
     """
-    loop = loop or asyncio.get_event_loop()
     return API(username=credentials.username, password=credentials.password,
                database=credentials.database, session_id=credentials.session_id,
                server=credentials.server, loop=loop)
 
-async def server_call(method, server, loop: asyncio.AbstractEventLoop=None, verify=True, **parameters):
+async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), verify=True, **parameters):
     """
     Makes an asynchronous call to an un-authenticated method on a server
 
