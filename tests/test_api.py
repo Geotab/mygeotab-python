@@ -110,7 +110,7 @@ class TestCallApi(unittest.TestCase):
         self.assertEqual(len(version_split), 4)
 
     def test_get_user(self):
-        user = self.api.get('User', name='{0}'.format(self.username))
+        user = self.api.get('User', name=self.username)
         self.assertEqual(len(user), 1)
         user = user[0]
         self.assertEqual(user['name'], self.username)
@@ -176,6 +176,58 @@ class TestCallApi(unittest.TestCase):
         with self.assertRaises(api.MyGeotabException) as cm:
             self.api.call('NonExistentMethod', not_a_property='abc123')
         self.assertTrue('NonExistentMethod' in str(cm.exception))
+
+
+class TestEntity(unittest.TestCase):
+    def setUp(self):
+        self.username = os.environ.get('MYGEOTAB_USERNAME')
+        self.password = os.environ.get('MYGEOTAB_PASSWORD')
+        self.database = os.environ.get('MYGEOTAB_DATABASE')
+        self.trailer_name = 'mygeotab-python test trailer'
+        if self.username and self.password:
+            self.api = api.API(self.username, password=self.password, database=self.database, server=None)
+            self.api.authenticate()
+            try:
+                trailers = self.api.get('Trailer', name=self.trailer_name)
+                for trailer in trailers:
+                    self.api.remove('Trailer', trailer)
+            except:
+                pass
+        else:
+            raise self.skipTest(
+                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
+                'variables being set')
+
+    def tearDown(self):
+        try:
+            trailers = self.api.get('Trailer', name=self.trailer_name)
+            for trailer in trailers:
+                self.api.remove('Trailer', trailer)
+        except:
+            pass
+
+    def test_add_edit_remove(self):
+        def get_trailer():
+            trailers = self.api.get('Trailer', name=self.trailer_name)
+            self.assertEqual(len(trailers), 1)
+            return trailers[0]
+        user = self.api.get('User', name=self.username)[0]
+        trailer = {
+            'name': self.trailer_name,
+            'groups': user['companyGroups']
+        }
+        trailer['id'] = self.api.add('Trailer', trailer)
+        self.assertIsNotNone(trailer['id'])
+        trailer = get_trailer()
+        self.assertEqual(trailer['name'], self.trailer_name)
+        comment = 'some comment'
+        trailer['comment'] = comment
+        self.api.set('Trailer', trailer)
+        trailer = get_trailer()
+        self.assertEqual(trailer['comment'], comment)
+        self.api.remove('Trailer', trailer)
+        trailers = self.api.get('Trailer', name=self.trailer_name)
+        self.assertEqual(len(trailers), 0)
 
 
 class TestAuthentication(unittest.TestCase):

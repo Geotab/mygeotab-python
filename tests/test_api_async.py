@@ -106,8 +106,64 @@ class TestAsyncCallApi(unittest.TestCase):
 
     def test_bad_parameters(self):
         with self.assertRaises(MyGeotabException) as cm:
-            run(self.api.call('NonExistentMethod', not_a_property='abc123'), loop=self.loop)
+            run(self.api.call_async('NonExistentMethod', not_a_property='abc123'), loop=self.loop)
         self.assertTrue('NonExistentMethod' in str(cm.exception))
+
+
+class TestAsyncEntity(unittest.TestCase):
+    def setUp(self):
+        self.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+        self.username = os.environ.get('MYGEOTAB_USERNAME')
+        self.password = os.environ.get('MYGEOTAB_PASSWORD')
+        self.database = os.environ.get('MYGEOTAB_DATABASE')
+        self.trailer_name = 'mygeotab-python test trailer'
+        if self.username and self.password:
+            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=False)
+            self.api.authenticate()
+            try:
+                trailers = self.api.get('Trailer', name=self.trailer_name)
+                for trailer in trailers:
+                    self.api.remove('Trailer', trailer)
+            except:
+                pass
+        else:
+            raise self.skipTest(
+                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
+                'variables being set')
+
+    def tearDown(self):
+        try:
+            trailers = self.api.get('Trailer', name=self.trailer_name)
+            for trailer in trailers:
+                self.api.remove('Trailer', trailer)
+        except:
+            pass
+
+    def test_add_edit_remove(self):
+        def get_trailer():
+            trailers = run(self.api.get_async('Trailer', name=self.trailer_name), loop=self.loop)
+            self.assertEqual(len(trailers), 1)
+            self.assertEqual(len(trailers[0]), 1)
+            return trailers[0][0]
+        user = self.api.get('User', name=self.username)[0]
+        trailer = {
+            'name': self.trailer_name,
+            'groups': user['companyGroups']
+        }
+        trailer_id = run(self.api.add_async('Trailer', trailer), loop=self.loop)
+        self.assertEqual(len(trailer_id), 1)
+        trailer['id'] = trailer_id[0]
+        trailer = get_trailer()
+        self.assertEqual(trailer['name'], self.trailer_name)
+        comment = 'some comment'
+        trailer['comment'] = comment
+        run(self.api.set_async('Trailer', trailer), loop=self.loop)
+        trailer = get_trailer()
+        self.assertEqual(trailer['comment'], comment)
+        run(self.api.remove_async('Trailer', trailer), loop=self.loop)
+        trailers = run(self.api.get_async('Trailer', name=self.trailer_name), loop=self.loop)
+        self.assertEqual(len(trailers), 1)
+        self.assertEqual(len(trailers[0]), 0)
 
 
 class TestAsyncAuthentication(unittest.TestCase):

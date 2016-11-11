@@ -310,8 +310,7 @@ def _process(data):
             raise MyGeotabException(data['error'])
         if 'result' in data:
             return data['result']
-        return data
-    return None
+    return data
 
 
 def from_credentials(credentials):
