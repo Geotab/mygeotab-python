@@ -20,7 +20,7 @@ class TestAsyncCallApi(unittest.TestCase):
         cls.password = os.environ.get('MYGEOTAB_PASSWORD')
         cls.database = os.environ.get('MYGEOTAB_DATABASE')
         if cls.username and cls.password:
-            cls.api = API(cls.username, password=cls.password, database=cls.database, loop=cls.loop, verify=False)
+            cls.api = API(cls.username, password=cls.password, database=cls.database, loop=cls.loop, verify=True)
             cls.api.authenticate()
         else:
             raise unittest.SkipTest(
@@ -77,7 +77,6 @@ class TestAsyncCallApi(unittest.TestCase):
 
     def test_api_from_credentials(self):
         new_api = from_credentials(self.api.credentials, loop=self.loop)
-        new_api.__verify_ssl = False
         users = run(new_api.get_async('User'), loop=self.loop)
         self.assertGreaterEqual(len(users), 1)
 
@@ -90,7 +89,6 @@ class TestAsyncCallApi(unittest.TestCase):
         credentials.password = self.password
         credentials.session_id = 'abc123'
         test_api = from_credentials(credentials, loop=self.loop)
-        test_api.__verify_ssl = False
         users = run(test_api.get_async('User'), loop=self.loop)
         self.assertGreaterEqual(len(users), 1)
 
@@ -99,7 +97,7 @@ class TestAsyncCallApi(unittest.TestCase):
             run(self.api.call_async(None), loop=self.loop)
 
     def test_call_without_credentials(self):
-        new_api = API(self.username, password=self.password, database=self.database, server=None)
+        new_api = API(self.username, password=self.password, database=self.database, server=None, loop=self.loop)
         user = run(new_api.get_async('User', name='{0}'.format(self.username)), loop=self.loop)
         self.assertEqual(len(user), 1)
         self.assertEqual(len(user[0]), 1)
@@ -118,7 +116,7 @@ class TestAsyncEntity(unittest.TestCase):
         self.database = os.environ.get('MYGEOTAB_DATABASE')
         self.trailer_name = 'mygeotab-python test trailer'
         if self.username and self.password:
-            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=False)
+            self.api = API(self.username, password=self.password, database=self.database, loop=self.loop, verify=True)
             self.api.authenticate()
             try:
                 trailers = self.api.get('Trailer', name=self.trailer_name)

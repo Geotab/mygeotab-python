@@ -5,6 +5,7 @@ if sys.version_info < (3, 5):
     raise Exception('Python 3.5+ is required to use the async API')
 import asyncio
 import json
+import ssl
 import typing
 import types
 import warnings
@@ -184,7 +185,11 @@ async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asynci
     """
     params = dict(id=-1, method=method, params=parameters)
     headers = {'Content-type': 'application/json; charset=UTF-8'}
-    conn = aiohttp.TCPConnector(verify_ssl=verify_ssl, loop=loop)
+    ssl_context = None
+    verify = verify_ssl
+    if verify_ssl:
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         r = await session.post(api_endpoint,
                                data=json.dumps(params,

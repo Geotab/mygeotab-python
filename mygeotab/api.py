@@ -2,10 +2,6 @@
 
 from __future__ import unicode_literals
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
 import copy
 import json
 import re
@@ -15,6 +11,7 @@ import warnings
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
+from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__
 import mygeotab.serializers
