@@ -74,9 +74,9 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         if method is None:
-            raise Exception("A method name must be specified")
+            raise Exception('A method name must be specified')
         params = process_parameters(parameters)
-        if self.credentials is None:
+        if self.credentials and not self.credentials.session_id:
             self.authenticate()
         if 'credentials' not in params and self.credentials.session_id:
             params['credentials'] = self.credentials.get_param()
@@ -85,7 +85,7 @@ class API(object):
             result = _query(get_api_url(self._server), method, params, verify_ssl=self._is_verify_ssl)
             if result is not None:
                 self.__reauthorize_count = 0
-                return result
+            return result
         except MyGeotabException as exception:
             if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
                 self.__reauthorize_count += 1

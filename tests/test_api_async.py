@@ -8,6 +8,7 @@ import asyncio
 import os
 import warnings
 
+from mygeotab import AuthenticationException, MyGeotabException
 from mygeotab.ext.async import API, run, from_credentials, server_call
 
 
@@ -92,6 +93,42 @@ class TestAsyncCallApi(unittest.TestCase):
         test_api.__verify_ssl = False
         users = run(test_api.get_async('User'), loop=self.loop)
         self.assertGreaterEqual(len(users), 1)
+
+    def test_missing_method(self):
+        with self.assertRaises(Exception):
+            run(self.api.call_async(None), loop=self.loop)
+
+    def test_call_without_credentials(self):
+        new_api = API(self.username, password=self.password, database=self.database, server=None)
+        user = run(new_api.get_async('User', name='{0}'.format(self.username)), loop=self.loop)
+        self.assertEqual(len(user), 1)
+        self.assertEqual(len(user[0]), 1)
+
+    def test_bad_parameters(self):
+        with self.assertRaises(MyGeotabException) as cm:
+            run(self.api.call('NonExistentMethod', not_a_property='abc123'), loop=self.loop)
+        self.assertTrue('NonExistentMethod' in str(cm.exception))
+
+
+class TestAsyncAuthentication(unittest.TestCase):
+    def setUp(self):
+        self.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+        self.username = os.environ.get('MYGEOTAB_USERNAME')
+        self.database = os.environ.get('MYGEOTAB_DATABASE')
+        if not self.username:
+            self.skipTest(
+                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
+                'variables being set')
+
+    def test_invalid_session(self):
+        test_api = API(self.username, session_id='abc123', database=self.database)
+        self.assertTrue(self.username in str(test_api.credentials))
+        self.assertTrue(self.database in str(test_api.credentials))
+        with self.assertRaises(AuthenticationException) as cm:
+            run(test_api.get('User'), loop=self.loop)
+        self.assertTrue('Cannot authenticate' in str(cm.exception))
+        self.assertTrue(self.database in str(cm.exception))
+        self.assertTrue(self.username in str(cm.exception))
 
 
 class TestAsyncServerCallApi(unittest.TestCase):

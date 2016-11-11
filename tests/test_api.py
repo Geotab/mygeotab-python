@@ -163,6 +163,20 @@ class TestCallApi(unittest.TestCase):
         users = test_api.get('User')
         self.assertGreaterEqual(len(users), 1)
 
+    def test_missing_method(self):
+        with self.assertRaises(Exception):
+            self.api.call(None)
+
+    def test_call_without_credentials(self):
+        new_api = api.API(self.username, password=self.password, database=self.database, server=None)
+        user = new_api.get('User', name='{0}'.format(self.username))
+        self.assertEqual(len(user), 1)
+
+    def test_bad_parameters(self):
+        with self.assertRaises(api.MyGeotabException) as cm:
+            self.api.call('NonExistentMethod', not_a_property='abc123')
+        self.assertTrue('NonExistentMethod' in str(cm.exception))
+
 
 class TestAuthentication(unittest.TestCase):
     def setUp(self):
@@ -175,8 +189,13 @@ class TestAuthentication(unittest.TestCase):
 
     def test_invalid_session(self):
         test_api = api.API(self.username, session_id='abc123', database=self.database)
-        with self.assertRaises(api.AuthenticationException):
+        self.assertTrue(self.username in str(test_api.credentials))
+        self.assertTrue(self.database in str(test_api.credentials))
+        with self.assertRaises(api.AuthenticationException) as cm:
             test_api.get('User')
+        self.assertTrue('Cannot authenticate' in str(cm.exception))
+        self.assertTrue(self.database in str(cm.exception))
+        self.assertTrue(self.username in str(cm.exception))
 
     def test_auth_exception(self):
         test_api = api.API(self.username, password='abc123', database='this_database_does_not_exist')

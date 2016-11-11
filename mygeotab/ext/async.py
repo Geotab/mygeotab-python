@@ -43,9 +43,9 @@ class API(mygeotab.API):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
         if method is None:
-            raise Exception("Must specify a method name")
+            raise Exception('A method name must be specified')
         params = mygeotab.api.process_parameters(parameters)
-        if self.credentials is None:
+        if self.credentials and not self.credentials.session_id:
             self.authenticate()
         if 'credentials' not in params and self.credentials.session_id:
             params['credentials'] = self.credentials.get_param()
@@ -54,14 +54,13 @@ class API(mygeotab.API):
             result = await _query(mygeotab.api.get_api_url(self._server), method, params, verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
-                return result
+            return result
         except mygeotab.MyGeotabException as exception:
             if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
                 self.__reauthorize_count += 1
                 self.authenticate()
                 return await self.call_async(method, **parameters)
             raise
-        return None
 
     async def multi_call_async(self, calls):
         """
@@ -137,8 +136,7 @@ class API(mygeotab.API):
 
 
 def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop=None):
-    if not loop:
-        loop = asyncio.get_event_loop()
+    loop = loop or asyncio.get_event_loop()
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
@@ -151,8 +149,7 @@ def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
     :param loop: The asyncio loop
     :return: A new API object populated with MyGeotab credentials
     """
-    if not loop:
-        loop = asyncio.get_event_loop()
+    loop = loop or asyncio.get_event_loop()
     return API(username=credentials.username, password=credentials.password,
                database=credentials.database, session_id=credentials.session_id,
                server=credentials.server, loop=loop)
@@ -174,14 +171,7 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop=None, veri
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = mygeotab.api.process_parameters(parameters)
-    try:
-        result = await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
-        if result is not None:
-            return result
-    except mygeotab.MyGeotabException:
-        raise
-    return None
-
+    return await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
 
 async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop=None):
     """
