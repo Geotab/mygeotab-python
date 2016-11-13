@@ -32,11 +32,17 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+.noseids
+.coverage
 
 # Translations
 *.mo
 *.pot
 
-# Pycharm
+# IDEs
 .idea/
+.vscode/
 docs/_build/
+
+# Mac
+.DS_Store
