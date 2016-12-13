@@ -1,5 +1,5 @@
 requests==2.12.3
 click
 pytz
-python-dateutil
+python-dateutil==2.6.0
 six
