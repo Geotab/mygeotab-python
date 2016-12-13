@@ -26,7 +26,7 @@ install:
   - travis_retry pip install coveralls
   - travis_retry pip install coverage
   - travis_retry pip install nose
-  - travis_retry pip install .
+  - travis_retry pip install -r requirements.txt
 
 cache:
   directories:
