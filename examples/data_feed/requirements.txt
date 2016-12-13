@@ -1,2 +1,2 @@
-click
-mygeotab
+click==6.6
+mygeotab==0.4.4

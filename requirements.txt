@@ -1,5 +1,5 @@
-requests
-click
-pytz
-python-dateutil
-six
+requests==2.12.3
+click==6.6
+pytz==2016.10
+python-dateutil==2.6.0
+six==1.10.0
