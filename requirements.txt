@@ -1,4 +1,4 @@
-requests
+requests==2.12.3
 click
 pytz
 python-dateutil
