@@ -23,13 +23,6 @@ setup(
     url='https://github.com/geotab/mygeotab-python',
     description='An unofficial Python client for the MyGeotab API',
     long_description=readme + '\n\n' + changelog,
-    install_requires=[
-        'requests>=2.6',
-        'click>=3.3',
-        'pytz>=2014.7',
-        'python-dateutil>=2.4',
-        'six>=1.9'
-    ],
     extras_require={
         'console': ['ipython'],
         'async': ['aiohttp']
