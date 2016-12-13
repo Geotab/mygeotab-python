@@ -1,2 +1,2 @@
-click
+click==6.6
 mygeotab
