@@ -233,7 +233,7 @@ class MyGeotabException(Exception):
         main_error = full_error['errors'][0]
         self.name = main_error['name']
         self.message = main_error['message']
-        self.stack_trace = main_error['stackTrace']
+        self.stack_trace = main_error.get('stackTrace')
 
     def __str__(self):
         error_str = '{0}\n{1}'.format(self.name, self.message)

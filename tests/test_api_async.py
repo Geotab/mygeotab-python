@@ -169,9 +169,9 @@ class TestAsyncAuthentication(unittest.TestCase):
         self.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
         self.username = os.environ.get('MYGEOTAB_USERNAME')
         self.database = os.environ.get('MYGEOTAB_DATABASE')
-        if not self.username:
+        if not self.username or not self.database:
             self.skipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
+                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_DATABASE environment '
                 'variables being set')
 
     def test_invalid_session(self):
