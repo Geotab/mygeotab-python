@@ -1,0 +1,10 @@
+dependencies:
+  override:
+    - pip install tox tox-pyenv
+    - pyenv local 2.7.10 3.6.0 pypy-5.6.0
+
+test:
+  override:
+    - tox
+  post:
+    - bash <(curl -s https://codecov.io/bash)
