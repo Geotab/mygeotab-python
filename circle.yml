@@ -5,6 +5,6 @@ dependencies:
 
 test:
   override:
-    - tox
+    - tox $CIRCLE_TEST_REPORTS
   post:
     - bash <(curl -s https://codecov.io/bash)
