@@ -16,8 +16,8 @@ class TestAsyncCallApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-        cls.username = os.environ.get('MYGEOTAB_USERNAME')
-        cls.password = os.environ.get('MYGEOTAB_PASSWORD')
+        cls.username = os.environ.get('MYGEOTAB_USERNAME_ASYNC', os.environ.get('MYGEOTAB_USERNAME'))
+        cls.password = os.environ.get('MYGEOTAB_PASSWORD_ASYNC', os.environ.get('MYGEOTAB_PASSWORD'))
         cls.database = os.environ.get('MYGEOTAB_DATABASE')
         cls.trailer_name = 'myg-python-test'
         if cls.username and cls.password:
@@ -29,8 +29,8 @@ class TestAsyncCallApi(unittest.TestCase):
                 pass
         else:
             raise unittest.SkipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
-                'variables being set')
+                'Can\'t make calls to the API without the MYGEOTAB_USERNAME_ASYNC and MYGEOTAB_PASSWORD_ASYNC '
+                'environment variables being set')
 
     @classmethod
     def tearDownClass(cls):
