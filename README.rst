@@ -1,12 +1,12 @@
 MyGeotab
 ========
 
-.. image:: https://img.shields.io/travis/Geotab/mygeotab-python/master.svg?style=flat
-    :target: https://travis-ci.org/Geotab/mygeotab-python
+.. image:: https://img.shields.io/circleci/project/github/Geotab/mygeotab-python/master.svg?style=flat
+    :target: https://circleci.com/gh/Geotab/mygeotab-python
     :alt: Build Status
 
-.. image:: https://img.shields.io/coveralls/Geotab/mygeotab-python/master.svg?style=flat
-    :target: https://coveralls.io/github/Geotab/mygeotab-python
+.. image:: https://img.shields.io/codecov/c/github/Geotab/mygeotab-python/master.svg?style=flat
+    :target: https://codecov.io/gh/Geotab/mygeotab-python
     :alt: Code Coverage
 
 .. image:: https://img.shields.io/pypi/v/mygeotab.svg?style=flat
