@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.5.1 (TBD)
++++++++++++
+
+**Bug Fixes**
+
+- Fix for search parameter not being properly handled in 'get()' call
+
+
 0.5 (2017-01-02)
 ++++++++++++++++
 

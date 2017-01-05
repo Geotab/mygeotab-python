@@ -177,6 +177,12 @@ class TestCallApi(unittest.TestCase):
             self.api.call('NonExistentMethod', not_a_property='abc123')
         self.assertTrue('NonExistentMethod' in str(cm.exception))
 
+    def test_get_search_parameter(self):
+        user = self.api.get('User', search=dict(name=self.username))
+        self.assertEqual(len(user), 1)
+        user = user[0]
+        self.assertEqual(user['name'], self.username)
+
 
 class TestEntity(unittest.TestCase):
     def setUp(self):

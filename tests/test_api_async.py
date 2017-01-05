@@ -48,7 +48,7 @@ class TestAsyncCallApi(unittest.TestCase):
         self.assertEqual(len(version_split), 4)
 
     def test_get_user(self):
-        user = run(self.api.get_async('User', name='{0}'.format(self.username)), loop=self.loop)
+        user = run(self.api.get_async('User', name=self.username), loop=self.loop)
         self.assertEqual(len(user), 1)
         self.assertEqual(len(user[0]), 1)
         user = user[0][0]
@@ -57,7 +57,7 @@ class TestAsyncCallApi(unittest.TestCase):
     def test_get_user_search(self):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            user = run(self.api.search_async('User', name='{0}'.format(self.username)), loop=self.loop)
+            user = run(self.api.search_async('User', name=self.username), loop=self.loop)
         self.assertEqual(len(w), 1)
         self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
         self.assertTrue('search_async()' in str(w[-1].message))
@@ -120,6 +120,13 @@ class TestAsyncCallApi(unittest.TestCase):
         with self.assertRaises(MyGeotabException) as cm:
             run(self.api.call_async('NonExistentMethod', not_a_property='abc123'), loop=self.loop)
         self.assertTrue('NonExistentMethod' in str(cm.exception))
+
+    def test_get_search_parameter(self):
+        user = run(self.api.get_async('User', search=dict(name=self.username)), loop=self.loop)
+        self.assertEqual(len(user), 1)
+        self.assertEqual(len(user[0]), 1)
+        user = user[0][0]
+        self.assertEqual(user['name'], self.username)
 
     def test_add_edit_remove(self):
         def get_trailer():

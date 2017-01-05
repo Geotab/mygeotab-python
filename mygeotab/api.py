@@ -114,6 +114,8 @@ class API(object):
             results_limit = parameters.get('resultsLimit', None)
             if results_limit is not None:
                 del parameters['resultsLimit']
+            if 'search' in parameters:
+                parameters.update(parameters['search'])
             parameters = dict(search=parameters, resultsLimit=results_limit)
         return self.call('Get', type_name=type_name, **parameters)
 
