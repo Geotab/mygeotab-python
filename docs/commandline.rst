@@ -37,7 +37,7 @@ For example, to launch a console for a database called `my_database`:
     .. code-block:: bash
 
         $ myg console my_database
-        MyGeotab Console 0.5 [Python 3.5.2 \|Anaconda custom (x86_64)\| (default, Jul  2 2016, 17:52:12) [GCC 4.2.1 Compatible Apple LLVM 4.2 (clang-425.0.28)]]
+        MyGeotab Console 0.5.1 [Python 3.5.2 \|Anaconda custom (x86_64)\| (default, Jul  2 2016, 17:52:12) [GCC 4.2.1 Compatible Apple LLVM 4.2 (clang-425.0.28)]]
         Logged in as:  my_user @ my1.geotab.com/my_database
         In [1]:
 
