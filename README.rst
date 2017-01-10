@@ -43,7 +43,7 @@ Usage
     >>> import mygeotab
     >>> api = mygeotab.API(username='hello@example.com', password='mypass', database='DemoDB')
     >>> api.authenticate()
-    >>> api.get('Device', search=dict(name='%Test Dev%'))
+    >>> api.get('Device', name='%Test Dev%')
     [{'maxSecondsBetweenLogs': 200.0,
       'activeTo': '2050-01-01',
       'minAccidentSpeed': 3.0,
