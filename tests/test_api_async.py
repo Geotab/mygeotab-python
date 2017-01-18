@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import unittest
-if sys.version_info < (3, 5):
-    raise unittest.SkipTest('Python 3.5+ is required to run the async API tests.')
-import asyncio
+import pytest
+asyncio = pytest.importorskip("asyncio")
 import os
 import warnings
+import unittest
 
 from mygeotab import AuthenticationException, MyGeotabException
 from mygeotab.ext.async import API, run, from_credentials, server_call
