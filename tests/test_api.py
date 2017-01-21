@@ -4,42 +4,71 @@ import os
 import unittest
 import warnings
 
+import pytest
+
 from mygeotab import api
 
+USERNAME = os.environ.get('MYGEOTAB_USERNAME')
+PASSWORD = os.environ.get('MYGEOTAB_PASSWORD')
+DATABASE = os.environ.get('MYGEOTAB_DATABASE')
+TRAILER_NAME = 'mygeotab-python test trailer'
 
-class TestAttributes(unittest.TestCase):
+@pytest.fixture(scope='module')
+def populated_api():
+    if USERNAME and PASSWORD:
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        try:
+            session.authenticate()
+        except api.MyGeotabException as exception:
+            pytest.fail(exception)
+            return
+        yield session
+    else:
+        pytest.skip('Can\'t make calls to the API without the '
+                    'MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD '
+                    'environment variables being set')
+
+@pytest.fixture(scope='module')
+def populated_api_entity(populated_api):
+    def clean_trailers():
+        try:
+            trailers = populated_api.get('Trailer', name=TRAILER_NAME)
+            for trailer in trailers:
+                populated_api.remove('Trailer', trailer)
+        except Exception:
+            pass
+    clean_trailers()
+    yield populated_api
+    clean_trailers()
+
+
+class TestAttributes:
     def test_should_verify_ssl(self):
         my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com')
-        self.assertTrue(my_api._is_verify_ssl)
+        assert my_api._is_verify_ssl is True
         my_api = api.API('test@example.com', session_id=123, server='127.0.0.1')
-        self.assertFalse(my_api._is_verify_ssl)
+        assert my_api._is_verify_ssl is False
         my_api = api.API('test@example.com', session_id=123, server='localhost')
-        self.assertFalse(my_api._is_verify_ssl)
+        assert my_api._is_verify_ssl is False
         my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com', verify=False)
-        self.assertFalse(my_api._is_verify_ssl)
+        assert my_api._is_verify_ssl is False
 
 
-class TestProcessParameters(unittest.TestCase):
-    def setUp(self):
-        self.api = api.API('test@example.com', session_id=123)
-
+class TestProcessParameters:
     def test_camel_case_transformer(self):
         params = dict(search=dict(device_search=dict(id=123),
                                   include_overlapped_trips=True))
         fixed_params = api.process_parameters(params)
-        self.assertIsNotNone(fixed_params)
-        self.assertTrue('search' in fixed_params)
-        self.assertTrue('deviceSearch' in fixed_params['search'])
-        self.assertTrue('id' in fixed_params['search']['deviceSearch'])
-        self.assertEqual(123, fixed_params['search']['deviceSearch']['id'])
-        self.assertTrue('includeOverlappedTrips' in fixed_params['search'])
-        self.assertEqual(True, fixed_params['search']['includeOverlappedTrips'])
+        assert fixed_params is not None
+        assert 'search' in fixed_params
+        assert 'deviceSearch' in fixed_params['search']
+        assert 'id' in fixed_params['search']['deviceSearch']
+        assert fixed_params['search']['deviceSearch']['id'] == 123
+        assert 'includeOverlappedTrips' in fixed_params['search']
+        assert fixed_params['search']['includeOverlappedTrips']
 
 
-class TestProcessResults(unittest.TestCase):
-    def setUp(self):
-        self.api = api.API('test@example.com', session_id=123)
-
+class TestProcessResults:
     def test_handle_server_exception(self):
         exception_response = dict(error=dict(errors=[dict(
             message=(
@@ -63,12 +92,12 @@ class TestProcessResults(unittest.TestCase):
                     u'"test@example.com", "sessionId": "12345678901234567890", "database": "my_company"}}, "method": '
             u'"Get", "id": -1}'),
             name=u'JSONRPCError'), requestIndex=0)
-        with self.assertRaises(api.MyGeotabException) as cm:
+        with pytest.raises(api.MyGeotabException) as excinfo:
             api._process(exception_response)
-        ex = cm.exception
-        self.assertEqual(ex.name, 'MissingMethodException')
-        self.assertEqual(ex.message,
-                         'The method "Get" could not be found. Verify the method name and ensure all method '
+        ex = excinfo.value
+        assert ex.name == 'MissingMethodException'
+        assert ex.message == \
+                         ('The method "Get" could not be found. Verify the method name and ensure all method '
                          'parameters are included. Request Json: {"params": {"typeName": "Passwords", '
                          '"credentials": {"userName": "test@example.com", "sessionId": "12345678901234567890", '
                          '"database": "my_company"}}, "method": "Get", "id": -1}')
@@ -81,208 +110,164 @@ class TestProcessResults(unittest.TestCase):
             )
         ]}
         result = api._process(results_response)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['name'], 'test@example.com')
-        self.assertEqual(result[0]['id'], 'b123')
+        assert len(result) == 1
+        assert result[0]['name'] == 'test@example.com'
+        assert result[0]['id'] == 'b123'
 
     def test_handle_none(self):
         result = api._process(None)
-        self.assertIsNone(result)
+        assert result is None
 
 
-class TestCallApi(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.username = os.environ.get('MYGEOTAB_USERNAME')
-        cls.password = os.environ.get('MYGEOTAB_PASSWORD')
-        cls.database = os.environ.get('MYGEOTAB_DATABASE')
-        if cls.username and cls.password:
-            cls.api = api.API(cls.username, password=cls.password, database=cls.database, server=None)
-            cls.api.authenticate()
-        else:
-            raise unittest.SkipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
-                'variables being set')
-
-    def test_get_version(self):
-        version = self.api.call('GetVersion')
+class TestCallApi:
+    def test_get_version(self, populated_api):
+        version = populated_api.call('GetVersion')
         version_split = version.split('.')
-        self.assertEqual(len(version_split), 4)
+        assert len(version_split) == 4
 
-    def test_get_user(self):
-        user = self.api.get('User', name=self.username)
-        self.assertEqual(len(user), 1)
+    def test_get_user(self, populated_api):
+        user = populated_api.get('User', name=USERNAME)
+        assert len(user) == 1
         user = user[0]
-        self.assertEqual(user['name'], self.username)
+        assert user['name'] == USERNAME
 
-    def test_get_user_search(self):
+    def test_get_user_search(self, populated_api):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            user = self.api.search('User', name='{0}'.format(self.username))
-        self.assertEqual(len(w), 1)
-        self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
-        self.assertTrue('search()' in str(w[-1].message))
-        self.assertEqual(len(user), 1)
+            user = populated_api.search('User', name='{0}'.format(USERNAME))
+        assert len(w) == 1
+        assert issubclass(w[-1].category, DeprecationWarning)
+        assert 'search()' in str(w[-1].message)
+        assert len(user) == 1
         user = user[0]
-        self.assertEqual(user['name'], self.username)
+        assert user['name'] == USERNAME
 
-    def test_multi_call(self):
+    def test_multi_call(self, populated_api):
         calls = [
-            ['Get', dict(typeName='User', search=dict(name='{0}'.format(self.username)))],
+            ['Get', dict(typeName='User', search=dict(name='{0}'.format(USERNAME)))],
             ['GetVersion']
         ]
-        results = self.api.multi_call(calls)
-        self.assertEqual(len(results), 2)
-        self.assertIsNotNone(results[0])
-        self.assertEqual(len(results[0]), 1)
-        self.assertIsNotNone(results[0][0]['name'], self.username)
-        self.assertIsNotNone(results[1])
+        results = populated_api.multi_call(calls)
+        assert len(results) == 2
+        assert results[0] is not None
+        assert len(results[0]) == 1
+        assert results[0][0]['name'] == USERNAME
+        assert results[1] is not None
         version_split = results[1].split('.')
-        self.assertEqual(len(version_split), 4)
+        assert len(version_split) == 4
 
-    def test_pythonic_parameters(self):
-        users = self.api.get('User')
-        count_users = self.api.call('Get', type_name='User')
-        self.assertGreaterEqual(len(count_users), 1)
-        self.assertEqual(len(count_users), len(users))
+    def test_pythonic_parameters(self, populated_api):
+        users = populated_api.get('User')
+        count_users = populated_api.call('Get', type_name='User')
+        assert len(count_users) >= 1
+        assert len(count_users) == len(users)
 
-    def test_api_from_credentials(self):
-        new_api = api.from_credentials(self.api.credentials)
+    def test_api_from_credentials(self, populated_api):
+        new_api = api.from_credentials(populated_api.credentials)
         users = new_api.get('User')
-        self.assertGreaterEqual(len(users), 1)
+        assert len(users) >= 1
 
-    def test_results_limit(self):
-        users = self.api.get('User', resultsLimit=1)
-        self.assertEqual(len(users), 1)
+    def test_results_limit(self, populated_api):
+        users = populated_api.get('User', resultsLimit=1)
+        assert len(users) == 1
 
-    def test_session_expired(self):
-        credentials = self.api.credentials
-        credentials.password = self.password
+    def test_session_expired(self, populated_api):
+        credentials = populated_api.credentials
+        credentials.password = PASSWORD
         credentials.session_id = 'abc123'
         test_api = api.from_credentials(credentials)
         users = test_api.get('User')
-        self.assertGreaterEqual(len(users), 1)
+        assert len(users) >= 1
 
-    def test_missing_method(self):
-        with self.assertRaises(Exception):
-            self.api.call(None)
+    def test_missing_method(self, populated_api):
+        with pytest.raises(Exception):
+            populated_api.call(None)
 
     def test_call_without_credentials(self):
-        new_api = api.API(self.username, password=self.password, database=self.database, server=None)
-        user = new_api.get('User', name='{0}'.format(self.username))
-        self.assertEqual(len(user), 1)
+        if not (USERNAME and PASSWORD):
+            pytest.skip('Can\'t make calls to the API without the '
+                        'MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD '
+                        'environment variables being set')
+        new_api = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        user = new_api.get('User', name='{0}'.format(USERNAME))
+        assert len(user) == 1
 
-    def test_bad_parameters(self):
-        with self.assertRaises(api.MyGeotabException) as cm:
-            self.api.call('NonExistentMethod', not_a_property='abc123')
-        self.assertTrue('NonExistentMethod' in str(cm.exception))
+    def test_bad_parameters(self, populated_api):
+        with pytest.raises(api.MyGeotabException) as excinfo:
+            populated_api.call('NonExistentMethod', not_a_property='abc123')
+        assert 'NonExistentMethod' in str(excinfo.value)
 
-    def test_get_search_parameter(self):
-        user = self.api.get('User', search=dict(name=self.username))
-        self.assertEqual(len(user), 1)
+    def test_get_search_parameter(self, populated_api):
+        user = populated_api.get('User', search=dict(name=USERNAME))
+        assert len(user) == 1
         user = user[0]
-        self.assertEqual(user['name'], self.username)
+        assert user['name'] == USERNAME
 
 
-class TestEntity(unittest.TestCase):
-    def setUp(self):
-        self.username = os.environ.get('MYGEOTAB_USERNAME')
-        self.password = os.environ.get('MYGEOTAB_PASSWORD')
-        self.database = os.environ.get('MYGEOTAB_DATABASE')
-        self.trailer_name = 'mygeotab-python test trailer'
-        if self.username and self.password:
-            self.api = api.API(self.username, password=self.password, database=self.database, server=None)
-            self.api.authenticate()
-            try:
-                trailers = self.api.get('Trailer', name=self.trailer_name)
-                for trailer in trailers:
-                    self.api.remove('Trailer', trailer)
-            except:
-                pass
-        else:
-            raise self.skipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
-                'variables being set')
-
-    def tearDown(self):
-        try:
-            trailers = self.api.get('Trailer', name=self.trailer_name)
-            for trailer in trailers:
-                self.api.remove('Trailer', trailer)
-        except:
-            pass
-
-    def test_add_edit_remove(self):
+class TestEntity:
+    def test_add_edit_remove(self, populated_api_entity):
         def get_trailer():
-            trailers = self.api.get('Trailer', name=self.trailer_name)
-            self.assertEqual(len(trailers), 1)
+            trailers = populated_api_entity.get('Trailer', name=TRAILER_NAME)
+            assert len(trailers) == 1
             return trailers[0]
-        user = self.api.get('User', name=self.username)[0]
+        user = populated_api_entity.get('User', name=USERNAME)[0]
         trailer = {
-            'name': self.trailer_name,
+            'name': TRAILER_NAME,
             'groups': user['companyGroups']
         }
-        trailer['id'] = self.api.add('Trailer', trailer)
-        self.assertIsNotNone(trailer['id'])
+        trailer['id'] = populated_api_entity.add('Trailer', trailer)
+        assert trailer['id'] is not None
         trailer = get_trailer()
-        self.assertEqual(trailer['name'], self.trailer_name)
+        assert trailer['name'] == TRAILER_NAME
         comment = 'some comment'
         trailer['comment'] = comment
-        self.api.set('Trailer', trailer)
+        populated_api_entity.set('Trailer', trailer)
         trailer = get_trailer()
-        self.assertEqual(trailer['comment'], comment)
-        self.api.remove('Trailer', trailer)
-        trailers = self.api.get('Trailer', name=self.trailer_name)
-        self.assertEqual(len(trailers), 0)
+        assert trailer['comment'] == comment
+        populated_api_entity.remove('Trailer', trailer)
+        trailers = populated_api_entity.get('Trailer', name=TRAILER_NAME)
+        assert len(trailers) == 0
 
 
-class TestAuthentication(unittest.TestCase):
-    def setUp(self):
-        self.username = os.environ.get('MYGEOTAB_USERNAME')
-        self.database = os.environ.get('MYGEOTAB_DATABASE')
-        if not self.username:
-            self.skipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment '
-                'variables being set')
-
+@pytest.mark.skipif(USERNAME is None or DATABASE is None,
+                    reason=('Can\'t make calls to the API without the MYGEOTAB_USERNAME '
+                            'and MYGEOTAB_PASSWORD environment variables being set'))
+class TestAuthentication:
     def test_invalid_session(self):
-        test_api = api.API(self.username, session_id='abc123', database=self.database)
-        self.assertTrue(self.username in str(test_api.credentials))
-        self.assertTrue(self.database in str(test_api.credentials))
-        with self.assertRaises(api.AuthenticationException) as cm:
+        test_api = api.API(USERNAME, session_id='abc123', database=DATABASE)
+        assert USERNAME in str(test_api.credentials)
+        assert DATABASE in str(test_api.credentials)
+        with pytest.raises(api.AuthenticationException) as excinfo:
             test_api.get('User')
-        self.assertTrue('Cannot authenticate' in str(cm.exception))
-        self.assertTrue(self.database in str(cm.exception))
-        self.assertTrue(self.username in str(cm.exception))
+        assert 'Cannot authenticate' in str(excinfo.value)
+        assert DATABASE in str(excinfo.value)
+        assert USERNAME in str(excinfo.value)
 
     def test_auth_exception(self):
-        test_api = api.API(self.username, password='abc123', database='this_database_does_not_exist')
-        with self.assertRaises(api.MyGeotabException) as cm:
+        test_api = api.API(USERNAME, password='abc123', database='this_database_does_not_exist')
+        with pytest.raises(api.MyGeotabException) as excinfo:
             test_api.authenticate(False)
-        self.assertEqual(cm.exception.name, 'DbUnavailableException')
+        assert excinfo.value.name == 'DbUnavailableException'
 
     def test_username_password_exists(self):
-        with self.assertRaises(Exception) as cm1:
+        with pytest.raises(Exception) as excinfo1:
             api.API(None)
-        with self.assertRaises(Exception) as cm2:
-            api.API(self.username)
-        self.assertTrue('username' in str(cm1.exception))
-        self.assertTrue('password' in str(cm2.exception))
+        with pytest.raises(Exception) as excinfo2:
+            api.API(USERNAME)
+        assert 'username' in str(excinfo1.value)
+        assert 'password' in str(excinfo2.value)
 
 
-class TestServerCallApi(unittest.TestCase):
+class TestServerCallApi:
     def test_get_version(self):
         version = api.server_call('GetVersion', server='my3.geotab.com')
         version_split = version.split('.')
-        self.assertEqual(len(version_split), 4)
+        assert len(version_split) == 4
 
     def test_invalid_server_call(self):
-        with self.assertRaises(Exception) as cm1:
+        with pytest.raises(Exception) as excinfo1:
             api.server_call(None, None)
-        with self.assertRaises(Exception) as cm2:
+        with pytest.raises(Exception) as excinfo2:
             api.server_call('GetVersion', None)
-        self.assertTrue('method' in str(cm1.exception))
-        self.assertTrue('server' in str(cm2.exception))
-
-if __name__ == '__main__':
-    unittest.main()
+        assert 'method' in str(excinfo1.value)
+        assert 'server' in str(excinfo2.value)
