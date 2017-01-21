@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import unittest
 import warnings
 
 import pytest
@@ -12,6 +11,7 @@ USERNAME = os.environ.get('MYGEOTAB_USERNAME')
 PASSWORD = os.environ.get('MYGEOTAB_PASSWORD')
 DATABASE = os.environ.get('MYGEOTAB_DATABASE')
 TRAILER_NAME = 'mygeotab-python test trailer'
+
 
 @pytest.fixture(scope='module')
 def populated_api():
@@ -27,6 +27,7 @@ def populated_api():
         pytest.skip('Can\'t make calls to the API without the '
                     'MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD '
                     'environment variables being set')
+
 
 @pytest.fixture(scope='module')
 def populated_api_entity(populated_api):
