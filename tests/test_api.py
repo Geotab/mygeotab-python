@@ -13,7 +13,7 @@ DATABASE = os.environ.get('MYGEOTAB_DATABASE')
 TRAILER_NAME = 'mygeotab-python test trailer'
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def populated_api():
     if USERNAME and PASSWORD:
         session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
@@ -29,7 +29,7 @@ def populated_api():
                     'environment variables being set')
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def populated_api_entity(populated_api):
     def clean_trailers():
         try:

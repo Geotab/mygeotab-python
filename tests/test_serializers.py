@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import json
 from datetime import datetime
 
@@ -17,17 +16,14 @@ def json_deserialize(data_str):
     return json.loads(data_str, object_hook=serializers.object_deserializer)
 
 
-class TestSerialization(unittest.TestCase):
-    def setUp(self):
-        pass
-
+class TestSerialization:
     def test_top_level_utc_datetime(self):
         data = dict(
             dateTime=datetime(2015, 6, 5, 2, 3, 44, 87000)
         )
         expected_str = '{"dateTime": "2015-06-05T02:03:44.087Z"}'
         data_str = json_serialize(data)
-        self.assertEqual(data_str, expected_str)
+        assert data_str == expected_str
 
     def test_top_level_zoned_datetime(self):
         est = pytz.timezone('US/Eastern')
@@ -36,50 +32,43 @@ class TestSerialization(unittest.TestCase):
         )
         expected_str = '{"dateTime": "2015-06-04T07:03:43.000Z"}'
         data_str = json_serialize(data)
-        self.assertEqual(data_str, expected_str)
+        assert data_str == expected_str
 
 
-class TestDeserialization(unittest.TestCase):
-    def setUp(self):
-        pass
-
+class TestDeserialization:
     def test_top_level_datetime(self):
         data_str = '{"dateTime": "2015-06-04T07:03:43Z"}'
         data = json_deserialize(data_str)
         utc_date = data.get('dateTime')
-        self.assertIsNotNone(utc_date)
+        assert utc_date is not None
         check_date = datetime(2015, 6, 4, 7, 3, 43)
-        self.assertEqual(utc_date.year, check_date.year)
-        self.assertEqual(utc_date.month, check_date.month)
-        self.assertEqual(utc_date.day, check_date.day)
-        self.assertEqual(utc_date.hour, check_date.hour)
-        self.assertEqual(utc_date.minute, check_date.minute)
-        self.assertEqual(utc_date.second, check_date.second)
+        assert utc_date.year == check_date.year
+        assert utc_date.month == check_date.month
+        assert utc_date.day == check_date.day
+        assert utc_date.hour == check_date.hour
+        assert utc_date.minute == check_date.minute
+        assert utc_date.second == check_date.second
 
     def test_second_level_datetime(self):
         data_str = '[{"group": {"dateTime": "2015-06-04T07:03:43Z"}}]'
         data = json_deserialize(data_str)
-        self.assertEqual(len(data), 1)
+        assert len(data) == 1
         group = data[0].get('group')
-        self.assertIsNotNone(group)
+        assert group is not None
         utc_date = group.get('dateTime')
-        self.assertIsNotNone(utc_date)
+        assert utc_date is not None
         check_date = datetime(2015, 6, 4, 7, 3, 43)
-        self.assertEqual(utc_date.year, check_date.year)
-        self.assertEqual(utc_date.month, check_date.month)
-        self.assertEqual(utc_date.day, check_date.day)
-        self.assertEqual(utc_date.hour, check_date.hour)
-        self.assertEqual(utc_date.minute, check_date.minute)
-        self.assertEqual(utc_date.second, check_date.second)
+        assert utc_date.year == check_date.year
+        assert utc_date.month == check_date.month
+        assert utc_date.day == check_date.day
+        assert utc_date.hour == check_date.hour
+        assert utc_date.minute == check_date.minute
+        assert utc_date.second == check_date.second
 
     def test_invalid_datetime(self):
         date_str = '2015-06-0407:03:43Z'
         data_str = '{{"dateTime": "{}"}}'.format(date_str)
         data = json_deserialize(data_str)
         utc_date = data.get('dateTime')
-        self.assertIsNotNone(utc_date)
-        self.assertEqual(utc_date, date_str)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert utc_date is not None
+        assert utc_date == date_str

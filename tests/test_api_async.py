@@ -2,195 +2,182 @@
 
 import pytest
 asyncio = pytest.importorskip("asyncio")
-import os
 import warnings
-import unittest
 
 from mygeotab import AuthenticationException, MyGeotabException
 from mygeotab.ext.async import API, run, from_credentials, server_call
+from tests.test_api import populated_api, populated_api_entity, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 
-class TestAsyncCallApi(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-        cls.username = os.environ.get('MYGEOTAB_USERNAME_ASYNC', os.environ.get('MYGEOTAB_USERNAME'))
-        cls.password = os.environ.get('MYGEOTAB_PASSWORD_ASYNC', os.environ.get('MYGEOTAB_PASSWORD'))
-        cls.database = os.environ.get('MYGEOTAB_DATABASE')
-        cls.trailer_name = 'myg-python-test'
-        if cls.username and cls.password:
-            cls.api = API(cls.username, password=cls.password, database=cls.database, loop=cls.loop, verify=True)
-            cls.api.authenticate()
-            try:
-                cls.tearDownClass()
-            except:
-                pass
-        else:
-            raise unittest.SkipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_USERNAME_ASYNC and MYGEOTAB_PASSWORD_ASYNC '
-                'environment variables being set')
+@pytest.fixture(scope='session')
+def async_populated_api(populated_api):
+    loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+    yield from_credentials(populated_api.credentials, loop=loop)
 
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            trailers = cls.api.get('Trailer', name=cls.trailer_name)
-            for trailer in trailers:
-                cls.api.remove('Trailer', trailer)
-        except:
-            pass
 
-    def test_get_version(self):
-        version = run(self.api.call_async('GetVersion'), loop=self.loop)
-        self.assertEqual(len(version), 1)
+@pytest.fixture(scope='session')
+def async_populated_api_entity(populated_api_entity):
+    loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+    yield from_credentials(populated_api_entity.credentials, loop=loop)
+
+
+class TestAsyncCallApi:
+    def test_get_version(self, async_populated_api):
+        version = run(async_populated_api.call_async('GetVersion'), loop=async_populated_api.loop)
+        assert len(version) == 1
         version_split = version[0].split('.')
-        self.assertEqual(len(version_split), 4)
+        assert len(version_split) == 4
 
-    def test_get_user(self):
-        user = run(self.api.get_async('User', name=self.username), loop=self.loop)
-        self.assertEqual(len(user), 1)
-        self.assertEqual(len(user[0]), 1)
+    def test_get_user(self, async_populated_api):
+        user = run(async_populated_api.get_async('User', name=USERNAME), loop=async_populated_api.loop)
+        assert len(user) == 1
+        assert len(user[0]) == 1
         user = user[0][0]
-        self.assertEqual(user['name'], self.username)
+        assert user['name'] == USERNAME
 
-    def test_get_user_search(self):
+    def test_get_user_search(self, async_populated_api):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            user = run(self.api.search_async('User', name=self.username), loop=self.loop)
-        self.assertEqual(len(w), 1)
-        self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
-        self.assertTrue('search_async()' in str(w[-1].message))
-        self.assertEqual(len(user), 1)
-        self.assertEqual(len(user[0]), 1)
+            user = run(async_populated_api.search_async('User', name=USERNAME), loop=async_populated_api.loop)
+        assert len(w) == 1
+        assert issubclass(w[-1].category, DeprecationWarning)
+        assert 'search_async()' in str(w[-1].message)
+        assert len(user) == 1
+        assert len(user[0]) == 1
         user = user[0][0]
-        self.assertEqual(user['name'], self.username)
+        assert user['name'] == USERNAME
 
-    def test_multi_call(self):
+    def test_multi_call(self, async_populated_api):
         calls = [
-            ['Get', dict(typeName='User', search=dict(name='{0}'.format(self.username)))],
+            ['Get', dict(typeName='User', search=dict(name='{0}'.format(USERNAME)))],
             ['GetVersion']
         ]
-        results = run(self.api.multi_call_async(calls), loop=self.loop)
-        self.assertEqual(len(results), 1)
+        results = run(async_populated_api.multi_call_async(calls), loop=async_populated_api.loop)
+        assert len(results) == 1
         results = results[0]
-        self.assertEqual(len(results), 2)
-        self.assertIsNotNone(results[0])
-        self.assertEqual(len(results[0]), 1)
-        self.assertIsNotNone(results[0][0]['name'], self.username)
-        self.assertIsNotNone(results[1])
+        assert len(results) == 2
+        assert results[0] is not None
+        assert len(results[0]) == 1
+        assert results[0][0]['name'] == USERNAME
+        assert results[1] is not None
         version_split = results[1].split('.')
-        self.assertEqual(len(version_split), 4)
+        assert len(version_split) == 4
 
-    def test_pythonic_parameters(self):
-        users = self.api.get('User')
-        count_users = run(self.api.call_async('Get', type_name='User'), loop=self.loop)
-        self.assertEqual(len(count_users), 1)
-        self.assertGreaterEqual(len(count_users[0]), 1)
-        self.assertEqual(len(count_users[0]), len(users))
+    def test_pythonic_parameters(self, async_populated_api):
+        users = async_populated_api.get('User')
+        count_users = run(async_populated_api.call_async('Get', type_name='User'), loop=async_populated_api.loop)
+        assert len(count_users) == 1
+        assert len(count_users[0]) >= 1
+        assert len(count_users[0]) == len(users)
 
-    def test_api_from_credentials(self):
-        new_api = from_credentials(self.api.credentials, loop=self.loop)
-        users = run(new_api.get_async('User'), loop=self.loop)
-        self.assertGreaterEqual(len(users), 1)
+    def test_api_from_credentials(self, async_populated_api):
+        new_api = from_credentials(async_populated_api.credentials, loop=async_populated_api.loop)
+        users = run(new_api.get_async('User'), loop=async_populated_api.loop)
+        assert len(users) >= 1
 
-    def test_results_limit(self):
-        users = run(self.api.get_async('User', resultsLimit=1), loop=self.loop)
-        self.assertEqual(len(users), 1)
+    def test_results_limit(self, async_populated_api):
+        users = run(async_populated_api.get_async('User', resultsLimit=1), loop=async_populated_api.loop)
+        assert len(users) == 1
 
-    def test_session_expired(self):
-        credentials = self.api.credentials
-        credentials.password = self.password
+    def test_session_expired(self, async_populated_api):
+        credentials = async_populated_api.credentials
+        credentials.password = PASSWORD
         credentials.session_id = 'abc123'
-        test_api = from_credentials(credentials, loop=self.loop)
-        users = run(test_api.get_async('User'), loop=self.loop)
-        self.assertGreaterEqual(len(users), 1)
+        test_api = from_credentials(credentials, loop=async_populated_api.loop)
+        users = run(test_api.get_async('User'), loop=async_populated_api.loop)
+        assert len(users) >= 1
 
-    def test_missing_method(self):
-        with self.assertRaises(Exception):
-            run(self.api.call_async(None), loop=self.loop)
+    def test_missing_method(self, async_populated_api):
+        with pytest.raises(Exception):
+            run(async_populated_api.call_async(None), loop=async_populated_api.loop)
 
     def test_call_without_credentials(self):
-        new_api = API(self.username, password=self.password, database=self.database, server=None, loop=self.loop)
-        user = run(new_api.get_async('User', name='{0}'.format(self.username)), loop=self.loop)
-        self.assertEqual(len(user), 1)
-        self.assertEqual(len(user[0]), 1)
+        loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+        new_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=None, loop=loop)
+        user = run(new_api.get_async('User', name='{0}'.format(USERNAME)), loop=loop)
+        assert len(user) == 1
+        assert len(user[0]) == 1
 
-    def test_bad_parameters(self):
-        with self.assertRaises(MyGeotabException) as cm:
-            run(self.api.call_async('NonExistentMethod', not_a_property='abc123'), loop=self.loop)
-        self.assertTrue('NonExistentMethod' in str(cm.exception))
+    def test_bad_parameters(self, async_populated_api):
+        with pytest.raises(MyGeotabException) as excinfo:
+            run(async_populated_api.call_async('NonExistentMethod', not_a_property='abc123'), loop=async_populated_api.loop)
+        assert 'NonExistentMethod' in str(excinfo.value)
 
-    def test_get_search_parameter(self):
-        user = run(self.api.get_async('User', search=dict(name=self.username)), loop=self.loop)
-        self.assertEqual(len(user), 1)
-        self.assertEqual(len(user[0]), 1)
+    def test_get_search_parameter(self, async_populated_api):
+        user = run(async_populated_api.get_async('User', search=dict(name=USERNAME)), loop=async_populated_api.loop)
+        assert len(user) == 1
+        assert len(user[0]) == 1
         user = user[0][0]
-        self.assertEqual(user['name'], self.username)
+        assert user['name'] == USERNAME
 
-    def test_add_edit_remove(self):
+    def test_add_edit_remove(self, async_populated_api_entity):
         def get_trailer():
-            trailers = run(self.api.get_async('Trailer', name=self.trailer_name), loop=self.loop)
-            self.assertEqual(len(trailers), 1)
-            self.assertEqual(len(trailers[0]), 1)
+            trailers = run(async_populated_api_entity.get_async('Trailer', name=TRAILER_NAME), loop=async_populated_api_entity.loop)
+            assert len(trailers) == 1
+            assert len(trailers[0]) == 1
             return trailers[0][0]
-        user = self.api.get('User', name=self.username)[0]
+        user = async_populated_api_entity.get('User', name=USERNAME)[0]
         trailer = {
-            'name': self.trailer_name,
+            'name': TRAILER_NAME,
             'groups': user['companyGroups']
         }
-        trailer_id = run(self.api.add_async('Trailer', trailer), loop=self.loop)
-        self.assertEqual(len(trailer_id), 1)
+        trailer_id = run(async_populated_api_entity.add_async('Trailer', trailer), loop=async_populated_api_entity.loop)
+        assert len(trailer_id) == 1
         trailer['id'] = trailer_id[0]
         trailer = get_trailer()
-        self.assertEqual(trailer['name'], self.trailer_name)
+        assert trailer['name'] == TRAILER_NAME
         comment = 'some comment'
         trailer['comment'] = comment
-        run(self.api.set_async('Trailer', trailer), loop=self.loop)
+        run(async_populated_api_entity.set_async('Trailer', trailer), loop=async_populated_api_entity.loop)
         trailer = get_trailer()
-        self.assertEqual(trailer['comment'], comment)
-        run(self.api.remove_async('Trailer', trailer), loop=self.loop)
-        trailers = run(self.api.get_async('Trailer', name=self.trailer_name), loop=self.loop)
-        self.assertEqual(len(trailers), 1)
-        self.assertEqual(len(trailers[0]), 0)
+        assert trailer['comment'] == comment
+        run(async_populated_api_entity.remove_async('Trailer', trailer), loop=async_populated_api_entity.loop)
+        trailers = run(async_populated_api_entity.get_async('Trailer', name=TRAILER_NAME), loop=async_populated_api_entity.loop)
+        assert len(trailers) == 1
+        assert len(trailers[0]) == 0
 
 
-class TestAsyncAuthentication(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-        self.username = 'fakeemail@example.com'
-        self.database = os.environ.get('MYGEOTAB_DATABASE')
-        if not self.database:
-            self.skipTest(
-                'Can\'t make calls to the API without the MYGEOTAB_DATABASE environment '
-                'variable being set')
-
+@pytest.mark.skipif(USERNAME is None or DATABASE is None,
+                    reason=('Can\'t make calls to the API without the MYGEOTAB_USERNAME '
+                            'and MYGEOTAB_PASSWORD environment variables being set'))
+class TestAuthentication:
     def test_invalid_session(self):
-        test_api = API(self.username, session_id='abc123', database=self.database)
-        self.assertTrue(self.username in str(test_api.credentials))
-        self.assertTrue(self.database in str(test_api.credentials))
-        with self.assertRaises(AuthenticationException) as cm:
-            run(test_api.get('User'), loop=self.loop)
-        self.assertTrue('Cannot authenticate' in str(cm.exception))
-        self.assertTrue(self.database in str(cm.exception))
-        self.assertTrue(self.username in str(cm.exception))
+        test_api = API(USERNAME, session_id='abc123', database=DATABASE)
+        assert USERNAME in str(test_api.credentials)
+        assert DATABASE in str(test_api.credentials)
+        with pytest.raises(AuthenticationException) as excinfo:
+            test_api.get('User')
+        assert 'Cannot authenticate' in str(excinfo.value)
+        assert DATABASE in str(excinfo.value)
+        assert USERNAME in str(excinfo.value)
+
+    def test_auth_exception(self):
+        test_api = API(USERNAME, password='abc123', database='this_database_does_not_exist')
+        with pytest.raises(MyGeotabException) as excinfo:
+            test_api.authenticate(False)
+        assert excinfo.value.name == 'DbUnavailableException'
+
+    def test_username_password_exists(self):
+        with pytest.raises(Exception) as excinfo1:
+            API(None)
+        with pytest.raises(Exception) as excinfo2:
+            API(USERNAME)
+        assert 'username' in str(excinfo1.value)
+        assert 'password' in str(excinfo2.value)
 
 
-class TestAsyncServerCallApi(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.get_event_loop()
-
+class TestAsyncServerCallApi:
     def test_get_version(self):
-        results = run(server_call('GetVersion', server='my.geotab.com', loop=self.loop, verify=False), loop=self.loop)
-        version_split = results[0].split('.')
-        self.assertEqual(len(version_split), 4)
+        loop = asyncio.get_event_loop()
+        version = run(server_call('GetVersion', server='my3.geotab.com'), loop=loop)
+        version_split = version[0].split('.')
+        assert len(version_split) == 4
 
     def test_invalid_server_call(self):
-        with self.assertRaises(Exception) as cm1:
-            run(server_call(None, None, loop=self.loop), loop=self.loop)
-        with self.assertRaises(Exception) as cm2:
-            run(server_call('GetVersion', None, loop=self.loop), loop=self.loop)
-        self.assertTrue('method' in str(cm1.exception))
-        self.assertTrue('server' in str(cm2.exception))
-
-
-if __name__ == '__main__':
-    unittest.main()
+        loop = asyncio.get_event_loop()
+        with pytest.raises(Exception) as excinfo1:
+            run(server_call(None, None), loop=loop)
+        with pytest.raises(Exception) as excinfo2:
+            run(server_call('GetVersion', None), loop=loop)
+        assert 'method' in str(excinfo1.value)
+        assert 'server' in str(excinfo2.value)
