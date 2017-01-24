@@ -36,11 +36,11 @@ def async_populated_api_entity(async_populated_api):
         try:
             trailers = async_populated_api.get('Trailer', name=TRAILER_NAME)
             for trailer in trailers:
-                populated_api.remove('Trailer', trailer)
+                async_populated_api.remove('Trailer', trailer)
         except Exception:
             pass
     clean_trailers()
-    yield populated_api
+    yield async_populated_api
     clean_trailers()
 
 
