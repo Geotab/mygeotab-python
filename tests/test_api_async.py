@@ -2,23 +2,46 @@
 
 import pytest
 asyncio = pytest.importorskip("asyncio")
+import os
 import warnings
 
 from mygeotab import AuthenticationException, MyGeotabException
 from mygeotab.ext.async import API, run, from_credentials, server_call
-from tests.test_api import populated_api, populated_api_entity, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+from tests.test_api import populated_api, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+
+USERNAME = os.environ.get('MYGEOTAB_USERNAME_ASYNC', USERNAME)
+PASSWORD = os.environ.get('MYGEOTAB_PASSWORD_ASYNC', PASSWORD)
 
 
 @pytest.fixture(scope='session')
-def async_populated_api(populated_api):
+def async_populated_api():
     loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-    yield from_credentials(populated_api.credentials, loop=loop)
+    if USERNAME and PASSWORD:
+        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=None, loop=loop)
+        try:
+            session.authenticate()
+        except MyGeotabException as exception:
+            pytest.fail(exception)
+            return
+        yield session
+    else:
+        pytest.skip('Can\'t make calls to the API without the '
+                    'MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD '
+                    'environment variables being set')
 
 
 @pytest.fixture(scope='session')
-def async_populated_api_entity(populated_api_entity):
-    loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-    yield from_credentials(populated_api_entity.credentials, loop=loop)
+def async_populated_api_entity(async_populated_api):
+    def clean_trailers():
+        try:
+            trailers = async_populated_api.get('Trailer', name=TRAILER_NAME)
+            for trailer in trailers:
+                populated_api.remove('Trailer', trailer)
+        except Exception:
+            pass
+    clean_trailers()
+    yield populated_api
+    clean_trailers()
 
 
 class TestAsyncCallApi:
