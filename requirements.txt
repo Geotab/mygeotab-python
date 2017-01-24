@@ -1,4 +1,4 @@
-requests==2.12.5
+requests==2.13.0
 click==6.7
 pytz==2016.10
 python-dateutil==2.6.0
