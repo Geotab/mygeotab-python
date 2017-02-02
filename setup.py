@@ -37,6 +37,13 @@ setup(
     package_data={'': ['LICENSE']},
     package_dir={'mygeotab': 'mygeotab'},
     license='Apache 2.0',
+    install_requires=[
+        'requests',
+        'click',
+        'pytz',
+        'python-dateutil',
+        'six'
+    ],
     entry_points='''
         [console_scripts]
         myg=mygeotab.cli:main

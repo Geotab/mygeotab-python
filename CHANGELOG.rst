@@ -3,6 +3,13 @@
 Changes
 -------
 
+0.5.2 (2017-02-02)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Switched back to using abstract dependencies in setup.py (recommended by `this guide <https://caremad.io/posts/2013/07/setup-vs-requirement/>`_)
+
 0.5.1 (2017-01-04)
 ++++++++++++++++++
 
