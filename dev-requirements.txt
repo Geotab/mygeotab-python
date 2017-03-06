@@ -1,5 +1,5 @@
 sphinx==1.5.2
-sphinx-rtd-theme==0.1.9
+sphinx-rtd-theme==0.2.3
 coverage==4.3.4
 pytest==3.0.6
 pytest-cov==2.4.0
