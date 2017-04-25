@@ -31,7 +31,7 @@ class DataFeedListener(object):
 
 
 class DataFeed(object):
-    def __init__(self, api, listener, type_name, interval, search=None):
+    def __init__(self, api, listener, type_name, interval, search=None, results_limit=None):
         """
         A simple wrapper for the MyGeotab Data Feed. Create a listener that inherits
         from DataFeedListener to pass in.
@@ -41,12 +41,14 @@ class DataFeed(object):
         :param type_name: The type of entity
         :param interval: The data retrieval interval (in seconds)
         :param search: The search object
+        :param results_limit: The maximum number of records to return
         """
         self.api = api
         self.listener = listener
         self.type_name = type_name
         self.interval = interval
         self.search = search
+        self.results_limit = results_limit
         self.running = False
         self._version = None
         self._thread = None
@@ -59,7 +61,7 @@ class DataFeed(object):
         while self.running:
             try:
                 result = self.api.call('GetFeed', type_name=self.type_name, search=self.search,
-                                       from_version=self._version)
+                                       from_version=self._version, results_limit=self.results_limit)
                 self._version = result['toVersion']
                 self.listener.on_data(result['data'])
             except Exception as e:
