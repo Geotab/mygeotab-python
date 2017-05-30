@@ -10,14 +10,14 @@ import warnings
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.poolmanager import PoolManager
+from requests.packages import urllib3
 from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__
 import mygeotab.serializers
 
 try:
-    requests.packages.urllib3.disable_warnings()
+    urllib3.disable_warnings()
 except:
     pass
 
@@ -264,11 +264,11 @@ class AuthenticationException(Exception):
 
 class GeotabHTTPAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        self.poolmanager = PoolManager(num_pools=connections,
-                                       maxsize=maxsize,
-                                       block=block,
-                                       ssl_version=ssl.PROTOCOL_TLSv1_2,
-                                       **pool_kwargs)
+        self.poolmanager = urllib3.poolmanager.PoolManager(num_pools=connections,
+                                                           maxsize=maxsize,
+                                                           block=block,
+                                                           ssl_version=ssl.PROTOCOL_TLSv1_2,
+                                                           **pool_kwargs)
 
 
 def _query(api_endpoint, method, parameters, verify_ssl=True):
