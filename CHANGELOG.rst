@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.5.3 (2017-05-30)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Fixed intermittent timeout errors due to `upstream changes <https://github.com/requests/requests/blob/master/HISTORY.rst#2161-2017-05-27>`_ in the 'requests' module
+
+
 0.5.2 (2017-02-02)
 ++++++++++++++++++
 
