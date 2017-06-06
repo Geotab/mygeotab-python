@@ -13,10 +13,6 @@ MyGeotab
     :target: https://pypi.python.org/pypi/mygeotab
     :alt: PyPI Version
 
-.. image:: https://img.shields.io/pypi/dm/mygeotab.svg?style=flat
-    :target: https://pypi.python.org/pypi/mygeotab
-    :alt: PyPI Downloads
-
 .. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
     :alt: Documentation Status
