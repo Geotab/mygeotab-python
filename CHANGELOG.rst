@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.5.4 (TBD)
++++++++++++
+
+**Bug Fixes**
+
+- Ensure all dates are timezone aware and are always UTC-localized.
+
+
 0.5.3 (2017-05-30)
 ++++++++++++++++++
 
