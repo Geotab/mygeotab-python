@@ -206,31 +206,6 @@ def console(session, database=None, user=None, password=None, server=None):
         code.interact(banner, local=local_vars)
 
 
-@click.command(help="Run a Python script with the user credentials already populated")
-@click.argument('script', nargs=1, required=True, type=click.Path(exists=True))
-@click.argument('database', nargs=1, required=False)
-@click.option('--user', '-u')
-@click.option('--password', '-p')
-@click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
-@click.pass_obj
-def run(session, script=None, database=None, user=None, password=None, server=None):
-    """Runs a script with pre-populated saved credentials
-
-    By default, all library objects are available as locals in the script, with 'myg' being the active API object
-
-    :param session: The current Session object
-    :param script: The script file to execute
-    :param database: The database name to open a console to
-    :param user: The username used for MyGeotab servers. Usually an email address.
-    :param password: The password associated with the username. Optional if `session_id` is provided.
-    :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
-    """
-    local_vars = _populate_locals(database, password, server, session, user)
-    with open(script) as f:
-        compiled_script = compile(f.read(), script, 'exec')
-        exec(compiled_script, globals(), local_vars)
-
-
 @click.group()
 @click.version_option()
 @click.pass_context
@@ -264,7 +239,6 @@ def _populate_locals(database, password, server, session, user):
 
 
 main.add_command(console)
-main.add_command(run)
 sessions.add_command(remove)
 main.add_command(sessions)
 

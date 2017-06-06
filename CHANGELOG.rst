@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.5.5 (TBD)
++++++++++++
+
+**Improvements**
+
+- Removed `run` command from the CLI
+
+
 0.5.4 (2017-06-05)
 ++++++++++++++++++
 
