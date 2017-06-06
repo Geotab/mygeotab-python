@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 if sys.version_info < (3, 5):
     raise Exception('Python 3.5+ is required to use the async API')
 import asyncio
@@ -18,7 +19,8 @@ import mygeotab.serializers
 
 
 class API(mygeotab.API):
-    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True, loop=None):
+    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True,
+                 loop=None):
         """
         Creates a new instance of this simple asynchronous Pythonic wrapper for the MyGeotab API.
 
@@ -52,7 +54,8 @@ class API(mygeotab.API):
             params['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query(mygeotab.api.get_api_url(self._server), method, params, verify_ssl=self._is_verify_ssl, loop=self.loop)
+            result = await _query(mygeotab.api.get_api_url(self._server), method, params,
+                                  verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -138,12 +141,12 @@ class API(mygeotab.API):
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
 
-def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
+def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
+def from_credentials(credentials, loop: asyncio.AbstractEventLoop = None):
     """
     Returns a new async API object from an existing Credentials object
 
@@ -155,7 +158,9 @@ def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
                database=credentials.database, session_id=credentials.session_id,
                server=credentials.server, loop=loop)
 
-async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), verify=True, **parameters):
+
+async def server_call(method, server, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), verify=True,
+                      **parameters):
     """
     Makes an asynchronous call to an un-authenticated method on a server
 
@@ -174,7 +179,8 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.ge
     parameters = mygeotab.api.process_parameters(parameters)
     return await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
 
-async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop=None):
+
+async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop = None):
     """
     Formats and performs the asynchronous query against the API
 

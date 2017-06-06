@@ -230,6 +230,7 @@ def run(session, script=None, database=None, user=None, password=None, server=No
         compiled_script = compile(f.read(), script, 'exec')
         exec(compiled_script, globals(), local_vars)
 
+
 @click.group()
 @click.version_option()
 @click.pass_context
@@ -243,6 +244,7 @@ def main(ctx):
         ctx.obj.load()
     except IOError:
         pass
+
 
 def _populate_locals(database, password, server, session, user):
     if not session.credentials:
@@ -259,6 +261,7 @@ def _populate_locals(database, password, server, session, user):
         click.echo('Your session has expired. Please login again.')
         api = login(session, user, password, database, server)
     return dict(myg=api, mygeotab=mygeotab, dates=mygeotab.dates)
+
 
 main.add_command(console)
 main.add_command(run)

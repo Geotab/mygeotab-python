@@ -13,8 +13,8 @@ from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
 from six.moves.urllib.parse import urlparse
 
-from . import __title__, __version__
 import mygeotab.serializers
+from . import __title__, __version__
 
 try:
     urllib3.disable_warnings()
@@ -374,5 +374,6 @@ def get_api_url(server):
     base_url = parsed.netloc if parsed.netloc else parsed.path
     base_url.replace('/', '')
     return 'https://' + base_url + '/apiv1'
+
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
