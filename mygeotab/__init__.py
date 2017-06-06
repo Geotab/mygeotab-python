@@ -2,6 +2,6 @@
 
 __title__ = 'mygeotab-python'
 __author__ = 'Aaron Toth'
-__version__ = '0.5.3'
+__version__ = '0.5.4'
 
 from .api import *
