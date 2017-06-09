@@ -215,6 +215,10 @@ class Credentials(object):
     def __str__(self):
         return '{0} @ {1}/{2}'.format(self.username, self.server, self.database)
 
+    def __repr__(self):
+        return 'Credentials(username={username}, database={database})'.format(username=self.username,
+                                                                              database=self.database)
+
     def get_param(self):
         """
         A simple representation of the credentials object for passing into the API.authenticate() server call
