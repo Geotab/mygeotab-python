@@ -3,6 +3,7 @@
 import pytest
 asyncio = pytest.importorskip("asyncio")
 import os
+import sys
 import warnings
 
 from mygeotab import AuthenticationException, MyGeotabException
@@ -12,6 +13,8 @@ from tests.test_api import populated_api, USERNAME, PASSWORD, DATABASE, TRAILER_
 USERNAME = os.environ.get('MYGEOTAB_USERNAME_ASYNC', USERNAME)
 PASSWORD = os.environ.get('MYGEOTAB_PASSWORD_ASYNC', PASSWORD)
 
+pytestmark = pytest.mark.skipif(sys.version_info < (3, 5),
+                                reason="Only testing API on Python 3.5")
 
 @pytest.fixture(scope='session')
 def async_populated_api():

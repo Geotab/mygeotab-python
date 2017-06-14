@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import warnings
 
 import pytest
@@ -11,6 +12,9 @@ USERNAME = os.environ.get('MYGEOTAB_USERNAME')
 PASSWORD = os.environ.get('MYGEOTAB_PASSWORD')
 DATABASE = os.environ.get('MYGEOTAB_DATABASE')
 TRAILER_NAME = 'mygeotab-python test trailer'
+
+pytestmark = pytest.mark.skipif(sys.version_info < (3, 5),
+                                reason="Only testing API on Python 3.5")
 
 
 @pytest.fixture(scope='session')
