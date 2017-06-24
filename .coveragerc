@@ -4,6 +4,7 @@ branch = True
 source = mygeotab
 include =
     */mygeotab/*
+    */mygeotab/api.py
 omit =
     */python?.?/*
     */pypy?.?/*
