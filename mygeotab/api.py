@@ -167,9 +167,9 @@ class API(object):
                 server = self.credentials.server
                 if new_server != 'ThisServer':
                     server = new_server
-                c = result['credentials']
-                self.credentials = Credentials(c['userName'], c['sessionId'], c['database'],
-                                               server)
+                credentials = result['credentials']
+                self.credentials = Credentials(credentials['userName'], credentials['sessionId'],
+                                               credentials['database'], server)
                 return self.credentials
         except MyGeotabException as exception:
             if exception.name == 'InvalidUserException':
@@ -236,6 +236,7 @@ class MyGeotabException(Exception):
         self.name = main_error['name']
         self.message = main_error['message']
         self.stack_trace = main_error.get('stackTrace')
+        super(MyGeotabException, self).__init__(self.message)
 
     def __str__(self):
         error_str = '{0}\n{1}'.format(self.name, self.message)
@@ -256,8 +257,13 @@ class AuthenticationException(Exception):
         self.username = username
         self.database = database
         self.server = server
+        super(AuthenticationException, self).__init__(self.message)
 
     def __str__(self):
+        return self.message
+
+    @property
+    def message(self):
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
                                                               self.database)
 
@@ -287,13 +293,13 @@ def _query(api_endpoint, method, parameters, verify_ssl=True):
         'Content-type': 'application/json; charset=UTF-8',
         'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
     }
-    with requests.Session() as s:
-        s.mount('https://', GeotabHTTPAdapter())
-        r = s.post(api_endpoint,
-                   data=json.dumps(params,
-                                   default=serializers.object_serializer),
-                   headers=headers, allow_redirects=True, verify=verify_ssl)
-    return _process(r.json(object_hook=serializers.object_deserializer))
+    with requests.Session() as session:
+        session.mount('https://', GeotabHTTPAdapter())
+        response = session.post(api_endpoint,
+                                data=json.dumps(params,
+                                                default=serializers.object_serializer),
+                                headers=headers, allow_redirects=True, verify=verify_ssl)
+    return _process(response.json(object_hook=serializers.object_deserializer))
 
 
 def _process(data):

@@ -7,7 +7,7 @@ from dateutil import parser
 
 from mygeotab import dates
 
-datetime_regex = re.compile(r'^\d{4}\-\d{2}\-\d{2}')
+DATETIME_REGEX = re.compile(r'^\d{4}\-\d{2}\-\d{2}')
 
 
 def object_serializer(obj):
@@ -15,10 +15,10 @@ def object_serializer(obj):
 
 
 def object_deserializer(obj):
-    for k, v in obj.items():
-        if isinstance(v, six.string_types) and datetime_regex.search(v):
+    for key, val in obj.items():
+        if isinstance(val, six.string_types) and DATETIME_REGEX.search(val):
             try:
-                obj[k] = dates.localize_datetime(parser.parse(v))
+                obj[key] = dates.localize_datetime(parser.parse(val))
             except ValueError:
-                obj[k] = v
+                obj[key] = val
     return obj

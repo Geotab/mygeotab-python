@@ -11,11 +11,10 @@ import types
 
 import aiohttp
 
-import mygeotab
-import mygeotab.serializers
+from mygeotab import api, serializers, MyGeotabException
 
 
-class API(mygeotab.api.API):
+class API(api.API):
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True,
                  loop=None):
         """
@@ -44,19 +43,19 @@ class API(mygeotab.api.API):
         """
         if method is None:
             raise Exception('A method name must be specified')
-        params = mygeotab.api.process_parameters(parameters)
+        params = api.process_parameters(parameters)
         if self.credentials and not self.credentials.session_id:
             self.authenticate()
         if 'credentials' not in params and self.credentials.session_id:
             params['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query(mygeotab.api.get_api_url(self._server), method, params,
+            result = await _query(api.get_api_url(self._server), method, params,
                                   verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
-        except mygeotab.MyGeotabException as exception:
+        except MyGeotabException as exception:
             if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
                 self.__reauthorize_count += 1
                 self.authenticate()
@@ -124,7 +123,7 @@ class API(mygeotab.api.API):
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
     @staticmethod
-    def from_credentials(credentials, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
+    def from_credentials(credentials, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
         """
         Returns a new async API object from an existing Credentials object
 
@@ -137,12 +136,12 @@ class API(mygeotab.api.API):
                    server=credentials.server, loop=loop)
 
 
-def run(*tasks: types.CoroutineType, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
+def run(*tasks: types.CoroutineType, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-async def server_call(method, server, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), verify=True,
+async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), verify=True,
                       **parameters):
     """
     Makes an asynchronous call to an un-authenticated method on a server
@@ -159,11 +158,11 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop = asyncio.
         raise Exception("A method name must be specified")
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
-    parameters = mygeotab.api.process_parameters(parameters)
-    return await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
+    parameters = api.process_parameters(parameters)
+    return await _query(api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
 
 
-async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop = None):
+async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop=None):
     """
     Formats and performs the asynchronous query against the API
 
@@ -182,10 +181,10 @@ async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asynci
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
-        r = await session.post(api_endpoint,
-                               data=json.dumps(params,
-                                               default=mygeotab.serializers.object_serializer),
-                               headers=headers,
-                               allow_redirects=True)
-        body = await r.text()
-    return mygeotab.api._process(json.loads(body, object_hook=mygeotab.serializers.object_deserializer))
+        response = await session.post(api_endpoint,
+                                      data=json.dumps(params,
+                                                      default=serializers.object_serializer),
+                                      headers=headers,
+                                      allow_redirects=True)
+        body = await response.text()
+    return api._process(json.loads(body, object_hook=serializers.object_deserializer))

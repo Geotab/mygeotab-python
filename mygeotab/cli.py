@@ -94,7 +94,7 @@ class Session(object):
     def login(self, username, password=None, database=None, server=None):
         if server:
             api = mygeotab.API(username=username, password=password, database=database,
-                                   server=server)
+                               server=server)
         else:
             api = mygeotab.API(username=username, password=password, database=database)
         self.credentials = api.authenticate()
@@ -128,9 +128,9 @@ def login(session, user, password, database=None, server=None):
     if not password:
         password = click.prompt("Password", hide_input=True, type=str)
     try:
-        with click.progressbar(length=1, label="Logging in...") as bar:
+        with click.progressbar(length=1, label="Logging in...") as progressbar:
             session.login(user, password, database, server)
-            bar.update(1)
+            progressbar.update(1)
         if session.credentials:
             click.echo('Logged in as: %s' % session.credentials)
             session.load(database)
@@ -149,7 +149,7 @@ def sessions(session):
     :param session: The current Session object
     """
     active_sessions = session.get_sessions()
-    if len(active_sessions) == 0:
+    if not active_sessions:
         click.echo('(No active sessions)')
         return
     for active_session in active_sessions:
