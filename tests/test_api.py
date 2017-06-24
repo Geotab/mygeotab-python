@@ -168,7 +168,7 @@ class TestCallApi:
         assert len(count_users) == len(users)
 
     def test_api_from_credentials(self, populated_api):
-        new_api = api.from_credentials(populated_api.credentials)
+        new_api = api.API.from_credentials(populated_api.credentials)
         users = new_api.get('User')
         assert len(users) >= 1
 
@@ -180,7 +180,7 @@ class TestCallApi:
         credentials = populated_api.credentials
         credentials.password = PASSWORD
         credentials.session_id = 'abc123'
-        test_api = api.from_credentials(credentials)
+        test_api = api.API.from_credentials(credentials)
         users = test_api.get('User')
         assert len(users) >= 1
 

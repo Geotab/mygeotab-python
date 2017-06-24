@@ -41,7 +41,7 @@ coverage.xml
 
 # IDEs
 .idea/
-.vscode/
+.vscode/tags
 docs/_build/
 
 # Mac

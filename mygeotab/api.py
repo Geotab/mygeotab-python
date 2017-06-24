@@ -13,8 +13,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
 from six.moves.urllib.parse import urlparse
 
-import mygeotab.serializers
-from . import __title__, __version__
+from . import __title__, __version__, serializers
 
 try:
     urllib3.disable_warnings()
@@ -194,6 +193,18 @@ class API(object):
                                               self.credentials.server)
             raise
 
+    @staticmethod
+    def from_credentials(credentials):
+        """
+        Returns a new API object from an existing Credentials object
+
+        :param credentials: The existing saved credentials
+        :return: A new API object populated with MyGeotab credentials
+        """
+        return API(username=credentials.username, password=credentials.password,
+                   database=credentials.database, session_id=credentials.session_id,
+                   server=credentials.server)
+
 
 class Credentials(object):
     def __init__(self, username, session_id, database, server, password=None):
@@ -295,9 +306,9 @@ def _query(api_endpoint, method, parameters, verify_ssl=True):
         s.mount('https://', GeotabHTTPAdapter())
         r = s.post(api_endpoint,
                    data=json.dumps(params,
-                                   default=mygeotab.serializers.object_serializer),
+                                   default=serializers.object_serializer),
                    headers=headers, allow_redirects=True, verify=verify_ssl)
-    return _process(r.json(object_hook=mygeotab.serializers.object_deserializer))
+    return _process(r.json(object_hook=serializers.object_deserializer))
 
 
 def _process(data):
@@ -314,18 +325,6 @@ def _process(data):
         if 'result' in data:
             return data['result']
     return data
-
-
-def from_credentials(credentials):
-    """
-    Returns a new API object from an existing Credentials object
-
-    :param credentials: The existing saved credentials
-    :return: A new API object populated with MyGeotab credentials
-    """
-    return API(username=credentials.username, password=credentials.password,
-               database=credentials.database, session_id=credentials.session_id,
-               server=credentials.server)
 
 
 def server_call(method, server, **parameters):

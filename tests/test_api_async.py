@@ -7,7 +7,7 @@ import sys
 import warnings
 
 from mygeotab import AuthenticationException, MyGeotabException
-from mygeotab.ext.async import API, run, from_credentials, server_call
+from mygeotab.async.api import API, run, server_call
 from tests.test_api import populated_api, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 USERNAME = os.environ.get('MYGEOTAB_USERNAME_ASYNC', USERNAME)
@@ -97,7 +97,7 @@ class TestAsyncCallApi:
         assert len(count_users[0]) == len(users)
 
     def test_api_from_credentials(self, async_populated_api):
-        new_api = from_credentials(async_populated_api.credentials, loop=async_populated_api.loop)
+        new_api = API.from_credentials(async_populated_api.credentials, loop=async_populated_api.loop)
         users = run(new_api.get_async('User'), loop=async_populated_api.loop)
         assert len(users) >= 1
 
@@ -109,7 +109,7 @@ class TestAsyncCallApi:
         credentials = async_populated_api.credentials
         credentials.password = PASSWORD
         credentials.session_id = 'abc123'
-        test_api = from_credentials(credentials, loop=async_populated_api.loop)
+        test_api = API.from_credentials(credentials, loop=async_populated_api.loop)
         users = run(test_api.get_async('User'), loop=async_populated_api.loop)
         assert len(users) >= 1
 

@@ -75,7 +75,7 @@ class Session(object):
             session_id = config.get(section_name, 'session_id')
             database = config.get(section_name, 'database')
             server = config.get(section_name, 'server')
-            self.credentials = mygeotab.api.Credentials(username, session_id, database, server)
+            self.credentials = mygeotab.Credentials(username, session_id, database, server)
         except configparser.NoSectionError:
             self.credentials = None
         except configparser.NoOptionError:
@@ -88,15 +88,15 @@ class Session(object):
 
     def get_api(self):
         if self.credentials:
-            return mygeotab.api.from_credentials(self.credentials)
+            return mygeotab.API.from_credentials(self.credentials)
         return None
 
     def login(self, username, password=None, database=None, server=None):
         if server:
-            api = mygeotab.api.API(username=username, password=password, database=database,
+            api = mygeotab.API(username=username, password=password, database=database,
                                    server=server)
         else:
-            api = mygeotab.api.API(username=username, password=password, database=database)
+            api = mygeotab.API(username=username, password=password, database=database)
         self.credentials = api.authenticate()
         self.save()
 
@@ -135,7 +135,7 @@ def login(session, user, password, database=None, server=None):
             click.echo('Logged in as: %s' % session.credentials)
             session.load(database)
         return session.get_api()
-    except mygeotab.api.AuthenticationException:
+    except mygeotab.AuthenticationException:
         click.echo('Incorrect credentials. Please try again.')
         sys.exit(0)
 
@@ -231,7 +231,7 @@ def _populate_locals(database, password, server, session, user):
         api = login(session, user, password, database, server)
     try:
         api.get('User', name=session.credentials.username)
-    except mygeotab.api.AuthenticationException:
+    except mygeotab.AuthenticationException:
         # Credentials expired, try logging in again
         click.echo('Your session has expired. Please login again.')
         api = login(session, user, password, database, server)

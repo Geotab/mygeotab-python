@@ -14,11 +14,10 @@ import warnings
 import aiohttp
 
 import mygeotab
-import mygeotab.api
 import mygeotab.serializers
 
 
-class API(mygeotab.API):
+class API(mygeotab.api.API):
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True,
                  loop=None):
         """
@@ -140,23 +139,23 @@ class API(mygeotab.API):
         """
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
+    @staticmethod
+    def from_credentials(credentials, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
+        """
+        Returns a new async API object from an existing Credentials object
 
-def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
+        :param credentials: The existing saved credentials
+        :param loop: The asyncio loop
+        :return: A new API object populated with MyGeotab credentials
+        """
+        return API(username=credentials.username, password=credentials.password,
+                   database=credentials.database, session_id=credentials.session_id,
+                   server=credentials.server, loop=loop)
+
+
+def run(*tasks: types.CoroutineType, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
-
-
-def from_credentials(credentials, loop: asyncio.AbstractEventLoop = None):
-    """
-    Returns a new async API object from an existing Credentials object
-
-    :param credentials: The existing saved credentials
-    :param loop: The asyncio loop
-    :return: A new API object populated with MyGeotab credentials
-    """
-    return API(username=credentials.username, password=credentials.password,
-               database=credentials.database, session_id=credentials.session_id,
-               server=credentials.server, loop=loop)
 
 
 async def server_call(method, server, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), verify=True,
