@@ -3,12 +3,15 @@
 Changes
 -------
 
-0.5.5 (TBD)
+0.6.0 (TBD)
 +++++++++++
 
 **Improvements**
 
-- Removed `run` command from the CLI
+- Removed `run` command from the CLI.
+- Removed deprecated `API.search` and `API.search_async` methods.
+- Refactored setup.py for async API. The async methods are now automatically a part of the `API` object if using Python 3.5 or higher
+- Code linting and cleanup
 
 
 0.5.4 (2017-06-05)
