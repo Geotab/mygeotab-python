@@ -7,9 +7,7 @@ if sys.version_info < (3, 5):
 import asyncio
 import json
 import ssl
-import typing
 import types
-import warnings
 
 import aiohttp
 
@@ -93,20 +91,6 @@ class API(mygeotab.api.API):
                 parameters.update(parameters['search'])
             parameters = dict(search=parameters, resultsLimit=results_limit)
         return await self.call_async('Get', type_name=type_name, **parameters)
-
-    async def search_async(self, type_name, **parameters):
-        """
-        Searches for entities asynchronously using the API. Shortcut for using async_get() with a search.
-
-        :param type_name: The type of entity
-        :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("'search_async()' is deprecated. Use 'get_async()' instead", DeprecationWarning, stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # turn off filter
-        return await self.get_async(type_name, **parameters)
 
     async def add_async(self, type_name, entity):
         """

@@ -4,7 +4,6 @@ import pytest
 asyncio = pytest.importorskip("asyncio")
 import os
 import sys
-import warnings
 
 from mygeotab import AuthenticationException, MyGeotabException
 from mygeotab.async.api import API, run, server_call
@@ -56,18 +55,6 @@ class TestAsyncCallApi:
 
     def test_get_user(self, async_populated_api):
         user = run(async_populated_api.get_async('User', name=USERNAME), loop=async_populated_api.loop)
-        assert len(user) == 1
-        assert len(user[0]) == 1
-        user = user[0][0]
-        assert user['name'] == USERNAME
-
-    def test_get_user_search(self, async_populated_api):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            user = run(async_populated_api.search_async('User', name=USERNAME), loop=async_populated_api.loop)
-        assert len(w) == 1
-        assert issubclass(w[-1].category, DeprecationWarning)
-        assert 'search_async()' in str(w[-1].message)
         assert len(user) == 1
         assert len(user[0]) == 1
         user = user[0][0]

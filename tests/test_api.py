@@ -2,7 +2,6 @@
 
 import os
 import sys
-import warnings
 
 import pytest
 
@@ -132,17 +131,6 @@ class TestCallApi:
 
     def test_get_user(self, populated_api):
         user = populated_api.get('User', name=USERNAME)
-        assert len(user) == 1
-        user = user[0]
-        assert user['name'] == USERNAME
-
-    def test_get_user_search(self, populated_api):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            user = populated_api.search('User', name='{0}'.format(USERNAME))
-        assert len(w) == 1
-        assert issubclass(w[-1].category, DeprecationWarning)
-        assert 'search()' in str(w[-1].message)
         assert len(user) == 1
         user = user[0]
         assert user['name'] == USERNAME
