@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import re
 import ast
+import re
+import sys
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
@@ -20,6 +21,13 @@ except IOError:
     readme = ''
     changelog = ''
 
+py_version = sys.version_info[:2]
+
+packages = ['mygeotab', 'mygeotab/ext']
+
+if py_version >= (3, 5):
+    packages.append('mygeotab/async')
+
 setup(
     name='mygeotab',
     author='Aaron Toth',
@@ -29,13 +37,12 @@ setup(
     long_description=readme + '\n\n' + changelog,
     extras_require={
         'console': ['ipython'],
-        'async': ['aiohttp']
+        ":python_version>='3.5'": ["aiohttp"],
     },
     test_suite="tests",
     include_package_data=True,
-    packages=find_packages(),
+    packages=packages,
     package_data={'': ['LICENSE']},
-    package_dir={'mygeotab': 'mygeotab'},
     license='Apache 2.0',
     install_requires=[
         'requests',

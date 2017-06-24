@@ -1,0 +1,6 @@
+include LICENSE
+
+graft docs
+graft examples
+graft mygeotab
+graft tests

@@ -6,15 +6,13 @@ import copy
 import json
 import re
 import ssl
-import warnings
 
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
 from six.moves.urllib.parse import urlparse
 
-import mygeotab.serializers
-from . import __title__, __version__
+from . import __title__, __version__, serializers
 
 try:
     urllib3.disable_warnings()
@@ -119,20 +117,6 @@ class API(object):
             parameters = dict(search=parameters, resultsLimit=results_limit)
         return self.call('Get', type_name=type_name, **parameters)
 
-    def search(self, type_name, **parameters):
-        """
-        Searches for entities using the API. Shortcut for using get() with a search.
-
-        :param type_name: The type of entity
-        :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("'search()' is deprecated. Use 'get()' instead", DeprecationWarning, stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # turn off filter
-        return self.get(type_name=type_name, **parameters)
-
     def add(self, type_name, entity):
         """
         Adds an entity using the API. Shortcut for using call() with the 'Add' method.
@@ -183,9 +167,9 @@ class API(object):
                 server = self.credentials.server
                 if new_server != 'ThisServer':
                     server = new_server
-                c = result['credentials']
-                self.credentials = Credentials(c['userName'], c['sessionId'], c['database'],
-                                               server)
+                credentials = result['credentials']
+                self.credentials = Credentials(credentials['userName'], credentials['sessionId'],
+                                               credentials['database'], server)
                 return self.credentials
         except MyGeotabException as exception:
             if exception.name == 'InvalidUserException':
@@ -193,6 +177,18 @@ class API(object):
                                               self.credentials.database,
                                               self.credentials.server)
             raise
+
+    @staticmethod
+    def from_credentials(credentials):
+        """
+        Returns a new API object from an existing Credentials object
+
+        :param credentials: The existing saved credentials
+        :return: A new API object populated with MyGeotab credentials
+        """
+        return API(username=credentials.username, password=credentials.password,
+                   database=credentials.database, session_id=credentials.session_id,
+                   server=credentials.server)
 
 
 class Credentials(object):
@@ -240,6 +236,7 @@ class MyGeotabException(Exception):
         self.name = main_error['name']
         self.message = main_error['message']
         self.stack_trace = main_error.get('stackTrace')
+        super(MyGeotabException, self).__init__(self.message)
 
     def __str__(self):
         error_str = '{0}\n{1}'.format(self.name, self.message)
@@ -260,8 +257,13 @@ class AuthenticationException(Exception):
         self.username = username
         self.database = database
         self.server = server
+        super(AuthenticationException, self).__init__(self.message)
 
     def __str__(self):
+        return self.message
+
+    @property
+    def message(self):
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
                                                               self.database)
 
@@ -291,13 +293,13 @@ def _query(api_endpoint, method, parameters, verify_ssl=True):
         'Content-type': 'application/json; charset=UTF-8',
         'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
     }
-    with requests.Session() as s:
-        s.mount('https://', GeotabHTTPAdapter())
-        r = s.post(api_endpoint,
-                   data=json.dumps(params,
-                                   default=mygeotab.serializers.object_serializer),
-                   headers=headers, allow_redirects=True, verify=verify_ssl)
-    return _process(r.json(object_hook=mygeotab.serializers.object_deserializer))
+    with requests.Session() as session:
+        session.mount('https://', GeotabHTTPAdapter())
+        response = session.post(api_endpoint,
+                                data=json.dumps(params,
+                                                default=serializers.object_serializer),
+                                headers=headers, allow_redirects=True, verify=verify_ssl)
+    return _process(response.json(object_hook=serializers.object_deserializer))
 
 
 def _process(data):
@@ -314,18 +316,6 @@ def _process(data):
         if 'result' in data:
             return data['result']
     return data
-
-
-def from_credentials(credentials):
-    """
-    Returns a new API object from an existing Credentials object
-
-    :param credentials: The existing saved credentials
-    :return: A new API object populated with MyGeotab credentials
-    """
-    return API(username=credentials.username, password=credentials.password,
-               database=credentials.database, session_id=credentials.session_id,
-               server=credentials.server)
 
 
 def server_call(method, server, **parameters):

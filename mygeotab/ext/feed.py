@@ -72,14 +72,14 @@ class DataFeed(object):
             sleep(self.interval)
         self.running = False
 
-    def start(self, async=True):
+    def start(self, threaded=True):
         """
         Start the Data Feed
 
-        :param async: If True, run in a separate thread
+        :param threaded: If True, run in a separate thread
         """
         self.running = True
-        if async:
+        if threaded:
             self._thread = Thread(target=self._run)
             self._thread.start()
         else:

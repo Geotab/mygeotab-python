@@ -1,0 +1,18 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "python.linting.mypyEnabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.unitTest.pyTestEnabled": true,
+    "files.exclude": {
+        "**/*.pyc": { "when": "$(basename).py"},
+        "**/*.egg-info": true,
+        "**/__pycache__": true,
+        "**/.tox": true,
+        "**/build": true,
+        "**/.cache": true,
+        "**/.mypy_cache": true
+    },
+    "python.unitTest.promptToConfigure": false,
+    "python.unitTest.unittestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false
+}

@@ -7,18 +7,14 @@ if sys.version_info < (3, 5):
 import asyncio
 import json
 import ssl
-import typing
 import types
-import warnings
 
 import aiohttp
 
-import mygeotab
-import mygeotab.api
-import mygeotab.serializers
+from mygeotab import api, serializers, MyGeotabException
 
 
-class API(mygeotab.API):
+class API(api.API):
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True,
                  loop=None):
         """
@@ -47,19 +43,19 @@ class API(mygeotab.API):
         """
         if method is None:
             raise Exception('A method name must be specified')
-        params = mygeotab.api.process_parameters(parameters)
+        params = api.process_parameters(parameters)
         if self.credentials and not self.credentials.session_id:
             self.authenticate()
         if 'credentials' not in params and self.credentials.session_id:
             params['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query(mygeotab.api.get_api_url(self._server), method, params,
+            result = await _query(api.get_api_url(self._server), method, params,
                                   verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
-        except mygeotab.MyGeotabException as exception:
+        except MyGeotabException as exception:
             if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
                 self.__reauthorize_count += 1
                 self.authenticate()
@@ -95,20 +91,6 @@ class API(mygeotab.API):
             parameters = dict(search=parameters, resultsLimit=results_limit)
         return await self.call_async('Get', type_name=type_name, **parameters)
 
-    async def search_async(self, type_name, **parameters):
-        """
-        Searches for entities asynchronously using the API. Shortcut for using async_get() with a search.
-
-        :param type_name: The type of entity
-        :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("'search_async()' is deprecated. Use 'get_async()' instead", DeprecationWarning, stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # turn off filter
-        return await self.get_async(type_name, **parameters)
-
     async def add_async(self, type_name, entity):
         """
         Adds an entity asynchronously using the API. Shortcut for using async_call() with the 'Add' method.
@@ -140,26 +122,26 @@ class API(mygeotab.API):
         """
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
+    @staticmethod
+    def from_credentials(credentials, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
+        """
+        Returns a new async API object from an existing Credentials object
 
-def run(*tasks: typing.List[types.CoroutineType], loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()):
+        :param credentials: The existing saved credentials
+        :param loop: The asyncio loop
+        :return: A new API object populated with MyGeotab credentials
+        """
+        return API(username=credentials.username, password=credentials.password,
+                   database=credentials.database, session_id=credentials.session_id,
+                   server=credentials.server, loop=loop)
+
+
+def run(*tasks: types.CoroutineType, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-def from_credentials(credentials, loop: asyncio.AbstractEventLoop = None):
-    """
-    Returns a new async API object from an existing Credentials object
-
-    :param credentials: The existing saved credentials
-    :param loop: The asyncio loop
-    :return: A new API object populated with MyGeotab credentials
-    """
-    return API(username=credentials.username, password=credentials.password,
-               database=credentials.database, session_id=credentials.session_id,
-               server=credentials.server, loop=loop)
-
-
-async def server_call(method, server, loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), verify=True,
+async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), verify=True,
                       **parameters):
     """
     Makes an asynchronous call to an un-authenticated method on a server
@@ -176,11 +158,11 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop = asyncio.
         raise Exception("A method name must be specified")
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
-    parameters = mygeotab.api.process_parameters(parameters)
-    return await _query(mygeotab.api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
+    parameters = api.process_parameters(parameters)
+    return await _query(api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
 
 
-async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop = None):
+async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop=None):
     """
     Formats and performs the asynchronous query against the API
 
@@ -199,10 +181,10 @@ async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asynci
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
-        r = await session.post(api_endpoint,
-                               data=json.dumps(params,
-                                               default=mygeotab.serializers.object_serializer),
-                               headers=headers,
-                               allow_redirects=True)
-        body = await r.text()
-    return mygeotab.api._process(json.loads(body, object_hook=mygeotab.serializers.object_deserializer))
+        response = await session.post(api_endpoint,
+                                      data=json.dumps(params,
+                                                      default=serializers.object_serializer),
+                                      headers=headers,
+                                      allow_redirects=True)
+        body = await response.text()
+    return api._process(json.loads(body, object_hook=serializers.object_deserializer))

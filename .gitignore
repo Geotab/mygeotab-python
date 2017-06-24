@@ -41,7 +41,9 @@ coverage.xml
 
 # IDEs
 .idea/
-.vscode/
+.vscode/tags
+.vscode/.ropeproject
+.mypy_cache
 docs/_build/
 
 # Mac

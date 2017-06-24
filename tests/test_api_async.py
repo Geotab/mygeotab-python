@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+
 asyncio = pytest.importorskip("asyncio")
 import os
 import sys
-import warnings
 
 from mygeotab import AuthenticationException, MyGeotabException
-from mygeotab.ext.async import API, run, from_credentials, server_call
-from tests.test_api import populated_api, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+from mygeotab.async.api import API, run, server_call
+from tests.test_api import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 USERNAME = os.environ.get('MYGEOTAB_USERNAME_ASYNC', USERNAME)
 PASSWORD = os.environ.get('MYGEOTAB_PASSWORD_ASYNC', PASSWORD)
 
 pytestmark = pytest.mark.skipif(sys.version_info < (3, 5),
                                 reason="Only testing API on Python 3.5")
+
 
 @pytest.fixture(scope='session')
 def async_populated_api():
@@ -42,6 +43,7 @@ def async_populated_api_entity(async_populated_api):
                 async_populated_api.remove('Trailer', trailer)
         except Exception:
             pass
+
     clean_trailers()
     yield async_populated_api
     clean_trailers()
@@ -56,18 +58,6 @@ class TestAsyncCallApi:
 
     def test_get_user(self, async_populated_api):
         user = run(async_populated_api.get_async('User', name=USERNAME), loop=async_populated_api.loop)
-        assert len(user) == 1
-        assert len(user[0]) == 1
-        user = user[0][0]
-        assert user['name'] == USERNAME
-
-    def test_get_user_search(self, async_populated_api):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            user = run(async_populated_api.search_async('User', name=USERNAME), loop=async_populated_api.loop)
-        assert len(w) == 1
-        assert issubclass(w[-1].category, DeprecationWarning)
-        assert 'search_async()' in str(w[-1].message)
         assert len(user) == 1
         assert len(user[0]) == 1
         user = user[0][0]
@@ -97,7 +87,7 @@ class TestAsyncCallApi:
         assert len(count_users[0]) == len(users)
 
     def test_api_from_credentials(self, async_populated_api):
-        new_api = from_credentials(async_populated_api.credentials, loop=async_populated_api.loop)
+        new_api = API.from_credentials(async_populated_api.credentials, loop=async_populated_api.loop)
         users = run(new_api.get_async('User'), loop=async_populated_api.loop)
         assert len(users) >= 1
 
@@ -109,7 +99,7 @@ class TestAsyncCallApi:
         credentials = async_populated_api.credentials
         credentials.password = PASSWORD
         credentials.session_id = 'abc123'
-        test_api = from_credentials(credentials, loop=async_populated_api.loop)
+        test_api = API.from_credentials(credentials, loop=async_populated_api.loop)
         users = run(test_api.get_async('User'), loop=async_populated_api.loop)
         assert len(users) >= 1
 
@@ -126,7 +116,8 @@ class TestAsyncCallApi:
 
     def test_bad_parameters(self, async_populated_api):
         with pytest.raises(MyGeotabException) as excinfo:
-            run(async_populated_api.call_async('NonExistentMethod', not_a_property='abc123'), loop=async_populated_api.loop)
+            run(async_populated_api.call_async('NonExistentMethod', not_a_property='abc123'),
+                loop=async_populated_api.loop)
         assert 'NonExistentMethod' in str(excinfo.value)
 
     def test_get_search_parameter(self, async_populated_api):
@@ -138,10 +129,12 @@ class TestAsyncCallApi:
 
     def test_add_edit_remove(self, async_populated_api_entity):
         def get_trailer():
-            trailers = run(async_populated_api_entity.get_async('Trailer', name=TRAILER_NAME), loop=async_populated_api_entity.loop)
+            trailers = run(async_populated_api_entity.get_async('Trailer', name=TRAILER_NAME),
+                           loop=async_populated_api_entity.loop)
             assert len(trailers) == 1
             assert len(trailers[0]) == 1
             return trailers[0][0]
+
         user = async_populated_api_entity.get('User', name=USERNAME)[0]
         trailer = {
             'name': TRAILER_NAME,
@@ -158,7 +151,8 @@ class TestAsyncCallApi:
         trailer = get_trailer()
         assert trailer['comment'] == comment
         run(async_populated_api_entity.remove_async('Trailer', trailer), loop=async_populated_api_entity.loop)
-        trailers = run(async_populated_api_entity.get_async('Trailer', name=TRAILER_NAME), loop=async_populated_api_entity.loop)
+        trailers = run(async_populated_api_entity.get_async('Trailer', name=TRAILER_NAME),
+                       loop=async_populated_api_entity.loop)
         assert len(trailers) == 1
         assert len(trailers[0]) == 0
 
