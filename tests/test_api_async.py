@@ -8,7 +8,7 @@ import sys
 
 from mygeotab import AuthenticationException, MyGeotabException
 from mygeotab.async.api import API, run, server_call
-from tests.test_api import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 USERNAME = os.environ.get('MYGEOTAB_USERNAME_ASYNC', USERNAME)
 PASSWORD = os.environ.get('MYGEOTAB_PASSWORD_ASYNC', PASSWORD)
