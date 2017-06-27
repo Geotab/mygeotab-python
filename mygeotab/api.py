@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+mygeotab.api
+~~~~~~~~~~~~
+
+Public objects and methods wrapping the MyGeotab API.
+"""
+
 from __future__ import unicode_literals
 
 import copy
@@ -13,11 +20,6 @@ from requests.packages import urllib3
 from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__, serializers
-
-try:
-    urllib3.disable_warnings()
-except:
-    pass
 
 
 class API(object):

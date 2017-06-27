@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+mygeotab.async.api
+~~~~~~~~~~~~~~~~~~
+
+Async/Await-able (Python 3.5+) public objects and methods wrapping the MyGeotab API.
+"""
+
 import sys
 
 if sys.version_info < (3, 5):
@@ -7,7 +14,7 @@ if sys.version_info < (3, 5):
 import asyncio
 import json
 import ssl
-import types
+from typing import Awaitable
 
 import aiohttp
 
@@ -136,7 +143,7 @@ class API(api.API):
                    server=credentials.server, loop=loop)
 
 
-def run(*tasks: types.CoroutineType, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
+def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 

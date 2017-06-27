@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 
+"""
+mygeotab.ext.feed
+~~~~~~~~~~~~~~~~~
+
+A simple data feed wrapper, written as an extension to the MyGeotab API object.
+"""
+
 import abc
 
 from threading import Thread
 from time import sleep
+
+from mygeotab import api
 
 
 class DataFeedListener(object):
@@ -64,7 +73,7 @@ class DataFeed(object):
                                        from_version=self._version, results_limit=self.results_limit)
                 self._version = result['toVersion']
                 self.listener.on_data(result['data'])
-            except Exception as e:
+            except api.MyGeotabException  as e:
                 if self.listener.on_error(e) is False:
                     break
             if not self.running:

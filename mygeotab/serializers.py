@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+mygeotab.serializers
+~~~~~~~~~~~~~~~~~~~~
+
+JSON serialization and deserialization helper objects for the MyGeotab API.
+"""
+
 import re
 
 import six

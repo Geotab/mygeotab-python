@@ -1,31 +1,38 @@
 # -*- coding: utf-8 -*-
 
+"""
+mygeotab.dates
+~~~~~~~~~~~~~~
+
+Date helper objects for timezone shifting and date formatting for the MyGeotab API.
+"""
+
 from datetime import datetime
 
 import pytz
 
 
-def format_iso_datetime(dt):
+def format_iso_datetime(datetime_obj):
     """
     Formats the given datetime as a UTC-zoned ISO 8601 date string
 
-    :param dt: The datetime object
+    :param datetime_obj: The datetime object
     :return: The datetime object in 8601 string form
     """
-    dt = localize_datetime(dt, pytz.utc)
-    return dt.replace(tzinfo=None).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    datetime_obj = localize_datetime(datetime_obj, pytz.utc)
+    return datetime_obj.replace(tzinfo=None).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 
-def localize_datetime(dt, tz=pytz.utc):
+def localize_datetime(datetime_obj, tz=pytz.utc):
     """
     Converts a naive or UTC-localized date into the provided timezone
 
     :rtype: datetime
-    :param dt: The datetime object
+    :param datetime_obj: The datetime object
     :param tz: The timezone. If blank or None, UTC is used
     :return: The localized datetime object
     """
-    if not dt.tzinfo:
-        return tz.localize(dt)
+    if not datetime_obj.tzinfo:
+        return tz.localize(datetime_obj)
     else:
-        return dt.astimezone(tz)
+        return datetime_obj.astimezone(tz)

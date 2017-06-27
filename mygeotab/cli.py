@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+mygeotab.cli
+~~~~~~~~~~~~
+
+Console utilities for working with the MyGeotab API.
+"""
+
 import os.path
 
 try:
