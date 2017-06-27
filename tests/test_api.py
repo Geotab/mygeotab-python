@@ -55,8 +55,6 @@ class TestAttributes:
         assert my_api._is_verify_ssl is False
         my_api = api.API('test@example.com', session_id=123, server='localhost')
         assert my_api._is_verify_ssl is False
-        my_api = api.API('test@example.com', session_id=123, server='my3.geotab.com', verify=False)
-        assert my_api._is_verify_ssl is False
 
 
 class TestProcessParameters:
