@@ -19,11 +19,12 @@ from typing import Awaitable
 import aiohttp
 
 from mygeotab import api, serializers, MyGeotabException
+from mygeotab.api import DEFAULT_TIMEOUT
 
 
 class API(api.API):
-    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com', verify=True,
-                 loop=None):
+    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com',
+                 timeout=DEFAULT_TIMEOUT, loop=None):
         """
         Creates a new instance of this simple asynchronous Pythonic wrapper for the MyGeotab API.
 
@@ -32,12 +33,12 @@ class API(api.API):
         :param database: The database or company name. Optional as this usually gets resolved upon authentication.
         :param session_id: A session ID, assigned by the server.
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
-        :param verify: If True, verify SSL certificate. It's recommended not to modify this.
+        :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
         :param loop: The asyncio event loop
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         self.loop = loop
-        super().__init__(username, password, database, session_id, server, verify)
+        super().__init__(username, password, database, session_id, server, timeout)
 
     async def call_async(self, method, **parameters):
         """
@@ -148,15 +149,16 @@ def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loo
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), verify=True,
-                      **parameters):
+async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), timeout=DEFAULT_TIMEOUT,
+                      verify_ssl=True, **parameters):
     """
     Makes an asynchronous call to an un-authenticated method on a server
 
     :param method: The method name
     :param server: The MyGeotab server
     :param loop: The asyncio loop
-    :param verify: If True, verify SSL certificate. It's recommended not to modify this.
+    :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+    :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
     :return: The JSON result (decoded into a dict) from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
@@ -166,16 +168,18 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.ge
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = api.process_parameters(parameters)
-    return await _query(api.get_api_url(server), method, parameters, verify_ssl=verify, loop=loop)
+    return await _query(api.get_api_url(server), method, parameters, timeout=timeout, verify_ssl=verify_ssl, loop=loop)
 
 
-async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asyncio.AbstractEventLoop=None):
+async def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
+                 loop: asyncio.AbstractEventLoop=None):
     """
     Formats and performs the asynchronous query against the API
 
     :param api_endpoint: The API endpoint to query
     :param method: The method name.
     :param parameters: A dict of parameters to send
+    :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
     :param verify_ssl: Whether or not to verify SSL connections
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
@@ -187,7 +191,7 @@ async def _query(api_endpoint, method, parameters, verify_ssl=True, loop: asynci
     if verify_ssl:
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
-    async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
+    async with aiohttp.ClientSession(connector=conn, read_timeout=timeout, loop=loop) as session:
         response = await session.post(api_endpoint,
                                       data=json.dumps(params,
                                                       default=serializers.object_serializer),
