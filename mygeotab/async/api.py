@@ -191,11 +191,12 @@ async def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, veri
     if verify_ssl:
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
-    async with aiohttp.ClientSession(connector=conn, read_timeout=timeout, loop=loop) as session:
+    async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         response = await session.post(api_endpoint,
                                       data=json.dumps(params,
                                                       default=serializers.object_serializer),
                                       headers=headers,
+                                      timeout=timeout,
                                       allow_redirects=True)
         body = await response.text()
     return api._process(json.loads(body, object_hook=serializers.object_deserializer))
