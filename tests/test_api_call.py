@@ -6,6 +6,7 @@ import sys
 import pytest
 
 from mygeotab import api
+from mygeotab.exceptions import TimeoutException
 
 USERNAME = os.environ.get('MYGEOTAB_USERNAME')
 PASSWORD = os.environ.get('MYGEOTAB_PASSWORD')
@@ -189,3 +190,8 @@ class TestServerCallApi:
             api.server_call('GetVersion', None)
         assert 'method' in str(excinfo1.value)
         assert 'server' in str(excinfo2.value)
+
+    def test_timeout(self):
+        with pytest.raises(TimeoutException) as excinfo:
+            api.server_call('GetVersion', server='my36.geotab.com', timeout=0.01)
+        assert 'Request timed out @ my36.geotab.com' in str(excinfo.value)

@@ -14,19 +14,25 @@ if sys.version_info < (3, 5):
 import asyncio
 import json
 import ssl
+from concurrent.futures import TimeoutError
 from typing import Awaitable
 
 import aiohttp
 
-from mygeotab import api, serializers, MyGeotabException
+from mygeotab import api
 from mygeotab.api import DEFAULT_TIMEOUT
+from mygeotab.exceptions import MyGeotabException, TimeoutException
+from mygeotab.serializers import object_serializer, object_deserializer
 
 
 class API(api.API):
+    """A simple, asynchronous, and Pythonic wrapper for the MyGeotab API.
+    """
+
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com',
                  timeout=DEFAULT_TIMEOUT, loop=None):
         """
-        Creates a new instance of this simple asynchronous Pythonic wrapper for the MyGeotab API.
+        Initialize the asynchronous MyGeotab API object with credentials.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
         :param password: The password associated with the username. Optional if `session_id` is provided.
@@ -58,7 +64,7 @@ class API(api.API):
             params['credentials'] = self.credentials.get_param()
 
         try:
-            result = await _query(api.get_api_url(self._server), method, params,
+            result = await _query(self._server, method, params,
                                   verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
@@ -132,8 +138,7 @@ class API(api.API):
 
     @staticmethod
     def from_credentials(credentials, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
-        """
-        Returns a new async API object from an existing Credentials object
+        """Returns a new async API object from an existing Credentials object
 
         :param credentials: The existing saved credentials
         :param loop: The asyncio loop
@@ -145,6 +150,11 @@ class API(api.API):
 
 
 def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
+    """Helper to run tasks in the event loop
+    
+    :param tasks: Tasks to run in the event loop.
+    :param loop: The event loop.
+    """
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
@@ -168,15 +178,15 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.ge
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = api.process_parameters(parameters)
-    return await _query(api.get_api_url(server), method, parameters, timeout=timeout, verify_ssl=verify_ssl, loop=loop)
+    return await _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl, loop=loop)
 
 
-async def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
+async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
                  loop: asyncio.AbstractEventLoop=None):
     """
     Formats and performs the asynchronous query against the API
 
-    :param api_endpoint: The API endpoint to query
+    :param server: The server to query.
     :param method: The method name.
     :param parameters: A dict of parameters to send
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
@@ -184,6 +194,7 @@ async def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, veri
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
     """
+    api_endpoint = api.get_api_url(server)
     params = dict(id=-1, method=method, params=parameters)
     headers = {'Content-type': 'application/json; charset=UTF-8'}
     ssl_context = None
@@ -191,12 +202,15 @@ async def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, veri
     if verify_ssl:
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
-    async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
-        response = await session.post(api_endpoint,
-                                      data=json.dumps(params,
-                                                      default=serializers.object_serializer),
-                                      headers=headers,
-                                      timeout=timeout,
-                                      allow_redirects=True)
-        body = await response.text()
-    return api._process(json.loads(body, object_hook=serializers.object_deserializer))
+    try:
+        async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
+            response = await session.post(api_endpoint,
+                                          data=json.dumps(params,
+                                                          default=object_serializer),
+                                          headers=headers,
+                                          timeout=timeout,
+                                          allow_redirects=True)
+            body = await response.text()
+    except TimeoutError as ex:
+        raise TimeoutException(server)
+    return api._process(json.loads(body, object_hook=object_deserializer))

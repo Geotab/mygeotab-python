@@ -16,18 +16,24 @@ import ssl
 
 import requests
 from requests.adapters import HTTPAdapter
+from requests.exceptions import Timeout
 from requests.packages import urllib3
 from six.moves.urllib.parse import urlparse
 
-from . import __title__, __version__, serializers
+from . import __title__, __version__
+from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
+from .serializers import object_serializer, object_deserializer
 
 DEFAULT_TIMEOUT = 300
 
 class API(object):
+    """A simple and Pythonic wrapper for the MyGeotab API.
+    """
+
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com',
                  timeout=DEFAULT_TIMEOUT):
         """
-        Creates a new instance of this simple Pythonic wrapper for the MyGeotab API.
+        Initialize the MyGeotab API object with credentials.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
         :param password: The password associated with the username. Optional if `session_id` is provided.
@@ -79,7 +85,7 @@ class API(object):
             params['credentials'] = self.credentials.get_param()
 
         try:
-            result = _query(get_api_url(self._server), method, params, self.timeout, verify_ssl=self._is_verify_ssl)
+            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -163,7 +169,7 @@ class API(object):
                          password=self.credentials.password)
         auth_data['global'] = is_global
         try:
-            result = _query(get_api_url(self._server), 'Authenticate', auth_data, self.timeout,
+            result = _query(self._server, 'Authenticate', auth_data, self.timeout,
                             verify_ssl=self._is_verify_ssl)
             if result:
                 new_server = result['path']
@@ -195,9 +201,12 @@ class API(object):
 
 
 class Credentials(object):
+    """The MyGeotab Credentials object.
+    """
+
     def __init__(self, username, session_id, database, server, password=None):
         """
-        Creates a new instance of a MyGeotab credentials object
+        Initialize the Credentials object.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
         :param session_id: A session ID, assigned by the server.
@@ -227,51 +236,10 @@ class Credentials(object):
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
 
-class MyGeotabException(Exception):
-    def __init__(self, full_error):
-        """
-        Creates a Pythonic exception for server-side exceptions
-
-        :param full_error: The full JSON-decoded error
-        """
-        self._full_error = full_error
-        main_error = full_error['errors'][0]
-        self.name = main_error['name']
-        self.message = main_error['message']
-        self.stack_trace = main_error.get('stackTrace')
-        super(MyGeotabException, self).__init__(self.message)
-
-    def __str__(self):
-        error_str = '{0}\n{1}'.format(self.name, self.message)
-        if self.stack_trace:
-            error_str += '\n\nStacktrace:\n{0}'.format(self.stack_trace)
-        return error_str
-
-
-class AuthenticationException(Exception):
-    def __init__(self, username, database, server):
-        """
-        An exception raised on an unsuccessful authentication with the server
-
-        :param username: The username used for MyGeotab servers. Usually an email address.
-        :param database: The database or company name.
-        :param server: The server ie. my23.geotab.com.
-        """
-        self.username = username
-        self.database = database
-        self.server = server
-        super(AuthenticationException, self).__init__(self.message)
-
-    def __str__(self):
-        return self.message
-
-    @property
-    def message(self):
-        return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
-                                                              self.database)
-
-
 class GeotabHTTPAdapter(HTTPAdapter):
+    """HTTP adapter to force use of TLS 1.2 for HTTPS connections
+    """
+
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         self.poolmanager = urllib3.poolmanager.PoolManager(num_pools=connections,
                                                            maxsize=maxsize,
@@ -280,11 +248,11 @@ class GeotabHTTPAdapter(HTTPAdapter):
                                                            **pool_kwargs)
 
 
-def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
+def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
     """
     Formats and performs the query against the API
 
-    :param api_endpoint: The API endpoint to query
+    :param server: The server to query.
     :param method: The method name
     :param parameters: A dict of parameters to send
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
@@ -292,6 +260,7 @@ def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
     """
+    api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters or {})
     headers = {
         'Content-type': 'application/json; charset=UTF-8',
@@ -299,12 +268,15 @@ def _query(api_endpoint, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     }
     with requests.Session() as session:
         session.mount('https://', GeotabHTTPAdapter())
-        response = session.post(api_endpoint,
-                                data=json.dumps(params,
-                                                default=serializers.object_serializer),
-                                headers=headers, allow_redirects=True, timeout=timeout,
-                                verify=verify_ssl)
-    return _process(response.json(object_hook=serializers.object_deserializer))
+        try:
+            response = session.post(api_endpoint,
+                                    data=json.dumps(params,
+                                                    default=object_serializer),
+                                    headers=headers, allow_redirects=True, timeout=timeout,
+                                    verify=verify_ssl)
+        except Timeout as ex:
+            raise TimeoutException(server)
+    return _process(response.json(object_hook=object_deserializer))
 
 
 def _process(data):
@@ -340,7 +312,7 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = process_parameters(parameters)
-    return _query(get_api_url(server), method, parameters, timeout=timeout, verify_ssl=verify_ssl)
+    return _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl)
 
 
 def process_parameters(parameters):

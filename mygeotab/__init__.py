@@ -4,7 +4,8 @@ __title__ = 'mygeotab-python'
 __author__ = 'Aaron Toth'
 __version__ = '0.6.0'
 
-from .api import Credentials, MyGeotabException, AuthenticationException
+from .api import Credentials
+from .exceptions import MyGeotabException, AuthenticationException
 
 try:
     from .async.api import API
