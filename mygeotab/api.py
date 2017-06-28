@@ -35,11 +35,17 @@ class API(object):
         """Initialize the MyGeotab API object with credentials.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
+        :type username: str
         :param password: The password associated with the username. Optional if `session_id` is provided.
+        :type password: str
         :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+        :type database: str
         :param session_id: A session ID, assigned by the server.
+        :type session_id: str
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :type server: str or None
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+        :type timeout: float or None
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         if username is None:
@@ -69,10 +75,12 @@ class API(object):
         """Makes a call to the API.
 
         :param method: The method name.
+        :type method: str
         :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
-        :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: dict or list
         """
         if method is None:
             raise Exception('A method name must be specified')
@@ -99,9 +107,11 @@ class API(object):
 
         :param calls: A list of call 2-tuples with method name and params
                       (for example, ('Get', dict(typeName='Trip')) ).
-        :return: The JSON result (decoded into a dict) from the server.
+        :type calls: list((str, dict))
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: list
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return self.call('ExecuteMultiCall', calls=formatted_calls)
@@ -110,10 +120,12 @@ class API(object):
         """Gets entities using the API. Shortcut for using call() with the 'Get' method.
 
         :param type_name: The type of entity.
+        :type type_name: str
         :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: list
         """
         if parameters:
             results_limit = parameters.get('resultsLimit', None)
@@ -128,10 +140,13 @@ class API(object):
         """Adds an entity using the API. Shortcut for using call() with the 'Add' method.
 
         :param type_name: The type of entity.
+        :type type_name: str
         :param entity: The entity to add.
-        :return: The id of the object added.
+        :type entity: dict
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The id of the object added.
+        :rtype: str
         """
         return self.call('Add', type_name=type_name, entity=entity)
 
@@ -139,7 +154,9 @@ class API(object):
         """Sets an entity using the API. Shortcut for using call() with the 'Set' method.
 
         :param type_name: The type of entity.
+        :type type_name: str
         :param entity: The entity to set.
+        :type entity: dict
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
@@ -149,7 +166,9 @@ class API(object):
         """Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
 
         :param type_name: The type of entity.
+        :type type_name: str
         :param entity: The entity to remove.
+        :type entity: dict
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
@@ -159,10 +178,11 @@ class API(object):
         """Authenticates against the API server.
 
         :param is_global: If True, authenticate globally. Local login if False.
-        :return: A Credentials object with a session ID created by the server.
         :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: A Credentials object with a session ID created by the server.
+        :rtype: Credentials
         """
         auth_data = dict(database=self.credentials.database, userName=self.credentials.username,
                          password=self.credentials.password)
@@ -191,7 +211,9 @@ class API(object):
         """Returns a new API object from an existing Credentials object.
 
         :param credentials: The existing saved credentials.
+        :type credentials: Credentials
         :return: A new API object populated with MyGeotab credentials.
+        :rtype: API
         """
         return API(username=credentials.username, password=credentials.password,
                    database=credentials.database, session_id=credentials.session_id,
@@ -206,10 +228,15 @@ class Credentials(object):
         """Initialize the Credentials object.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
+        :type username: str
         :param session_id: A session ID, assigned by the server.
+        :type session_id: str
         :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+        :type database: str or None
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :type server: str or None
         :param password: The password associated with the username. Optional if `session_id` is provided.
+        :type password: str or None
         """
         self.username = username
         self.session_id = session_id
@@ -228,6 +255,7 @@ class Credentials(object):
         """A simple representation of the credentials object for passing into the API.authenticate() server call.
 
         :return: The simple credentials object for use by API.authenticate().
+        :rtype: dict
         """
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
@@ -247,14 +275,19 @@ class GeotabHTTPAdapter(HTTPAdapter):
 def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
     """Formats and performs the query against the API.
 
-    :param server: The server to query.
+    :param server: The MyGeotab server.
+    :type server: str
     :param method: The method name.
-    :param parameters: A dict of parameters to send.
+    :type method: str
+    :param parameters: The parameters to send with the query.
+    :type parameters: dict
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-    :param verify_ssl: Whether or not to verify SSL connections.
-    :return: The JSON-decoded result from the server.
+    :type timeout: float
+    :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
+    :type verify_ssl: bool
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
+    :return: The JSON-decoded result from the server.
     """
     api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters or {})
@@ -279,8 +312,8 @@ def _process(data):
     """Processes the returned JSON from the server.
 
     :param data: The JSON data in dict form.
-    :return: The result dict.
     :raise MyGeotabException: Raises when a server exception was encountered.
+    :return: The result data.
     """
     if data:
         if 'error' in data:
@@ -294,13 +327,17 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
     """Makes a call to an un-authenticated method on a server
 
     :param method: The method name.
+    :type method: str
     :param server: The MyGeotab server.
+    :type server: str
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+    :type timeout: float
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
+    :type verify_ssl: bool
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
-    :return: The JSON result (decoded into a dict) from the server.
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
+    :return: The result from the server.
     """
     if method is None:
         raise Exception("A method name must be specified")
@@ -313,8 +350,10 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
 def process_parameters(parameters):
     """Allows the use of Pythonic-style parameters with underscores instead of camel-case.
 
-    :param parameters: The parameters object dict.
+    :param parameters: The parameters object.
+    :type parameters: dict
     :return: The processed parameters.
+    :rtype: dict
     """
     if not parameters:
         return {}
@@ -333,8 +372,8 @@ def process_parameters(parameters):
 def get_api_url(server):
     """Formats the server URL properly in order to query the API.
 
-    :rtype: str
     :return: A valid MyGeotab API request URL.
+    :rtype: str
     """
     parsed = urlparse(server)
     base_url = parsed.netloc if parsed.netloc else parsed.path

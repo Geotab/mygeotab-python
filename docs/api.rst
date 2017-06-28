@@ -1,7 +1,7 @@
 API
 ===
 
-.. module:: mygeotab
+.. module:: mygeotab.api
 
 The full API reference for all public classes and functions.
 
