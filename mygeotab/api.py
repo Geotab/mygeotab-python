@@ -32,8 +32,7 @@ class API(object):
 
     def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com',
                  timeout=DEFAULT_TIMEOUT):
-        """
-        Initialize the MyGeotab API object with credentials.
+        """Initialize the MyGeotab API object with credentials.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
         :param password: The password associated with the username. Optional if `session_id` is provided.
@@ -59,22 +58,20 @@ class API(object):
 
     @property
     def _is_verify_ssl(self):
-        """
-        Whether or not SSL be verified.
+        """Whether or not SSL be verified.
 
         :rtype: bool
-        :return: True if the calls are being made locally
+        :return: True if the calls are being made locally.
         """
         return not any(s in get_api_url(self._server) for s in ['127.0.0.1', 'localhost'])
 
     def call(self, method, **parameters):
-        """
-        Makes a call to the API.
+        """Makes a call to the API.
 
         :param method: The method name.
-        :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
+        :return: The JSON result (decoded into a dict) from the server.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         if method is None:
             raise Exception('A method name must be specified')
@@ -97,24 +94,23 @@ class API(object):
             raise
 
     def multi_call(self, calls):
-        """
-        Performs a multi-call to the API
+        """Performs a multi-call to the API.
 
-        :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param calls: A list of call 2-tuples with method name and params
+                      (for example, ('Get', dict(typeName='Trip')) ).
+        :return: The JSON result (decoded into a dict) from the server.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return self.call('ExecuteMultiCall', calls=formatted_calls)
 
     def get(self, type_name, **parameters):
-        """
-        Gets entities using the API. Shortcut for using call() with the 'Get' method.
+        """Gets entities using the API. Shortcut for using call() with the 'Get' method.
 
-        :param type_name: The type of entity
+        :param type_name: The type of entity.
         :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :return: The JSON result (decoded into a dict) from the server.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         if parameters:
             results_limit = parameters.get('resultsLimit', None)
@@ -126,44 +122,40 @@ class API(object):
         return self.call('Get', type_name=type_name, **parameters)
 
     def add(self, type_name, entity):
-        """
-        Adds an entity using the API. Shortcut for using call() with the 'Add' method.
+        """Adds an entity using the API. Shortcut for using call() with the 'Add' method.
 
-        :param type_name: The type of entity
-        :param entity: The entity to add
-        :return: The id of the object added
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param type_name: The type of entity.
+        :param entity: The entity to add.
+        :return: The id of the object added.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         return self.call('Add', type_name=type_name, entity=entity)
 
     def set(self, type_name, entity):
-        """
-        Sets an entity using the API. Shortcut for using call() with the 'Set' method.
+        """Sets an entity using the API. Shortcut for using call() with the 'Set' method.
 
-        :param type_name: The type of entity
-        :param entity: The entity to set
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param type_name: The type of entity.
+        :param entity: The entity to set.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         return self.call('Set', type_name=type_name, entity=entity)
 
     def remove(self, type_name, entity):
-        """
-        Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
+        """Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
 
-        :param type_name: The type of entity
-        :param entity: The entity to remove
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param type_name: The type of entity.
+        :param entity: The entity to remove.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         return self.call('Remove', type_name=type_name, entity=entity)
 
     def authenticate(self, is_global=True):
-        """
-        Authenticates against the API server.
+        """Authenticates against the API server.
 
         :param is_global: If True, authenticate globally. Local login if False.
-        :return: A Credentials object with a session ID created by the server
-        :raise AuthenticationException: Raises if there was an issue with authenticating or logging in
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :return: A Credentials object with a session ID created by the server.
+        :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         auth_data = dict(database=self.credentials.database, userName=self.credentials.username,
                          password=self.credentials.password)
@@ -189,11 +181,10 @@ class API(object):
 
     @staticmethod
     def from_credentials(credentials):
-        """
-        Returns a new API object from an existing Credentials object
+        """Returns a new API object from an existing Credentials object.
 
-        :param credentials: The existing saved credentials
-        :return: A new API object populated with MyGeotab credentials
+        :param credentials: The existing saved credentials.
+        :return: A new API object populated with MyGeotab credentials.
         """
         return API(username=credentials.username, password=credentials.password,
                    database=credentials.database, session_id=credentials.session_id,
@@ -205,8 +196,7 @@ class Credentials(object):
     """
 
     def __init__(self, username, session_id, database, server, password=None):
-        """
-        Initialize the Credentials object.
+        """Initialize the Credentials object.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
         :param session_id: A session ID, assigned by the server.
@@ -228,16 +218,15 @@ class Credentials(object):
                                                                               database=self.database)
 
     def get_param(self):
-        """
-        A simple representation of the credentials object for passing into the API.authenticate() server call
+        """A simple representation of the credentials object for passing into the API.authenticate() server call.
 
-        :return: The simple credentials object for use by API.authenticate()
+        :return: The simple credentials object for use by API.authenticate().
         """
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
 
 class GeotabHTTPAdapter(HTTPAdapter):
-    """HTTP adapter to force use of TLS 1.2 for HTTPS connections
+    """HTTP adapter to force use of TLS 1.2 for HTTPS connections.
     """
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
@@ -249,16 +238,15 @@ class GeotabHTTPAdapter(HTTPAdapter):
 
 
 def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
-    """
-    Formats and performs the query against the API
+    """Formats and performs the query against the API.
 
     :param server: The server to query.
-    :param method: The method name
-    :param parameters: A dict of parameters to send
+    :param method: The method name.
+    :param parameters: A dict of parameters to send.
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-    :param verify_ssl: Whether or not to verify SSL connections
-    :return: The JSON-decoded result from the server
-    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    :param verify_ssl: Whether or not to verify SSL connections.
+    :return: The JSON-decoded result from the server.
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     """
     api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters or {})
@@ -274,18 +262,17 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
                                                     default=object_serializer),
                                     headers=headers, allow_redirects=True, timeout=timeout,
                                     verify=verify_ssl)
-        except Timeout as ex:
+        except Timeout:
             raise TimeoutException(server)
     return _process(response.json(object_hook=object_deserializer))
 
 
 def _process(data):
-    """
-    Processes the returned JSON from the server.
+    """Processes the returned JSON from the server.
 
-    :param data: The JSON data in dict form
-    :return: The result dict
-    :raise MyGeotabException: Raises when a server exception was encountered
+    :param data: The JSON data in dict form.
+    :return: The result dict.
+    :raise MyGeotabException: Raises when a server exception was encountered.
     """
     if data:
         if 'error' in data:
@@ -296,16 +283,15 @@ def _process(data):
 
 
 def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters):
-    """
-    Makes a call to an un-authenticated method on a server
+    """Makes a call to an un-authenticated method on a server
 
-    :param method: The method name
-    :param server: The MyGeotab server
+    :param method: The method name.
+    :param server: The MyGeotab server.
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
-    :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
-    :return: The JSON result (decoded into a dict) from the server
-    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
+    :return: The JSON result (decoded into a dict) from the server.
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     """
     if method is None:
         raise Exception("A method name must be specified")
@@ -316,11 +302,10 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
 
 
 def process_parameters(parameters):
-    """
-    Allows the use of Pythonic-style parameters with underscores instead of camel-case
+    """Allows the use of Pythonic-style parameters with underscores instead of camel-case.
 
-    :param parameters: The parameters object dict
-    :return: The processed parameters
+    :param parameters: The parameters object dict.
+    :return: The processed parameters.
     """
     if not parameters:
         return {}
@@ -337,11 +322,10 @@ def process_parameters(parameters):
 
 
 def get_api_url(server):
-    """
-    Formats the server URL properly in order to query the API.
+    """Formats the server URL properly in order to query the API.
 
     :rtype: str
-    :return: A valid MyGeotab API request URL
+    :return: A valid MyGeotab API request URL.
     """
     parsed = urlparse(server)
     base_url = parsed.netloc if parsed.netloc else parsed.path

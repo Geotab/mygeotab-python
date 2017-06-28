@@ -40,20 +40,19 @@ class API(api.API):
         :param session_id: A session ID, assigned by the server.
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-        :param loop: The asyncio event loop
+        :param loop: The asyncio event loop.
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         self.loop = loop
         super().__init__(username, password, database, session_id, server, timeout)
 
     async def call_async(self, method, **parameters):
-        """
-        Makes an async call to the API.
+        """Makes an async call to the API.
 
         :param method: The method name.
         :param params: Additional parameters to send (for example, search=dict(id='b123') )
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :return: The JSON result (decoded into a dict) from the server.abs
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         if method is None:
             raise Exception('A method name must be specified')
@@ -77,8 +76,7 @@ class API(api.API):
             raise
 
     async def multi_call_async(self, calls):
-        """
-        Performs an async multi-call to the API
+        """Performs an async multi-call to the API
 
         :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
         :return: The JSON result (decoded into a dict) from the server
@@ -88,13 +86,12 @@ class API(api.API):
         return await self.call_async('ExecuteMultiCall', calls=formatted_calls)
 
     async def get_async(self, type_name, **parameters):
-        """
-        Gets entities asynchronously using the API. Shortcut for using async_call() with the 'Get' method.
+        """Gets entities asynchronously using the API. Shortcut for using async_call() with the 'Get' method.
 
-        :param type_name: The type of entity
+        :param type_name: The type of entity.
         :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :return: The JSON result (decoded into a dict) from the server.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         """
         if parameters:
             results_limit = parameters.get('resultsLimit', None)
@@ -117,8 +114,7 @@ class API(api.API):
         return await self.call_async('Add', type_name=type_name, entity=entity)
 
     async def set_async(self, type_name, entity):
-        """
-        Sets an entity asynchronously using the API. Shortcut for using async_call() with the 'Set' method.
+        """Sets an entity asynchronously using the API. Shortcut for using async_call() with the 'Set' method.
 
         :param type_name: The type of entity
         :param entity: The entity to set
@@ -127,8 +123,7 @@ class API(api.API):
         return await self.call_async('Set', type_name=type_name, entity=entity)
 
     async def remove_async(self, type_name, entity):
-        """
-        Removes an entity asynchronously using the API. Shortcut for using async_call() with the 'Remove' method.
+        """Removes an entity asynchronously using the API. Shortcut for using async_call() with the 'Remove' method.
 
         :param type_name: The type of entity
         :param entity: The entity to remove
@@ -151,7 +146,7 @@ class API(api.API):
 
 def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
     """Helper to run tasks in the event loop
-    
+
     :param tasks: Tasks to run in the event loop.
     :param loop: The event loop.
     """
@@ -161,8 +156,7 @@ def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loo
 
 async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), timeout=DEFAULT_TIMEOUT,
                       verify_ssl=True, **parameters):
-    """
-    Makes an asynchronous call to an un-authenticated method on a server
+    """Makes an asynchronous call to an un-authenticated method on a server
 
     :param method: The method name
     :param server: The MyGeotab server
@@ -183,8 +177,7 @@ async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.ge
 
 async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
                  loop: asyncio.AbstractEventLoop=None):
-    """
-    Formats and performs the asynchronous query against the API
+    """Formats and performs the asynchronous query against the API
 
     :param server: The server to query.
     :param method: The method name.
@@ -211,6 +204,6 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
                                           timeout=timeout,
                                           allow_redirects=True)
             body = await response.text()
-    except TimeoutError as ex:
+    except TimeoutError:
         raise TimeoutException(server)
     return api._process(json.loads(body, object_hook=object_deserializer))

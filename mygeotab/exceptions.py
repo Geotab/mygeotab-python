@@ -14,7 +14,7 @@ class MyGeotabException(IOError):
     def __init__(self, full_error, *args, **kwargs):
         """Initialize MyGeotabException with the full error from the server.
 
-        :param full_error: The full JSON-decoded error
+        :param full_error: The full JSON-decoded error.
         """
         self._full_error = full_error
         main_error = full_error['errors'][0]
@@ -51,7 +51,8 @@ class AuthenticationException(IOError):
 
     @property
     def message(self):
-        """The exception message."""
+        """The exception message.
+        """
         return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
                                                               self.database)
 
@@ -72,5 +73,6 @@ class TimeoutException(IOError):
 
     @property
     def message(self):
-        """The excepton message."""
+        """The excepton message.
+        """
         return 'Request timed out @ {0}'.format(self.server)

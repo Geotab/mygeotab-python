@@ -23,7 +23,12 @@ import mygeotab.dates
 
 
 class Session(object):
+    """The console session object.
+    """
+
     def __init__(self):
+        """Initialize the console session object.
+        """
         self.credentials = None
 
     @staticmethod
@@ -121,10 +126,9 @@ class Session(object):
 
 
 def login(session, user, password, database=None, server=None):
-    """
-    Logs into a MyGeotab server and stores the returned credentials
+    """Logs into a MyGeotab server and stores the returned credentials.
 
-    :param session: The current Session object
+    :param session: The current Session object.
     :param user: The username used for MyGeotab servers. Usually an email address.
     :param password: The password associated with the username. Optional if `session_id` is provided.
     :param database: The database or company name. Optional as this usually gets resolved upon authentication.
@@ -150,10 +154,9 @@ def login(session, user, password, database=None, server=None):
 @click.group(invoke_without_command=True, help='Lists active sessions')
 @click.pass_obj
 def sessions(session):
-    """
-    Shows the current logged in sessions
+    """Shows the current logged in sessions.
 
-    :param session: The current Session object
+    :param session: The current Session object.
     """
     active_sessions = session.get_sessions()
     if not active_sessions:
@@ -167,11 +170,10 @@ def sessions(session):
 @click.argument('database', nargs=1, required=True)
 @click.pass_obj
 def remove(session, database):
-    """
-    Removes a session from the saved credentials
+    """Removes a session from the saved credentials.
 
-    :param session: The current Session object
-    :param database: The database name to log out from
+    :param session: The current Session object.
+    :param database: The database name to log out from.
     """
     session.load(database)
     session.logout()
@@ -190,10 +192,10 @@ def console(session, database=None, user=None, password=None, server=None):
     IPython console has numerous advantages over the stock Python console, including: colors, pretty printing,
     command auto-completion, and more.
 
-    By default, all library objects are available as locals in the script, with 'myg' being the active API object
+    By default, all library objects are available as locals in the script, with 'myg' being the active API object.
 
-    :param session: The current Session object
-    :param database: The database name to open a console to
+    :param session: The current Session object.
+    :param database: The database name to open a console to.
     :param user: The username used for MyGeotab servers. Usually an email address.
     :param password: The password associated with the username. Optional if `session_id` is provided.
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
@@ -217,9 +219,9 @@ def console(session, database=None, user=None, password=None, server=None):
 @click.version_option()
 @click.pass_context
 def main(ctx):
-    """MyGeotab Python SDK command line tools
+    """MyGeotab Python SDK command line tools.
 
-    You probably want to use the `console` command
+    You probably want to use the `console` command.
     """
     ctx.obj = Session()
     try:
