@@ -72,6 +72,7 @@ class API(object):
         :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
         :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         if method is None:
             raise Exception('A method name must be specified')
@@ -100,6 +101,7 @@ class API(object):
                       (for example, ('Get', dict(typeName='Trip')) ).
         :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return self.call('ExecuteMultiCall', calls=formatted_calls)
@@ -111,6 +113,7 @@ class API(object):
         :param parameters: Additional parameters to send.
         :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         if parameters:
             results_limit = parameters.get('resultsLimit', None)
@@ -128,6 +131,7 @@ class API(object):
         :param entity: The entity to add.
         :return: The id of the object added.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         return self.call('Add', type_name=type_name, entity=entity)
 
@@ -137,6 +141,7 @@ class API(object):
         :param type_name: The type of entity.
         :param entity: The entity to set.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         return self.call('Set', type_name=type_name, entity=entity)
 
@@ -146,6 +151,7 @@ class API(object):
         :param type_name: The type of entity.
         :param entity: The entity to remove.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         return self.call('Remove', type_name=type_name, entity=entity)
 
@@ -156,6 +162,7 @@ class API(object):
         :return: A Credentials object with a session ID created by the server.
         :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         auth_data = dict(database=self.credentials.database, userName=self.credentials.username,
                          password=self.credentials.password)
@@ -247,6 +254,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
     :param verify_ssl: Whether or not to verify SSL connections.
     :return: The JSON-decoded result from the server.
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+    :raise TimeoutException: Raises when the request does not respond after some time.
     """
     api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters or {})
@@ -292,6 +300,7 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
     :return: The JSON result (decoded into a dict) from the server.
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+    :raise TimeoutException: Raises when the request does not respond after some time.
     """
     if method is None:
         raise Exception("A method name must be specified")

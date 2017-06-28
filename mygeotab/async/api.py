@@ -53,6 +53,7 @@ class API(api.API):
         :param params: Additional parameters to send (for example, search=dict(id='b123') )
         :return: The JSON result (decoded into a dict) from the server.abs
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         if method is None:
             raise Exception('A method name must be specified')
@@ -81,6 +82,7 @@ class API(api.API):
         :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
         :return: The JSON result (decoded into a dict) from the server
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return await self.call_async('ExecuteMultiCall', calls=formatted_calls)
@@ -92,6 +94,7 @@ class API(api.API):
         :param parameters: Additional parameters to send.
         :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         if parameters:
             results_limit = parameters.get('resultsLimit', None)
@@ -106,10 +109,11 @@ class API(api.API):
         """
         Adds an entity asynchronously using the API. Shortcut for using async_call() with the 'Add' method.
 
-        :param type_name: The type of entity
-        :param entity: The entity to add
-        :return: The id of the object added
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param type_name: The type of entity.
+        :param entity: The entity to add.
+        :return: The id of the object added.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         return await self.call_async('Add', type_name=type_name, entity=entity)
 
@@ -125,19 +129,20 @@ class API(api.API):
     async def remove_async(self, type_name, entity):
         """Removes an entity asynchronously using the API. Shortcut for using async_call() with the 'Remove' method.
 
-        :param type_name: The type of entity
-        :param entity: The entity to remove
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :param type_name: The type of entity.
+        :param entity: The entity to remove.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
         """
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
     @staticmethod
     def from_credentials(credentials, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
-        """Returns a new async API object from an existing Credentials object
+        """Returns a new async API object from an existing Credentials object.
 
-        :param credentials: The existing saved credentials
-        :param loop: The asyncio loop
-        :return: A new API object populated with MyGeotab credentials
+        :param credentials: The existing saved credentials.
+        :param loop: The asyncio loop.
+        :return: A new API object populated with MyGeotab credentials.
         """
         return API(username=credentials.username, password=credentials.password,
                    database=credentials.database, session_id=credentials.session_id,
@@ -156,16 +161,17 @@ def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loo
 
 async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), timeout=DEFAULT_TIMEOUT,
                       verify_ssl=True, **parameters):
-    """Makes an asynchronous call to an un-authenticated method on a server
+    """Makes an asynchronous call to an un-authenticated method on a server.
 
-    :param method: The method name
-    :param server: The MyGeotab server
-    :param loop: The asyncio loop
+    :param method: The method name.
+    :param server: The MyGeotab server.
+    :param loop: The event loop.
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
-    :param parameters: Additional parameters to send (for example, search=dict(id='b123') )
-    :return: The JSON result (decoded into a dict) from the server
-    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
+    :return: The JSON result (decoded into a dict) from the server.
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+    :raise TimeoutException: Raises when the request does not respond after some time.
     """
     if method is None:
         raise Exception("A method name must be specified")
@@ -186,6 +192,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     :param verify_ssl: Whether or not to verify SSL connections
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    :raise TimeoutException: Raises when the request does not respond after some time.
     """
     api_endpoint = api.get_api_url(server)
     params = dict(id=-1, method=method, params=parameters)
