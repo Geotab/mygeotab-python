@@ -8,6 +8,8 @@ Changes
 
 **Improvements**
 
+- Configurable timeouts when making calls.
+- Removed `verify` parameter from API objects as SSL is required when calling a MyGeotab server.
 - Removed `run` command from the CLI.
 - Removed deprecated `API.search` and `API.search_async` methods.
 - Refactored setup.py for async API. The async methods are now automatically a part of the `API` object if using Python 3.5 or higher
