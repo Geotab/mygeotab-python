@@ -13,6 +13,8 @@ Querying Data
 
 .. autoclass:: MyGeotabException
 
+.. autoclass:: TimeoutException
+
 Credentials & Authentication
 ----------------------------
 

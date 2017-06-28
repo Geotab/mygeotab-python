@@ -1,10 +1,8 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = mygeotab
 include =
-    */mygeotab/*
-    */mygeotab/api.py
+    mygeotab/*
 omit =
     */python?.?/*
     */pypy?.?/*
@@ -14,9 +12,9 @@ omit =
     */site-packages/nose/*
     */unittest2/*
     *__init__*
-    */tests/*
-    */mygeotab/cli.py
-    */mygeotab/ext/feed.py
+    tests/*
+    mygeotab/cli.py
+    mygeotab/ext/feed.py
 
 [report]
 # Regexes for lines to exclude from consideration
