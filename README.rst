@@ -5,6 +5,10 @@ MyGeotab
     :target: https://circleci.com/gh/Geotab/mygeotab-python
     :alt: Build Status
 
+.. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
+    :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
+    :alt: Documentation Status
+
 .. image:: https://img.shields.io/codecov/c/github/Geotab/mygeotab-python/master.svg?style=flat
     :target: https://codecov.io/gh/Geotab/mygeotab-python
     :alt: Code Coverage
@@ -13,10 +17,13 @@ MyGeotab
     :target: https://pypi.python.org/pypi/mygeotab
     :alt: PyPI Version
 
-.. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
-    :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
-    :alt: Documentation Status
+.. image:: https://img.shields.io/pypi/pyversions/mygeotab.svg
+    :target: https://pypi.python.org/pypi/mygeotab
+    :alt: Python Versions
 
+.. image:: https://img.shields.io/pypi/l/mygeotab.svg
+    :target: https://pypi.python.org/pypi/mygeotab
+    :alt: License
 
 
 An Apache2 Licensed, unofficial Python client for the `MyGeotab SDK <http://sdk.geotab.com>`_.

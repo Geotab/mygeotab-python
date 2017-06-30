@@ -9,6 +9,7 @@ Querying Data
 -------------
 
 .. autoclass:: API
+   :inherited-members:
    :members:
 
 .. autoclass:: MyGeotabException
