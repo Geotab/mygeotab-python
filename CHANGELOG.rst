@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.6.1 (2017-07-03)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Don't compile to prevent issues when installing via setup.py on Python 2.7.
+
+
 0.6.0 (2017-06-29)
 ++++++++++++++++++
 
