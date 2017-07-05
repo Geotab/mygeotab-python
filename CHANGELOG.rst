@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.6.2 (2017-07-04)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Revert the change to stop compilation in setup.cfg.
+
+
 0.6.1 (2017-07-03)
 ++++++++++++++++++
 
