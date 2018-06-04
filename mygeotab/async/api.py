@@ -193,6 +193,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
     :raise TimeoutException: Raises when the request does not respond after some time.
+    :raise aiohttp.ClientResponseError: Raises when there is an HTTP status code that indicates failure.
     """
     api_endpoint = api.get_api_url(server)
     params = dict(id=-1, method=method, params=parameters)
@@ -210,6 +211,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
                                           headers=headers,
                                           timeout=timeout,
                                           allow_redirects=True)
+            response.raise_for_status()
             body = await response.text()
     except TimeoutError:
         raise TimeoutException(server)
