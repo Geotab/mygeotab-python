@@ -13,6 +13,7 @@ import copy
 import json
 import re
 import ssl
+import sys
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -52,7 +53,8 @@ class API(object):
             raise Exception('`username` cannot be None')
         if password is None and session_id is None:
             raise Exception('`password` and `session_id` must not both be None')
-        self.credentials = Credentials(username, session_id, database, server, password)
+        self.credentials = Credentials(username=username, session_id=session_id, database=database, server=server,
+                                       password=password)
         self.timeout = timeout
         self.__reauthorize_count = 0
 
@@ -96,7 +98,7 @@ class API(object):
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
+            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0 and self.credentials.password:
                 self.__reauthorize_count += 1
                 self.authenticate()
                 return self.call(method, **parameters)
@@ -293,10 +295,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
     """
     api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters or {})
-    headers = {
-        'Content-type': 'application/json; charset=UTF-8',
-        'User-Agent': '{title}/{version}'.format(title=__title__, version=__version__)
-    }
+    headers = get_headers()
     with requests.Session() as session:
         session.mount('https://', GeotabHTTPAdapter())
         try:
@@ -382,6 +381,20 @@ def get_api_url(server):
     base_url = parsed.netloc if parsed.netloc else parsed.path
     base_url.replace('/', '')
     return 'https://' + base_url + '/apiv1'
+
+
+def get_headers():
+    """Gets the request headers.
+
+    :return: The user agent
+    :rtype: dict
+    """
+    return {
+        'Content-type': 'application/json; charset=UTF-8',
+        'User-Agent': 'Python/{py_version[0]}.{py_version[1]} {title}/{version}'.format(py_version=sys.version_info,
+                                                                                        title=__title__,
+                                                                                        version=__version__)
+    }
 
 
 __all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']

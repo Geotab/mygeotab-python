@@ -20,7 +20,7 @@ from typing import Awaitable
 import aiohttp
 
 from mygeotab import api
-from mygeotab.api import DEFAULT_TIMEOUT
+from mygeotab.api import DEFAULT_TIMEOUT, get_headers
 from mygeotab.exceptions import MyGeotabException, TimeoutException
 from mygeotab.serializers import object_serializer, object_deserializer
 
@@ -70,7 +70,7 @@ class API(api.API):
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
+            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0 and self.credentials.password:
                 self.__reauthorize_count += 1
                 self.authenticate()
                 return await self.call_async(method, **parameters)
@@ -197,7 +197,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     """
     api_endpoint = api.get_api_url(server)
     params = dict(id=-1, method=method, params=parameters)
-    headers = {'Content-type': 'application/json; charset=UTF-8'}
+    headers = get_headers()
     ssl_context = None
     verify = verify_ssl
     if verify_ssl:
