@@ -98,10 +98,15 @@ class API(object):
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0 and self.credentials.password:
-                self.__reauthorize_count += 1
-                self.authenticate()
-                return self.call(method, **parameters)
+            if exception.name == 'InvalidUserException':
+                if self.__reauthorize_count == 0 and self.credentials.password:
+                    self.__reauthorize_count += 1
+                    self.authenticate()
+                    return self.call(method, **parameters)
+                else:
+                    raise AuthenticationException(self.credentials.username,
+                                                  self.credentials.database,
+                                                  self.credentials.server)
             raise
 
     def multi_call(self, calls):
