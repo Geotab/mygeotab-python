@@ -20,8 +20,8 @@ from typing import Awaitable
 import aiohttp
 
 from mygeotab import api
-from mygeotab.api import DEFAULT_TIMEOUT
-from mygeotab.exceptions import MyGeotabException, TimeoutException
+from mygeotab.api import DEFAULT_TIMEOUT, get_headers
+from mygeotab.exceptions import MyGeotabException, TimeoutException, AuthenticationException
 from mygeotab.serializers import object_serializer, object_deserializer
 
 
@@ -70,10 +70,15 @@ class API(api.API):
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException' and self.__reauthorize_count == 0:
-                self.__reauthorize_count += 1
-                self.authenticate()
-                return await self.call_async(method, **parameters)
+            if exception.name == 'InvalidUserException':
+                if self.__reauthorize_count == 0 and self.credentials.password:
+                    self.__reauthorize_count += 1
+                    self.authenticate()
+                    return await self.call_async(method, **parameters)
+                else:
+                    raise AuthenticationException(self.credentials.username,
+                                                  self.credentials.database,
+                                                  self.credentials.server)
             raise
 
     async def multi_call_async(self, calls):
@@ -193,10 +198,11 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
     :raise TimeoutException: Raises when the request does not respond after some time.
+    :raise aiohttp.ClientResponseError: Raises when there is an HTTP status code that indicates failure.
     """
     api_endpoint = api.get_api_url(server)
     params = dict(id=-1, method=method, params=parameters)
-    headers = {'Content-type': 'application/json; charset=UTF-8'}
+    headers = get_headers()
     ssl_context = None
     verify = verify_ssl
     if verify_ssl:
@@ -210,6 +216,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
                                           headers=headers,
                                           timeout=timeout,
                                           allow_redirects=True)
+            response.raise_for_status()
             body = await response.text()
     except TimeoutError:
         raise TimeoutException(server)
