@@ -3,11 +3,6 @@ jobs:
   python3:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
-      MYGEOTAB_DATABASE: $MYGEOTAB_DATABASE
-      MYGEOTAB_USERNAME: $MYGEOTAB_USERNAME
-      MYGEOTAB_PASSWORD: $MYGEOTAB_PASSWORD
-      MYGEOTAB_USERNAME_ASYNC: $MYGEOTAB_USERNAME_ASYNC
-      MYGEOTAB_PASSWORD_ASYNC: $MYGEOTAB_PASSWORD_ASYNC
     docker:
       - image: circleci/python:3.6-stretch
     steps:
@@ -32,11 +27,6 @@ jobs:
   python2:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
-      MYGEOTAB_DATABASE: $MYGEOTAB_DATABASE
-      MYGEOTAB_USERNAME: $MYGEOTAB_USERNAME
-      MYGEOTAB_PASSWORD: $MYGEOTAB_PASSWORD
-      MYGEOTAB_USERNAME_ASYNC: $MYGEOTAB_USERNAME_ASYNC
-      MYGEOTAB_PASSWORD_ASYNC: $MYGEOTAB_PASSWORD_ASYNC
     docker:
       - image: circleci/python:2.7-stretch
     steps:
@@ -59,11 +49,6 @@ jobs:
   pypy2:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
-      MYGEOTAB_DATABASE: $MYGEOTAB_DATABASE
-      MYGEOTAB_USERNAME: $MYGEOTAB_USERNAME
-      MYGEOTAB_PASSWORD: $MYGEOTAB_PASSWORD
-      MYGEOTAB_USERNAME_ASYNC: $MYGEOTAB_USERNAME_ASYNC
-      MYGEOTAB_PASSWORD_ASYNC: $MYGEOTAB_PASSWORD_ASYNC
     docker:
       - image: pypy:2
     steps:
