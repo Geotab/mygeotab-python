@@ -9,7 +9,7 @@ jobs:
       MYGEOTAB_USERNAME_ASYNC: $MYGEOTAB_USERNAME_ASYNC
       MYGEOTAB_PASSWORD_ASYNC: $MYGEOTAB_PASSWORD_ASYNC
     docker:
-      - image: circleci/python:3.7-rc-stretch
+      - image: circleci/python:3.6-stretch
     steps:
       - checkout
       - run:
