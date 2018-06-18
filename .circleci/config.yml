@@ -23,7 +23,9 @@ jobs:
           name: Uploading code coverage results
           command: bash <(curl -s https://codecov.io/bash)
       - store_test_results:
-          path: $CIRCLE_TEST_REPORTS
+          path: /tmp/circleci-test-results
+      - store_artifacts:
+          path: /tmp/circleci-test-results
   python2:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
@@ -45,7 +47,7 @@ jobs:
               . venv/bin/activate
               py.test --junitxml $CIRCLE_TEST_REPORTS/python2-test-results.xml tests/
       - store_test_results:
-          path: $CIRCLE_TEST_REPORTS
+          path: /tmp/circleci-test-results
   pypy2:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
@@ -67,7 +69,7 @@ jobs:
               . venv/bin/activate
               py.test --junitxml $CIRCLE_TEST_REPORTS/pypy2-test-results.xml tests/
       - store_test_results:
-          path: $CIRCLE_TEST_REPORTS
+          path: /tmp/circleci-test-results
 workflows:
   version: 2
   test_all:
