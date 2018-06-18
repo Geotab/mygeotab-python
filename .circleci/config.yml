@@ -4,7 +4,7 @@ jobs:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
     docker:
-      - image: circleci/python:3.6-stretch
+      - image: circleci/python:3.7-rc-stretch
     steps:
       - checkout
       - run:
