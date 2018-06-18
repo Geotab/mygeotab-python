@@ -8,7 +8,7 @@ import sys
 
 from concurrent.futures import TimeoutError
 
-from mygeotab.async.api import API, run, server_call
+from mygeotab.py3.api_async import API, run, server_call
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
 from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 

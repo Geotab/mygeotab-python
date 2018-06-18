@@ -8,7 +8,7 @@ from .api import Credentials
 from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
 
 try:
-    from .async.api import API
+    from .py3.api_async import API
 except (SyntaxError, ImportError):
     from .api import API
 

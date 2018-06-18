@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-mygeotab.async.api
-~~~~~~~~~~~~~~~~~~
+mygeotab.py3.api_async
+~~~~~~~~~~~~~~~~~~~~~~
 
 Async/Await-able (Python 3.5+) public objects and methods wrapping the MyGeotab API.
 """
