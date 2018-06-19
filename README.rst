@@ -26,7 +26,7 @@ MyGeotab
     :alt: License
 
 
-An Apache2 Licensed, unofficial Python client for the `MyGeotab SDK <http://sdk.geotab.com>`_.
+An Apache2 Licensed, unofficial Python client for the `MyGeotab SDK <https://geotab.github.io/sdk/>`_.
 
 Also bundled is the "myg" command line tool, which is a sandboxed console for quickly querying and operating on
 MyGeotab data.
@@ -41,19 +41,50 @@ Features
 Usage
 -----
 
+It's very easy to get started once you've registered with `MyGeotab <https://www.geotab.com/fleet-management-software/>`_:
+
 .. code-block:: python
 
-    >>> import mygeotab
-    >>> api = mygeotab.API(username='hello@example.com', password='mypass', database='DemoDB')
-    >>> api.authenticate()
-    >>> api.get('Device', name='%Test Dev%')
-    [{'maxSecondsBetweenLogs': 200.0,
-      'activeTo': '2050-01-01',
-      'minAccidentSpeed': 3.0,
-      'ignoreDownloadsUntil': '1986-01-01',
-      'name': 'Test Device',
-      'idleMinutes': 3.0,
-      ......
+    import mygeotab
+
+    client = mygeotab.API(username='hello@example.com', password='mypass', database='MyDatabase')
+    client.authenticate()
+
+    devices = client.get('Device', name='%Test Dev%')
+
+    print(devices)
+
+    # [{'maxSecondsBetweenLogs': 200.0,
+    #   'activeTo': '2050-01-01',
+    #   'minAccidentSpeed': 3.0,
+    #   'ignoreDownloadsUntil': '1986-01-01',
+    #   'name': 'Test Device',
+    #   'idleMinutes': 3.0,
+    #   ......
+
+If you're using Python 3.5 and higher, you can also make calls asynchronously via `asyncio <https://docs.python.org/3/library/asyncio.html>`__:
+
+.. code-block:: python
+
+    import asyncio
+    import mygeotab
+
+    client = mygeotab.API(username='hello@example.com', password='mypass', database='MyDatabase')
+    client.authenticate()
+
+    async def get_device():
+      return await client.get_async('Device', name='%Test Dev%')
+    
+    devices = loop.run_until_complete(get_device())
+    print(devices)
+
+    # [{'maxSecondsBetweenLogs': 200.0,
+    #   'activeTo': '2050-01-01',
+    #   'minAccidentSpeed': 3.0,
+    #   'ignoreDownloadsUntil': '1986-01-01',
+    #   'name': 'Test Device',
+    #   'idleMinutes': 3.0,
+    #   ......
 
 Installation
 ------------
