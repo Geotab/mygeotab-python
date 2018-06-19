@@ -8,7 +8,7 @@ import sys
 
 from concurrent.futures import TimeoutError
 
-from mygeotab.py3.api_async import API, run, server_call
+from mygeotab.py3.api_async import API, run, server_call_async
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
 from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
@@ -191,21 +191,21 @@ class TestAuthentication:
 class TestAsyncServerCallApi:
     def test_get_version(self):
         loop = asyncio.get_event_loop()
-        version = run(server_call('GetVersion', server='my3.geotab.com'), loop=loop)
+        version = run(server_call_async('GetVersion', server='my3.geotab.com'), loop=loop)
         version_split = version[0].split('.')
         assert len(version_split) == 4
 
     def test_invalid_server_call(self):
         loop = asyncio.get_event_loop()
         with pytest.raises(Exception) as excinfo1:
-            run(server_call(None, None), loop=loop)
+            run(server_call_async(None, None), loop=loop)
         with pytest.raises(Exception) as excinfo2:
-            run(server_call('GetVersion', None), loop=loop)
+            run(server_call_async('GetVersion', None), loop=loop)
         assert 'method' in str(excinfo1.value)
         assert 'server' in str(excinfo2.value)
 
     def test_timeout(self):
         loop = asyncio.get_event_loop()
         with pytest.raises(TimeoutException) as excinfo:
-            run(server_call('GetVersion', server='my36.geotab.com', timeout=0.01), loop=loop)
+            run(server_call_async('GetVersion', server='my36.geotab.com', timeout=0.01), loop=loop)
         assert 'Request timed out @ my36.geotab.com' in str(excinfo.value)
