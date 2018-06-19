@@ -15,7 +15,7 @@ Changes
 **Bug Fixes**
 
 - Since all MyGeotab servers enforce the use of TLS1.2, Python 2.7.9 or greater is required.
-- Fix issue where the password was not provided when retrying authentication. Should better handle #92.
+- Fix issue where the password was not provided when retrying authentication. Should better handle `#92 <https://github.com/Geotab/mygeotab-python/issues/92>`__.
 
 
 0.6.2 (2017-07-04)
