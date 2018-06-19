@@ -35,6 +35,7 @@ nosetests.xml
 coverage.xml
 .noseids
 .coverage
+.pytest_cache
 
 # Translations
 *.mo

@@ -8,8 +8,9 @@ import sys
 
 from concurrent.futures import TimeoutError
 
-from mygeotab.py3.api_async import API, run, server_call_async
+from mygeotab import API, server_call_async
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
+from mygeotab.py3.api_async import run
 from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 USERNAME = os.environ.get('MYGEOTAB_USERNAME_ASYNC', USERNAME)
