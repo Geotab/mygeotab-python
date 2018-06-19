@@ -164,7 +164,7 @@ def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loo
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-async def server_call(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), timeout=DEFAULT_TIMEOUT,
+async def server_call_async(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), timeout=DEFAULT_TIMEOUT,
                       verify_ssl=True, **parameters):
     """Makes an asynchronous call to an un-authenticated method on a server.
 
