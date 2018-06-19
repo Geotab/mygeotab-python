@@ -3,6 +3,21 @@
 Changes
 -------
 
+0.8.0 (2018-06-18)
+++++++++++++++++++
+
+**Improvements**
+
+- Python 3.7 support.
+- Raises an exception when request was not successful.
+- Documentation improvements.
+
+**Bug Fixes**
+
+- Since all MyGeotab servers enforce the use of TLS1.2, Python 2.7.9 or greater is required.
+- Fix issue where the password was not provided when retrying authentication. Should better handle #92.
+
+
 0.6.2 (2017-07-04)
 ++++++++++++++++++
 
