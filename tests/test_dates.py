@@ -61,12 +61,12 @@ class TestFormatIsoDate:
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
-    def test_format_very_early_date(self):
+    def test_format_outside_min_max_dates(self):
         date = datetime(1, 1, 1, 1, 45, 34, 987000, tzinfo=pytz.utc)
-        check_fmt = '0001-01-01T01:45:34.987Z'
+        check_fmt = '1950-01-01T00:00:00.000Z'
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
-        date = datetime(999, 1, 1, 1, 45, 34, 987000, tzinfo=pytz.utc)
-        check_fmt = '0999-01-01T01:45:34.987Z'
+        date = datetime(2800, 1, 1, 1, 45, 34, 987000, tzinfo=pytz.utc)
+        check_fmt = '2050-01-01T00:00:00.000Z'
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
