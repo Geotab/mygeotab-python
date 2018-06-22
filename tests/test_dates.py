@@ -66,3 +66,7 @@ class TestFormatIsoDate:
         check_fmt = '0001-01-01T01:45:34.987Z'
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
+        date = datetime(999, 1, 1, 1, 45, 34, 987000, tzinfo=pytz.utc)
+        check_fmt = '0999-01-01T01:45:34.987Z'
+        fmt_date = dates.format_iso_datetime(date)
+        assert fmt_date == check_fmt

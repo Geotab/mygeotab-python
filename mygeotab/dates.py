@@ -21,7 +21,7 @@ def format_iso_datetime(datetime_obj):
     :rtype: datetime
     """
     datetime_obj = localize_datetime(datetime_obj, pytz.utc)
-    return datetime_obj.replace(tzinfo=None).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    return datetime_obj.replace(tzinfo=None).strftime('%04Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 
 def localize_datetime(datetime_obj, tz=pytz.utc):
