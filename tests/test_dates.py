@@ -52,7 +52,7 @@ class TestGetUtcDate:
         assert est_date.day == check_date.day
         assert est_date.hour == check_date.hour
 
-    def test_zoned_min_datetime(self):
+    def test_zoned_max_datetime(self):
         tz_aus = pytz.timezone('Australia/Sydney')
         tz_est = pytz.timezone('America/Toronto')
         date = datetime(9999, 12, 31, 23, 59,59, 999, tzinfo=tz_est)
