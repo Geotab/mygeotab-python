@@ -23,11 +23,11 @@ def format_iso_datetime(datetime_obj):
     :return: The datetime object in 8601 string form.
     :rtype: datetime
     """
+    datetime_obj = localize_datetime(datetime_obj, pytz.utc)
     if datetime_obj < MIN_DATE:
         datetime_obj = MIN_DATE
     elif datetime_obj > MAX_DATE:
         datetime_obj = MAX_DATE
-    datetime_obj = localize_datetime(datetime_obj, pytz.utc)
     return datetime_obj.replace(tzinfo=None).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 
@@ -44,4 +44,9 @@ def localize_datetime(datetime_obj, tz=pytz.utc):
     if not datetime_obj.tzinfo:
         return tz.localize(datetime_obj)
     else:
-        return datetime_obj.astimezone(tz)
+        try:
+            return datetime_obj.astimezone(tz)
+        except OverflowError:
+            if datetime_obj < datetime(2, 1, 1, tzinfo=pytz.utc):
+                return MIN_DATE.astimezone(tz)
+            return MAX_DATE.astimezone(tz)
