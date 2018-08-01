@@ -1,6 +1,6 @@
 coverage==4.5.1
 jedi==0.12.1
-pylint==1.9.2
+pylint==2.1.0
 pytest==3.6.3
 pytest-cov==2.5.1
 sphinx==1.7.5
