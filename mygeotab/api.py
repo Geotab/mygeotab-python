@@ -312,6 +312,9 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
         except Timeout:
             raise TimeoutException(server)
     response.raise_for_status()
+    content_type = response.headers.get('Content-Type')
+    if content_type and 'application/json' not in content_type.lower():
+        return response.text
     return _process(response.json(object_hook=object_deserializer))
 
 
