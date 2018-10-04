@@ -20,6 +20,7 @@ class MyGeotabException(IOError):
         main_error = full_error['errors'][0]
         self.name = main_error['name']
         self.message = main_error['message']
+        self.data = main_error.get('data')
         self.stack_trace = main_error.get('stackTrace')
         super(MyGeotabException, self).__init__(self.message, *args, **kwargs)
 
