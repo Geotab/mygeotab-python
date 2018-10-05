@@ -10,7 +10,9 @@
         "**/.tox": true,
         "**/build": true,
         "**/.cache": true,
-        "**/.mypy_cache": true
+        "**/.mypy_cache": true,
+        "**/pip-wheel-metadata": true,
+        "**/.pytest_cache": true
     },
     "python.testing.promptToConfigure": false,
     "python.testing.unittestEnabled": false,

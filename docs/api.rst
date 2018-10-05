@@ -12,6 +12,8 @@ Querying Data
    :inherited-members:
    :members:
 
+.. autoclass:: ResultList
+
 .. autoclass:: MyGeotabException
 
 .. autoclass:: TimeoutException
