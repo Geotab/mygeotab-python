@@ -1,5 +1,5 @@
 coverage==4.5.2
-jedi==0.13.1
+jedi==0.13.2
 pylint==1.9.3; python_version < '3'
 pylint==2.2.2; python_version >= '3'
 pytest==4.0.2
