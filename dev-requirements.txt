@@ -2,7 +2,7 @@ coverage==4.5.2
 jedi==0.13.2
 pylint==1.9.3; python_version < '3'
 pylint==2.2.2; python_version >= '3'
-pytest==4.2.0
+pytest==4.3.0
 pytest-cov==2.6.1
 sphinx==1.8.4
 sphinx-rtd-theme==0.4.3
