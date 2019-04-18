@@ -3,8 +3,8 @@ jedi==0.13.3
 flake8==3.7.7
 pytest==4.4.1
 pytest-cov==2.6.1
-sphinx==2.0.1
-sphinx-rtd-theme==0.4.3
+sphinx==2.0.1; python_version >= '3'
+sphinx-rtd-theme==0.4.3; python_version >= '3'
 tox==3.9.0
 rope==0.14.0
 mypy==0.701; python_version >= '3.5'
