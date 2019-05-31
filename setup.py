@@ -51,7 +51,7 @@ setup(
         'requests',
         'click',
         'pytz',
-        'python-dateutil',
+        'arrow',
         'six'
     ],
     entry_points='''
