@@ -11,8 +11,8 @@ from datetime import datetime
 
 import pytz
 
-MIN_DATE = pytz.utc.localize(datetime(1950, 1, 1))
-MAX_DATE = pytz.utc.localize(datetime(2050, 1, 1))
+MIN_DATE = pytz.utc.localize(datetime(1, 1, 1))
+MAX_DATE = pytz.utc.localize(datetime(9999, 12, 31, 23, 59, 59, 999999))
 
 
 def format_iso_datetime(datetime_obj):
@@ -48,5 +48,5 @@ def localize_datetime(datetime_obj, tz=pytz.utc):
             return datetime_obj.astimezone(tz)
         except OverflowError:
             if datetime_obj < datetime(2, 1, 1, tzinfo=pytz.utc):
-                return MIN_DATE.astimezone(tz)
-            return MAX_DATE.astimezone(tz)
+                return MIN_DATE.astimezone(pytz.utc)
+            return MAX_DATE.astimezone(pytz.utc)
