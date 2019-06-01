@@ -34,6 +34,6 @@ def object_deserializer(obj):
         if isinstance(val, six.string_types) and DATETIME_REGEX.search(val):
             try:
                 obj[key] = dates.localize_datetime(arrow.get(val).datetime)
-            except ValueError:
+            except (ValueError, arrow.parser.ParserError):
                 obj[key] = val
     return obj

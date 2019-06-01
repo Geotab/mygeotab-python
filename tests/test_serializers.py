@@ -82,7 +82,7 @@ class TestDeserialization:
         assert utc_date.second == check_date.second
 
     def test_invalid_datetime(self):
-        date_str = '2015-06-0407:03:43Z'
+        date_str = '2015-06-0407T03:43Z'
         data_str = '{{"dateTime": "{}"}}'.format(date_str)
         data = json_deserialize(data_str)
         utc_date = data.get('dateTime')
