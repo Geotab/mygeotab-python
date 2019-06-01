@@ -2,7 +2,7 @@
 {
     "python.linting.mypyEnabled": true,
     "python.linting.pylintEnabled": true,
-    "python.unitTest.pyTestEnabled": true,
+    "python.testing.pyTestEnabled": true,
     "files.exclude": {
         "**/*.pyc": { "when": "$(basename).py"},
         "**/*.egg-info": true,
@@ -12,7 +12,7 @@
         "**/.cache": true,
         "**/.mypy_cache": true
     },
-    "python.unitTest.promptToConfigure": false,
-    "python.unitTest.unittestEnabled": false,
-    "python.unitTest.nosetestsEnabled": false
+    "python.testing.promptToConfigure": false,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false
 }
