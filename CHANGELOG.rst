@@ -3,6 +3,17 @@
 Changes
 -------
 
+0.8.1 (2019-06-03)
+++++++++++++++++++
+
+**Improvements**
+
+- Return content with a non-JSON content type as text
+
+**Bug Fixes**
+
+- Handle serialization of very old dates `#121 <https://github.com/Geotab/mygeotab-python/issues/121>`__.
+
 0.8.0 (2018-06-18)
 ++++++++++++++++++
 
