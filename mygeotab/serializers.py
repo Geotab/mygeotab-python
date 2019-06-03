@@ -9,8 +9,8 @@ JSON serialization and deserialization helper objects for the MyGeotab API.
 
 import re
 
+import arrow
 import six
-from dateutil import parser
 
 from mygeotab import dates
 
@@ -33,7 +33,7 @@ def object_deserializer(obj):
     for key, val in obj.items():
         if isinstance(val, six.string_types) and DATETIME_REGEX.search(val):
             try:
-                obj[key] = dates.localize_datetime(parser.parse(val))
-            except ValueError:
+                obj[key] = dates.localize_datetime(arrow.get(val).datetime)
+            except (ValueError, arrow.parser.ParserError):
                 obj[key] = val
     return obj
