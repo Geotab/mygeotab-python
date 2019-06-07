@@ -142,29 +142,33 @@ class API(api.API):
         return await self.call_async('Remove', type_name=type_name, entity=entity)
 
     @staticmethod
-    def from_credentials(credentials, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
+    def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
         """Returns a new async API object from an existing Credentials object.
 
         :param credentials: The existing saved credentials.
         :param loop: The asyncio loop.
         :return: A new API object populated with MyGeotab credentials.
         """
+        if not loop:
+            loop = asyncio.get_event_loop()
         return API(username=credentials.username, password=credentials.password,
                    database=credentials.database, session_id=credentials.session_id,
                    server=credentials.server, loop=loop)
 
 
-def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop()):
+def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=None):
     """Helper to run tasks in the event loop
 
     :param tasks: Tasks to run in the event loop.
     :param loop: The event loop.
     """
+    if not loop:
+        loop = asyncio.get_event_loop()
     futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-async def server_call_async(method, server, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), timeout=DEFAULT_TIMEOUT,
+async def server_call_async(method, server, loop: asyncio.AbstractEventLoop=None, timeout=DEFAULT_TIMEOUT,
                       verify_ssl=True, **parameters):
     """Makes an asynchronous call to an un-authenticated method on a server.
 
@@ -182,6 +186,8 @@ async def server_call_async(method, server, loop: asyncio.AbstractEventLoop=asyn
         raise Exception("A method name must be specified")
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
+    if not loop:
+        loop = asyncio.get_event_loop()
     parameters = api.process_parameters(parameters)
     return await _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl, loop=loop)
 
