@@ -3,6 +3,12 @@
 Changes
 -------
 
+0.8.2 (2019-06-10)
+++++++++++++++++++
+
+**Bug Fixes**
+- Remove asyncio-specific default arguments preventing from importing this pacakge in a Python 3.5+ thread `#236 <https://github.com/Geotab/mygeotab-python/issues/236>`__.
+
 0.8.1 (2019-06-03)
 ++++++++++++++++++
 

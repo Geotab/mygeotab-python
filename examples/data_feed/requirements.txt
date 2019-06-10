@@ -1,2 +1,2 @@
 click==7.0
-mygeotab==0.8.1
+mygeotab==0.8.2
