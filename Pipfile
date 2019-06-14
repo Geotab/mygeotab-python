@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[dev-packages]
+coverage = "*"
+flake8 = "*"
+jedi = "*"
+pytest = "*"
+pytest-cov = "*"
+rope = "*"
+tox = "*"
+mygeotab = {editable = true,path = "."}
+mypy = {markers = "python_version >= '3.5'",version = "*"}
+pytest-asyncio = {markers = "python_version >= '3.5'",version = "*"}
+sphinx = {markers = "python_version >= '3'",version = "*"}
+sphinx-rtd-theme = {markers = "python_version >= '3'",version = "*"}
+
+[packages]
+mygeotab = {editable = true,path = "."}

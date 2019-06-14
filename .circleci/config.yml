@@ -10,16 +10,13 @@ jobs:
       - run:
           name: Installing Python dependencies
           command: |
-              python3 -m venv venv
-              . venv/bin/activate
-              pip install .
-              pip install -r dev-requirements.txt
+              sudo pip install --upgrade pip pipenv
+              pipenv install --dev -e .
       - run:
           name: Running tests
           command: |
-              . venv/bin/activate
-              py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml tests/
-      - run: 
+              pipenv run py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml tests/
+      - run:
           name: Uploading code coverage results
           command: bash <(curl -s https://codecov.io/bash)
       - store_test_results:
