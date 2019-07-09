@@ -32,9 +32,9 @@ class ExceptionDataFeedListener(feed.DataFeedListener):
             entity[key] = dict(id=entity[key])
             return
         cache = self._cache[key]
-        subentity = cache.get(entity[key]['id'])
+        subentity = cache.get(entity[key]["id"])
         if not subentity:
-            subentities = self.api.get(type_name, id=entity[key]['id'], results_limit=1)
+            subentities = self.api.get(type_name, id=entity[key]["id"], results_limit=1)
             if len(subentities) > 0:
                 subentity = subentities[0]
                 entity[key] = subentity
@@ -48,12 +48,16 @@ class ExceptionDataFeedListener(feed.DataFeedListener):
         :param data: The list of data records received.
         """
         for d in data:
-            self._populate_sub_entity(d, 'Device')
-            self._populate_sub_entity(d, 'Rule')
-            date = dates.localize_datetime(d['activeFrom'])
+            self._populate_sub_entity(d, "Device")
+            self._populate_sub_entity(d, "Rule")
+            date = dates.localize_datetime(d["activeFrom"])
             click.echo(
-                '[{date}] {device} ({rule})'.format(date=date, device=d['device'].get('name', '**Unknown Vehicle'),
-                                                    rule=d['rule'].get('name', '**Unknown Rule')))
+                "[{date}] {device} ({rule})".format(
+                    date=date,
+                    device=d["device"].get("name", "**Unknown Vehicle"),
+                    rule=d["rule"].get("name", "**Unknown Rule"),
+                )
+            )
 
     def on_error(self, error):
         """
@@ -63,22 +67,27 @@ class ExceptionDataFeedListener(feed.DataFeedListener):
         :param error:
         :return: If True, keep listening. If False, stop the data feed.
         """
-        click.secho(error, fg='red')
+        click.secho(error, fg="red")
         return True
 
 
 @click.command(help="A console data feeder example")
-@click.argument('database', nargs=1, required=True)
-@click.option('--user', '-u', prompt=True, help='A MyGeotab username')
-@click.option('--password', '-p', prompt=True, hide_input=True, help='A MyGeotab password')
-@click.option('--server', default=None, help='The server (default is my.geotab.com)')
-@click.option('--interval', '-i', type=click.IntRange(5, 300), default=60,
-              help='The data feed interval in seconds (default is 60 seconds)')
+@click.argument("database", nargs=1, required=True)
+@click.option("--user", "-u", prompt=True, help="A MyGeotab username")
+@click.option("--password", "-p", prompt=True, hide_input=True, help="A MyGeotab password")
+@click.option("--server", default=None, help="The server (default is my.geotab.com)")
+@click.option(
+    "--interval",
+    "-i",
+    type=click.IntRange(5, 300),
+    default=60,
+    help="The data feed interval in seconds (default is 60 seconds)",
+)
 def main(database, user=None, password=None, server=None, interval=60):
     api = API(database=database, username=user, password=password, server=server)
     api.authenticate()
-    feed.DataFeed(api, ExceptionDataFeedListener(api), 'ExceptionEvent', interval=interval).start()
+    feed.DataFeed(api, ExceptionDataFeedListener(api), "ExceptionEvent", interval=interval).start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

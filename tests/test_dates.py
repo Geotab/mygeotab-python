@@ -29,7 +29,7 @@ class TestGetUtcDate:
         assert utc_date.hour == date.hour
 
     def test_zoned_datetime_to_utc(self):
-        tz = pytz.timezone('US/Eastern')
+        tz = pytz.timezone("US/Eastern")
         date = tz.localize(datetime(2015, 3, 12, 2, 45, 34))
         utc_date = dates.localize_datetime(date, pytz.utc)
         check_date = date.astimezone(pytz.utc)
@@ -41,8 +41,8 @@ class TestGetUtcDate:
         assert utc_date.hour == check_date.hour
 
     def test_zoned_min_datetime(self):
-        tz_aus = pytz.timezone('Australia/Sydney')
-        tz_est = pytz.timezone('America/Toronto')
+        tz_aus = pytz.timezone("Australia/Sydney")
+        tz_est = pytz.timezone("America/Toronto")
         date = datetime(1, 1, 1, tzinfo=tz_aus)
         est_date = dates.localize_datetime(date, tz_est)
         check_date = dates.MIN_DATE
@@ -53,8 +53,8 @@ class TestGetUtcDate:
         assert est_date.hour == check_date.hour
 
     def test_zoned_max_datetime(self):
-        tz_aus = pytz.timezone('Australia/Sydney')
-        tz_est = pytz.timezone('America/Toronto')
+        tz_aus = pytz.timezone("Australia/Sydney")
+        tz_est = pytz.timezone("America/Toronto")
         date = datetime(9999, 12, 31, 23, 59, 59, 999, tzinfo=tz_est)
         aus_date = dates.localize_datetime(date, tz_aus)
         check_date = dates.MAX_DATE
@@ -64,58 +64,59 @@ class TestGetUtcDate:
         assert aus_date.day == check_date.day
         assert aus_date.hour == check_date.hour
 
+
 class TestFormatIsoDate:
     def test_format_naive_datetime(self):
         date = datetime(2015, 3, 12, 2, 45, 34)
-        check_fmt = '2015-03-12T02:45:34.000Z'
+        check_fmt = "2015-03-12T02:45:34.000Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
     def test_format_utc_datetime(self):
         date = pytz.utc.localize(datetime(2015, 3, 12, 2, 45, 34))
-        check_fmt = '2015-03-12T02:45:34.000Z'
+        check_fmt = "2015-03-12T02:45:34.000Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
     def test_format_local_datetime(self):
-        est = pytz.timezone('US/Eastern')
+        est = pytz.timezone("US/Eastern")
         date = est.localize(datetime(2015, 3, 12, 2, 45, 34, 987000))
-        check_fmt = '2015-03-12T06:45:34.987Z'
+        check_fmt = "2015-03-12T06:45:34.987Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
     def test_format_far_past_date(self):
         date = datetime(1, 1, 1, 0, 2, 34, 987000)
-        check_fmt = '0001-01-01T00:02:34.987Z'
+        check_fmt = "0001-01-01T00:02:34.987Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
-    
+
     def test_format_far_past_date_utc(self):
         date = datetime(1, 1, 1, 0, 2, 34, 987000, tzinfo=pytz.utc)
-        check_fmt = '0001-01-01T00:02:34.987Z'
+        check_fmt = "0001-01-01T00:02:34.987Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
-    
+
     def test_format_far_past_date_invalid(self):
-        date = datetime(1, 1, 1, 0, 2, 34, 987000, tzinfo=pytz.timezone('Asia/Tokyo'))
-        check_fmt = '0001-01-01T00:00:00.000Z'
+        date = datetime(1, 1, 1, 0, 2, 34, 987000, tzinfo=pytz.timezone("Asia/Tokyo"))
+        check_fmt = "0001-01-01T00:00:00.000Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
     def test_format_far_future_date(self):
         date = datetime(9999, 12, 31, 23, 59, 58, 987000)
-        check_fmt = '9999-12-31T23:59:58.987Z'
+        check_fmt = "9999-12-31T23:59:58.987Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
     def test_format_far_future_date_utc(self):
         date = datetime(9999, 12, 31, 23, 59, 58, 987000, tzinfo=pytz.utc)
-        check_fmt = '9999-12-31T23:59:58.987Z'
+        check_fmt = "9999-12-31T23:59:58.987Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
 
     def test_format_far_future_date_invalid(self):
-        date = datetime(9999, 12, 31, 23, 59, 58, 987000, tzinfo=pytz.timezone('America/Toronto'))
-        check_fmt = '9999-12-31T23:59:59.999Z'
+        date = datetime(9999, 12, 31, 23, 59, 58, 987000, tzinfo=pytz.timezone("America/Toronto"))
+        check_fmt = "9999-12-31T23:59:59.999Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt

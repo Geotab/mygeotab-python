@@ -10,7 +10,7 @@ Async/Await-able (Python 3.5+) public objects and methods wrapping the MyGeotab 
 import sys
 
 if sys.version_info < (3, 5):
-    raise Exception('Python 3.5+ is required to use the async API')
+    raise Exception("Python 3.5+ is required to use the async API")
 import asyncio
 import json
 import ssl
@@ -29,8 +29,16 @@ class API(api.API):
     """A simple, asynchronous, and Pythonic wrapper for the MyGeotab API.
     """
 
-    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com',
-                 timeout=DEFAULT_TIMEOUT, loop=None):
+    def __init__(
+        self,
+        username,
+        password=None,
+        database=None,
+        session_id=None,
+        server="my.geotab.com",
+        timeout=DEFAULT_TIMEOUT,
+        loop=None,
+    ):
         """
         Initialize the asynchronous MyGeotab API object with credentials.
 
@@ -56,29 +64,28 @@ class API(api.API):
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
         if method is None:
-            raise Exception('A method name must be specified')
+            raise Exception("A method name must be specified")
         params = api.process_parameters(parameters)
         if self.credentials and not self.credentials.session_id:
             self.authenticate()
-        if 'credentials' not in params and self.credentials.session_id:
-            params['credentials'] = self.credentials.get_param()
+        if "credentials" not in params and self.credentials.session_id:
+            params["credentials"] = self.credentials.get_param()
 
         try:
-            result = await _query(self._server, method, params,
-                                  verify_ssl=self._is_verify_ssl, loop=self.loop)
+            result = await _query(self._server, method, params, verify_ssl=self._is_verify_ssl, loop=self.loop)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException':
+            if exception.name == "InvalidUserException":
                 if self.__reauthorize_count == 0 and self.credentials.password:
                     self.__reauthorize_count += 1
                     self.authenticate()
                     return await self.call_async(method, **parameters)
                 else:
-                    raise AuthenticationException(self.credentials.username,
-                                                  self.credentials.database,
-                                                  self.credentials.server)
+                    raise AuthenticationException(
+                        self.credentials.username, self.credentials.database, self.credentials.server
+                    )
             raise
 
     async def multi_call_async(self, calls):
@@ -90,7 +97,7 @@ class API(api.API):
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
-        return await self.call_async('ExecuteMultiCall', calls=formatted_calls)
+        return await self.call_async("ExecuteMultiCall", calls=formatted_calls)
 
     async def get_async(self, type_name, **parameters):
         """Gets entities asynchronously using the API. Shortcut for using async_call() with the 'Get' method.
@@ -102,13 +109,13 @@ class API(api.API):
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
         if parameters:
-            results_limit = parameters.get('resultsLimit', None)
+            results_limit = parameters.get("resultsLimit", None)
             if results_limit is not None:
-                del parameters['resultsLimit']
-            if 'search' in parameters:
-                parameters.update(parameters['search'])
+                del parameters["resultsLimit"]
+            if "search" in parameters:
+                parameters.update(parameters["search"])
             parameters = dict(search=parameters, resultsLimit=results_limit)
-        return await self.call_async('Get', type_name=type_name, **parameters)
+        return await self.call_async("Get", type_name=type_name, **parameters)
 
     async def add_async(self, type_name, entity):
         """
@@ -120,7 +127,7 @@ class API(api.API):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        return await self.call_async('Add', type_name=type_name, entity=entity)
+        return await self.call_async("Add", type_name=type_name, entity=entity)
 
     async def set_async(self, type_name, entity):
         """Sets an entity asynchronously using the API. Shortcut for using async_call() with the 'Set' method.
@@ -129,7 +136,7 @@ class API(api.API):
         :param entity: The entity to set
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
         """
-        return await self.call_async('Set', type_name=type_name, entity=entity)
+        return await self.call_async("Set", type_name=type_name, entity=entity)
 
     async def remove_async(self, type_name, entity):
         """Removes an entity asynchronously using the API. Shortcut for using async_call() with the 'Remove' method.
@@ -139,10 +146,10 @@ class API(api.API):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        return await self.call_async('Remove', type_name=type_name, entity=entity)
+        return await self.call_async("Remove", type_name=type_name, entity=entity)
 
     @staticmethod
-    def from_credentials(credentials, loop: asyncio.AbstractEventLoop=None):
+    def from_credentials(credentials, loop: asyncio.AbstractEventLoop = None):
         """Returns a new async API object from an existing Credentials object.
 
         :param credentials: The existing saved credentials.
@@ -151,12 +158,17 @@ class API(api.API):
         """
         if not loop:
             loop = asyncio.get_event_loop()
-        return API(username=credentials.username, password=credentials.password,
-                   database=credentials.database, session_id=credentials.session_id,
-                   server=credentials.server, loop=loop)
+        return API(
+            username=credentials.username,
+            password=credentials.password,
+            database=credentials.database,
+            session_id=credentials.session_id,
+            server=credentials.server,
+            loop=loop,
+        )
 
 
-def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=None):
+def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop = None):
     """Helper to run tasks in the event loop
 
     :param tasks: Tasks to run in the event loop.
@@ -168,8 +180,9 @@ def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop=None):
     return loop.run_until_complete(asyncio.gather(*futures))
 
 
-async def server_call_async(method, server, loop: asyncio.AbstractEventLoop=None, timeout=DEFAULT_TIMEOUT,
-                      verify_ssl=True, **parameters):
+async def server_call_async(
+    method, server, loop: asyncio.AbstractEventLoop = None, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters
+):
     """Makes an asynchronous call to an un-authenticated method on a server.
 
     :param method: The method name.
@@ -192,8 +205,9 @@ async def server_call_async(method, server, loop: asyncio.AbstractEventLoop=None
     return await _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl, loop=loop)
 
 
-async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
-                 loop: asyncio.AbstractEventLoop=None):
+async def _query(
+    server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, loop: asyncio.AbstractEventLoop = None
+):
     """Formats and performs the asynchronous query against the API
 
     :param server: The server to query.
@@ -216,17 +230,18 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
     try:
         async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
-            response = await session.post(api_endpoint,
-                                          data=json.dumps(params,
-                                                          default=object_serializer),
-                                          headers=headers,
-                                          timeout=timeout,
-                                          allow_redirects=True)
+            response = await session.post(
+                api_endpoint,
+                data=json.dumps(params, default=object_serializer),
+                headers=headers,
+                timeout=timeout,
+                allow_redirects=True,
+            )
             response.raise_for_status()
-            content_type = response.headers.get('Content-Type')
+            content_type = response.headers.get("Content-Type")
             body = await response.text()
     except TimeoutError:
         raise TimeoutException(server)
-    if content_type and 'application/json' not in content_type.lower():
+    if content_type and "application/json" not in content_type.lower():
         return body
     return api._process(json.loads(body, object_hook=object_deserializer))

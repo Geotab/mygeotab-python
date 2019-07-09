@@ -36,11 +36,11 @@ class Session(object):
         config_path = click.get_app_dir(mygeotab.__title__)
         if not os.path.exists(config_path):
             os.makedirs(config_path)
-        return os.path.join(config_path, 'config.ini')
+        return os.path.join(config_path, "config.ini")
 
     @staticmethod
     def _section_name(database):
-        return 'session:{0}'.format(database)
+        return "session:{0}".format(database)
 
     @staticmethod
     def session_names(config):
@@ -49,8 +49,8 @@ class Session(object):
         names = []
         section_names = config.sections()
         for name in section_names:
-            if ':' in name:
-                names.append(name.split(':')[-1])
+            if ":" in name:
+                names.append(name.split(":")[-1])
         return names
 
     def save(self):
@@ -63,12 +63,12 @@ class Session(object):
         section_name = self._section_name(database)
         if section_name not in config.sections():
             config.add_section(section_name)
-        config.set(section_name, 'username', self.credentials.username)
-        config.set(section_name, 'session_id', self.credentials.session_id)
-        config.set(section_name, 'database', self.credentials.database)
-        config.set(section_name, 'server', self.credentials.server)
+        config.set(section_name, "username", self.credentials.username)
+        config.set(section_name, "session_id", self.credentials.session_id)
+        config.set(section_name, "database", self.credentials.database)
+        config.set(section_name, "server", self.credentials.server)
 
-        with open(self._get_config_file(), 'w') as configfile:
+        with open(self._get_config_file(), "w") as configfile:
             config.write(configfile)
 
     def load(self, name=None):
@@ -83,10 +83,10 @@ class Session(object):
                 section_name = sections[-1]
             else:
                 section_name = self._section_name(name)
-            username = config.get(section_name, 'username')
-            session_id = config.get(section_name, 'session_id')
-            database = config.get(section_name, 'database')
-            server = config.get(section_name, 'server')
+            username = config.get(section_name, "username")
+            session_id = config.get(section_name, "session_id")
+            database = config.get(section_name, "database")
+            server = config.get(section_name, "server")
             self.credentials = mygeotab.Credentials(username, session_id, database, server)
         except configparser.NoSectionError:
             self.credentials = None
@@ -105,8 +105,7 @@ class Session(object):
 
     def login(self, username, password=None, database=None, server=None):
         if server:
-            api = mygeotab.API(username=username, password=password, database=database,
-                               server=server)
+            api = mygeotab.API(username=username, password=password, database=database, server=server)
         else:
             api = mygeotab.API(username=username, password=password, database=database)
         self.credentials = api.authenticate()
@@ -119,7 +118,7 @@ class Session(object):
             config = configparser.ConfigParser()
             config.read(self._get_config_file())
             config.remove_section(section_name)
-            with open(self._get_config_file(), 'w') as configfile:
+            with open(self._get_config_file(), "w") as configfile:
                 config.write(configfile)
         self.credentials = None
         sys.exit(0)
@@ -143,15 +142,15 @@ def login(session, user, password, database=None, server=None):
             session.login(user, password, database, server)
             progressbar.update(1)
         if session.credentials:
-            click.echo('Logged in as: %s' % session.credentials)
+            click.echo("Logged in as: %s" % session.credentials)
             session.load(database)
         return session.get_api()
     except mygeotab.AuthenticationException:
-        click.echo('Incorrect credentials. Please try again.')
+        click.echo("Incorrect credentials. Please try again.")
         sys.exit(0)
 
 
-@click.group(invoke_without_command=True, help='Lists active sessions')
+@click.group(invoke_without_command=True, help="Lists active sessions")
 @click.pass_obj
 def sessions(session):
     """Shows the current logged in sessions.
@@ -160,14 +159,14 @@ def sessions(session):
     """
     active_sessions = session.get_sessions()
     if not active_sessions:
-        click.echo('(No active sessions)')
+        click.echo("(No active sessions)")
         return
     for active_session in active_sessions:
         click.echo(active_session)
 
 
-@click.command(help='Log out from a MyGeotab server')
-@click.argument('database', nargs=1, required=True)
+@click.command(help="Log out from a MyGeotab server")
+@click.argument("database", nargs=1, required=True)
 @click.pass_obj
 def remove(session, database):
     """Removes a session from the saved credentials.
@@ -180,10 +179,10 @@ def remove(session, database):
 
 
 @click.command(help="Launch an interactive MyGeotab console")
-@click.argument('database', nargs=1, required=False)
-@click.option('--user', '-u')
-@click.option('--password', '-p')
-@click.option('--server', default=None, help='The server (ie. my4.geotab.com)')
+@click.argument("database", nargs=1, required=False)
+@click.option("--user", "-u")
+@click.option("--password", "-p")
+@click.option("--server", default=None, help="The server (ie. my4.geotab.com)")
 @click.pass_obj
 def console(session, database=None, user=None, password=None, server=None):
     """An interactive Python API console for MyGeotab
@@ -201,10 +200,9 @@ def console(session, database=None, user=None, password=None, server=None):
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
     local_vars = _populate_locals(database, password, server, session, user)
-    version = 'MyGeotab Console {0} [Python {1}]'.format(mygeotab.__version__,
-                                                         sys.version.replace('\n', ''))
-    auth_line = ('Logged in as: %s' % session.credentials) if session.credentials else 'Not logged in'
-    banner = '\n'.join([version, auth_line])
+    version = "MyGeotab Console {0} [Python {1}]".format(mygeotab.__version__, sys.version.replace("\n", ""))
+    auth_line = ("Logged in as: %s" % session.credentials) if session.credentials else "Not logged in"
+    banner = "\n".join([version, auth_line])
     try:
         from IPython import embed
 
@@ -239,10 +237,10 @@ def _populate_locals(database, password, server, session, user):
         # This DB hasn't been logged into before
         api = login(session, user, password, database, server)
     try:
-        api.get('User', name=session.credentials.username)
+        api.get("User", name=session.credentials.username)
     except mygeotab.AuthenticationException:
         # Credentials expired, try logging in again
-        click.echo('Your session has expired. Please login again.')
+        click.echo("Your session has expired. Please login again.")
         api = login(session, user, password, database, server)
     return dict(myg=api, mygeotab=mygeotab, dates=mygeotab.dates)
 
@@ -251,5 +249,5 @@ main.add_command(console)
 sessions.add_command(remove)
 main.add_command(sessions)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
