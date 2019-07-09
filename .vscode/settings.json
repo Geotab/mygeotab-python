@@ -2,7 +2,7 @@
 {
     "python.linting.mypyEnabled": true,
     "python.linting.pylintEnabled": false,
-    "python.testing.pyTestEnabled": true,
+    "python.testing.pytestEnabled": true,
     "files.exclude": {
         "**/*.pyc": { "when": "$(basename).py"},
         "**/*.egg-info": true,
@@ -16,5 +16,6 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black",
 }
