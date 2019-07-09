@@ -9,10 +9,6 @@ Console utilities for working with the MyGeotab API.
 
 import os.path
 
-try:
-    import ConfigParser as configparser
-except ImportError:
-    import configparser
 import sys
 
 import click
@@ -20,6 +16,8 @@ import click
 import mygeotab
 import mygeotab.api
 import mygeotab.dates
+
+from six.moves import configparser
 
 
 class Session(object):

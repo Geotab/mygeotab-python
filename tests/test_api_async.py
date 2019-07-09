@@ -6,8 +6,6 @@ asyncio = pytest.importorskip("asyncio")
 import os
 import sys
 
-from concurrent.futures import TimeoutError
-
 from mygeotab import API, server_call_async
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
 from mygeotab.py3.api_async import run
