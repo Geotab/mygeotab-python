@@ -18,6 +18,7 @@ from mygeotab import api
 class DataFeedListener(object):
     """The abstract DataFeedListener to override
     """
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -69,10 +70,15 @@ class DataFeed(object):
         """
         while self.running:
             try:
-                result = self.client_api.call('GetFeed', type_name=self.type_name, search=self.search,
-                                              from_version=self._version, results_limit=self.results_limit)
-                self._version = result['toVersion']
-                self.listener.on_data(result['data'])
+                result = self.client_api.call(
+                    "GetFeed",
+                    type_name=self.type_name,
+                    search=self.search,
+                    from_version=self._version,
+                    results_limit=self.results_limit,
+                )
+                self._version = result["toVersion"]
+                self.listener.on_data(result["data"])
             except api.MyGeotabException as exception:
                 if self.listener.on_error(exception) is False:
                     break

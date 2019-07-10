@@ -14,7 +14,7 @@ import six
 
 from mygeotab import dates
 
-DATETIME_REGEX = re.compile(r'^\d{4}\-\d{2}\-\d{2}')
+DATETIME_REGEX = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
 
 
 def object_serializer(obj):
@@ -22,7 +22,7 @@ def object_serializer(obj):
 
     :param obj: The object.
     """
-    return dates.format_iso_datetime(obj) if hasattr(obj, 'isoformat') else obj
+    return dates.format_iso_datetime(obj) if hasattr(obj, "isoformat") else obj
 
 
 def object_deserializer(obj):

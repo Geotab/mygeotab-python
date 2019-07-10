@@ -7,6 +7,7 @@ mygeotab.exceptions
 Exceptions thrown by the MyGeotab API.
 """
 
+
 class MyGeotabException(IOError):
     """There was an exception while handling your call.
     """
@@ -17,17 +18,17 @@ class MyGeotabException(IOError):
         :param full_error: The full JSON-decoded error.
         """
         self._full_error = full_error
-        main_error = full_error['errors'][0]
-        self.name = main_error['name']
-        self.message = main_error['message']
-        self.data = main_error.get('data')
-        self.stack_trace = main_error.get('stackTrace')
+        main_error = full_error["errors"][0]
+        self.name = main_error["name"]
+        self.message = main_error["message"]
+        self.data = main_error.get("data")
+        self.stack_trace = main_error.get("stackTrace")
         super(MyGeotabException, self).__init__(self.message, *args, **kwargs)
 
     def __str__(self):
-        error_str = '{0}\n{1}'.format(self.name, self.message)
+        error_str = "{0}\n{1}".format(self.name, self.message)
         if self.stack_trace:
-            error_str += '\n\nStacktrace:\n{0}'.format(self.stack_trace)
+            error_str += "\n\nStacktrace:\n{0}".format(self.stack_trace)
         return error_str
 
 
@@ -54,8 +55,8 @@ class AuthenticationException(IOError):
     def message(self):
         """The exception message.
         """
-        return 'Cannot authenticate \'{0} @ {1}/{2}\''.format(self.username, self.server,
-                                                              self.database)
+        return "Cannot authenticate '{0} @ {1}/{2}'".format(self.username, self.server, self.database)
+
 
 class TimeoutException(IOError):
     """The request timed out while handling your request.
@@ -76,4 +77,4 @@ class TimeoutException(IOError):
     def message(self):
         """The excepton message.
         """
-        return 'Request timed out @ {0}'.format(self.server)
+        return "Request timed out @ {0}".format(self.server)

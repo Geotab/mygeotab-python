@@ -29,7 +29,7 @@ def format_iso_datetime(datetime_obj):
         datetime_obj = MIN_DATE
     elif datetime_obj > MAX_DATE:
         datetime_obj = MAX_DATE
-    return arrow.get(datetime_obj).format('YYYY-MM-DDTHH:mm:ss.SSS') + 'Z'
+    return arrow.get(datetime_obj).format("YYYY-MM-DDTHH:mm:ss.SSS") + "Z"
 
 
 def localize_datetime(datetime_obj, tz=pytz.utc):

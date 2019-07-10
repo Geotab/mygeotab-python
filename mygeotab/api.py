@@ -27,12 +27,14 @@ from .serializers import object_serializer, object_deserializer
 
 DEFAULT_TIMEOUT = 300
 
+
 class API(object):
     """A simple and Pythonic wrapper for the MyGeotab API.
     """
 
-    def __init__(self, username, password=None, database=None, session_id=None, server='my.geotab.com',
-                 timeout=DEFAULT_TIMEOUT):
+    def __init__(
+        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT
+    ):
         """Initialize the MyGeotab API object with credentials.
 
         :param username: The username used for MyGeotab servers. Usually an email address.
@@ -50,18 +52,19 @@ class API(object):
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         if username is None:
-            raise Exception('`username` cannot be None')
+            raise Exception("`username` cannot be None")
         if password is None and session_id is None:
-            raise Exception('`password` and `session_id` must not both be None')
-        self.credentials = Credentials(username=username, session_id=session_id, database=database, server=server,
-                                       password=password)
+            raise Exception("`password` and `session_id` must not both be None")
+        self.credentials = Credentials(
+            username=username, session_id=session_id, database=database, server=server, password=password
+        )
         self.timeout = timeout
         self.__reauthorize_count = 0
 
     @property
     def _server(self):
         if not self.credentials.server:
-            self.credentials.server = 'my.geotab.com'
+            self.credentials.server = "my.geotab.com"
         return self.credentials.server
 
     @property
@@ -71,7 +74,7 @@ class API(object):
         :rtype: bool
         :return: True if the calls are being made locally.
         """
-        return not any(s in get_api_url(self._server) for s in ['127.0.0.1', 'localhost'])
+        return not any(s in get_api_url(self._server) for s in ["127.0.0.1", "localhost"])
 
     def call(self, method, **parameters):
         """Makes a call to the API.
@@ -85,12 +88,12 @@ class API(object):
         :rtype: dict or list
         """
         if method is None:
-            raise Exception('A method name must be specified')
+            raise Exception("A method name must be specified")
         params = process_parameters(parameters)
         if self.credentials and not self.credentials.session_id:
             self.authenticate()
-        if 'credentials' not in params and self.credentials.session_id:
-            params['credentials'] = self.credentials.get_param()
+        if "credentials" not in params and self.credentials.session_id:
+            params["credentials"] = self.credentials.get_param()
 
         try:
             result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl)
@@ -98,15 +101,15 @@ class API(object):
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException':
+            if exception.name == "InvalidUserException":
                 if self.__reauthorize_count == 0 and self.credentials.password:
                     self.__reauthorize_count += 1
                     self.authenticate()
                     return self.call(method, **parameters)
                 else:
-                    raise AuthenticationException(self.credentials.username,
-                                                  self.credentials.database,
-                                                  self.credentials.server)
+                    raise AuthenticationException(
+                        self.credentials.username, self.credentials.database, self.credentials.server
+                    )
             raise
 
     def multi_call(self, calls):
@@ -121,7 +124,7 @@ class API(object):
         :rtype: list
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
-        return self.call('ExecuteMultiCall', calls=formatted_calls)
+        return self.call("ExecuteMultiCall", calls=formatted_calls)
 
     def get(self, type_name, **parameters):
         """Gets entities using the API. Shortcut for using call() with the 'Get' method.
@@ -135,13 +138,13 @@ class API(object):
         :rtype: list
         """
         if parameters:
-            results_limit = parameters.get('resultsLimit', None)
+            results_limit = parameters.get("resultsLimit", None)
             if results_limit is not None:
-                del parameters['resultsLimit']
-            if 'search' in parameters:
-                parameters.update(parameters['search'])
+                del parameters["resultsLimit"]
+            if "search" in parameters:
+                parameters.update(parameters["search"])
             parameters = dict(search=parameters, resultsLimit=results_limit)
-        return self.call('Get', type_name=type_name, **parameters)
+        return self.call("Get", type_name=type_name, **parameters)
 
     def add(self, type_name, entity):
         """Adds an entity using the API. Shortcut for using call() with the 'Add' method.
@@ -155,7 +158,7 @@ class API(object):
         :return: The id of the object added.
         :rtype: str
         """
-        return self.call('Add', type_name=type_name, entity=entity)
+        return self.call("Add", type_name=type_name, entity=entity)
 
     def set(self, type_name, entity):
         """Sets an entity using the API. Shortcut for using call() with the 'Set' method.
@@ -167,7 +170,7 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        return self.call('Set', type_name=type_name, entity=entity)
+        return self.call("Set", type_name=type_name, entity=entity)
 
     def remove(self, type_name, entity):
         """Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
@@ -179,7 +182,7 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        return self.call('Remove', type_name=type_name, entity=entity)
+        return self.call("Remove", type_name=type_name, entity=entity)
 
     def authenticate(self, is_global=True):
         """Authenticates against the API server.
@@ -191,26 +194,27 @@ class API(object):
         :return: A Credentials object with a session ID created by the server.
         :rtype: Credentials
         """
-        auth_data = dict(database=self.credentials.database, userName=self.credentials.username,
-                         password=self.credentials.password)
-        auth_data['global'] = is_global
+        auth_data = dict(
+            database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
+        )
+        auth_data["global"] = is_global
         try:
-            result = _query(self._server, 'Authenticate', auth_data, self.timeout,
-                            verify_ssl=self._is_verify_ssl)
+            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl)
             if result:
-                new_server = result['path']
+                new_server = result["path"]
                 server = self.credentials.server
-                if new_server != 'ThisServer':
+                if new_server != "ThisServer":
                     server = new_server
-                credentials = result['credentials']
-                self.credentials = Credentials(credentials['userName'], credentials['sessionId'],
-                                               credentials['database'], server)
+                credentials = result["credentials"]
+                self.credentials = Credentials(
+                    credentials["userName"], credentials["sessionId"], credentials["database"], server
+                )
                 return self.credentials
         except MyGeotabException as exception:
-            if exception.name == 'InvalidUserException':
-                raise AuthenticationException(self.credentials.username,
-                                              self.credentials.database,
-                                              self.credentials.server)
+            if exception.name == "InvalidUserException":
+                raise AuthenticationException(
+                    self.credentials.username, self.credentials.database, self.credentials.server
+                )
             raise
 
     @staticmethod
@@ -222,9 +226,13 @@ class API(object):
         :return: A new API object populated with MyGeotab credentials.
         :rtype: API
         """
-        return API(username=credentials.username, password=credentials.password,
-                   database=credentials.database, session_id=credentials.session_id,
-                   server=credentials.server)
+        return API(
+            username=credentials.username,
+            password=credentials.password,
+            database=credentials.database,
+            session_id=credentials.session_id,
+            server=credentials.server,
+        )
 
 
 class Credentials(object):
@@ -252,11 +260,12 @@ class Credentials(object):
         self.password = password
 
     def __str__(self):
-        return '{0} @ {1}/{2}'.format(self.username, self.server, self.database)
+        return "{0} @ {1}/{2}".format(self.username, self.server, self.database)
 
     def __repr__(self):
-        return 'Credentials(username={username}, database={database})'.format(username=self.username,
-                                                                              database=self.database)
+        return "Credentials(username={username}, database={database})".format(
+            username=self.username, database=self.database
+        )
 
     def get_param(self):
         """A simple representation of the credentials object for passing into the API.authenticate() server call.
@@ -272,12 +281,9 @@ class GeotabHTTPAdapter(HTTPAdapter):
     """
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        self.poolmanager = urllib3.poolmanager.PoolManager(num_pools=connections,
-                                                           maxsize=maxsize,
-                                                           block=block,
-                                                           ssl_version=ssl.PROTOCOL_TLSv1_2,
-                                                           **pool_kwargs)
-
+        self.poolmanager = urllib3.poolmanager.PoolManager(
+            num_pools=connections, maxsize=maxsize, block=block, ssl_version=ssl.PROTOCOL_TLSv1_2, **pool_kwargs
+        )
 
 
 def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
@@ -302,18 +308,21 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
     params = dict(id=-1, method=method, params=parameters or {})
     headers = get_headers()
     with requests.Session() as session:
-        session.mount('https://', GeotabHTTPAdapter())
+        session.mount("https://", GeotabHTTPAdapter())
         try:
-            response = session.post(api_endpoint,
-                                    data=json.dumps(params,
-                                                    default=object_serializer),
-                                    headers=headers, allow_redirects=True, timeout=timeout,
-                                    verify=verify_ssl)
+            response = session.post(
+                api_endpoint,
+                data=json.dumps(params, default=object_serializer),
+                headers=headers,
+                allow_redirects=True,
+                timeout=timeout,
+                verify=verify_ssl,
+            )
         except Timeout:
             raise TimeoutException(server)
     response.raise_for_status()
-    content_type = response.headers.get('Content-Type')
-    if content_type and 'application/json' not in content_type.lower():
+    content_type = response.headers.get("Content-Type")
+    if content_type and "application/json" not in content_type.lower():
         return response.text
     return _process(response.json(object_hook=object_deserializer))
 
@@ -326,10 +335,10 @@ def _process(data):
     :return: The result data.
     """
     if data:
-        if 'error' in data:
-            raise MyGeotabException(data['error'])
-        if 'result' in data:
-            return data['result']
+        if "error" in data:
+            raise MyGeotabException(data["error"])
+        if "result" in data:
+            return data["result"]
     return data
 
 
@@ -370,7 +379,7 @@ def process_parameters(parameters):
     params = copy.copy(parameters)
     for param_name in parameters:
         value = parameters[param_name]
-        server_param_name = re.sub(r'_(\w)', lambda m: m.group(1).upper(), param_name)
+        server_param_name = re.sub(r"_(\w)", lambda m: m.group(1).upper(), param_name)
         if isinstance(value, dict):
             value = process_parameters(value)
         params[server_param_name] = value
@@ -387,8 +396,8 @@ def get_api_url(server):
     """
     parsed = urlparse(server)
     base_url = parsed.netloc if parsed.netloc else parsed.path
-    base_url.replace('/', '')
-    return 'https://' + base_url + '/apiv1'
+    base_url.replace("/", "")
+    return "https://" + base_url + "/apiv1"
 
 
 def get_headers():
@@ -398,11 +407,11 @@ def get_headers():
     :rtype: dict
     """
     return {
-        'Content-type': 'application/json; charset=UTF-8',
-        'User-Agent': 'Python/{py_version[0]}.{py_version[1]} {title}/{version}'.format(py_version=sys.version_info,
-                                                                                        title=__title__,
-                                                                                        version=__version__)
+        "Content-type": "application/json; charset=UTF-8",
+        "User-Agent": "Python/{py_version[0]}.{py_version[1]} {title}/{version}".format(
+            py_version=sys.version_info, title=__title__, version=__version__
+        ),
     }
 
 
-__all__ = ['API', 'Credentials', 'MyGeotabException', 'AuthenticationException']
+__all__ = ["API", "Credentials", "MyGeotabException", "AuthenticationException"]

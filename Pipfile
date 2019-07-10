@@ -16,6 +16,10 @@ mypy = {markers = "python_version >= '3.5'",version = "*"}
 pytest-asyncio = {markers = "python_version >= '3.5'",version = "*"}
 sphinx = {markers = "python_version >= '3'",version = "*"}
 sphinx-rtd-theme = {markers = "python_version >= '3'",version = "*"}
+black = "*"
 
 [packages]
 mygeotab = {editable = true,path = "."}
+
+[pipenv]
+allow_prereleases = true
