@@ -8,14 +8,34 @@ JSON serialization and deserialization helper objects for the MyGeotab API.
 """
 
 import re
+import sys
 import warnings
 
 import arrow
 import six
 
+using_rapidjson = False
+if sys.version_info >= (3, 5):
+    import rapidjson
+
+    using_rapidjson = True
+import json
+
 from mygeotab import dates
 
 DATETIME_REGEX = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
+
+
+def json_serialize(obj):
+    if using_rapidjson:
+        return rapidjson.dumps(obj, default=object_serializer)
+    return json.dumps(obj, default=object_serializer, separators=(",", ":"))
+
+
+def json_deserialize(json_str):
+    if using_rapidjson:
+        return rapidjson.loads(json_str, object_hook=object_deserializer)
+    return json.loads(json_str, object_hook=object_deserializer)
 
 
 def object_serializer(obj):
