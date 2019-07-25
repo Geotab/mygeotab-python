@@ -8,17 +8,18 @@ JSON serialization and deserialization helper objects for the MyGeotab API.
 """
 
 import re
-import sys
 import warnings
 
 import arrow
 import six
 
 using_rapidjson = False
-if sys.version_info >= (3, 5):
+try:
     import rapidjson
 
     using_rapidjson = True
+except ImportError:
+    pass
 import json
 
 from mygeotab import dates
