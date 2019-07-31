@@ -13,11 +13,12 @@ import warnings
 import arrow
 import six
 
-using_rapidjson = False
+use_rapidjson = False
 try:
     import rapidjson
+    DATETIME_MODE = rapidjson.DM_SHIFT_TO_UTC | rapidjson.DM_ISO8601
 
-    using_rapidjson = True
+    use_rapidjson = True
 except ImportError:
     pass
 import json
@@ -28,14 +29,14 @@ DATETIME_REGEX = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
 
 
 def json_serialize(obj):
-    if using_rapidjson:
-        return rapidjson.dumps(obj, default=object_serializer)
+    if use_rapidjson:
+        return rapidjson.dumps(obj, datetime_mode=DATETIME_MODE)
     return json.dumps(obj, default=object_serializer, separators=(",", ":"))
 
 
 def json_deserialize(json_str):
-    if using_rapidjson:
-        return rapidjson.loads(json_str, object_hook=object_deserializer)
+    if use_rapidjson:
+        return rapidjson.loads(json_str, datetime_mode=DATETIME_MODE)
     return json.loads(json_str, object_hook=object_deserializer)
 
 
