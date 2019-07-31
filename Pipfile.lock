@@ -43,10 +43,10 @@
         },
         "arrow": {
             "hashes": [
-                "sha256:03404b624e89ac5e4fc19c52045fa0f3203419fd4dd64f6e8958c522580a574a",
-                "sha256:41be7ea4c53c2cf57bf30f2d614f60c411160133f7a0a8c49111c30fb7e725b5"
+                "sha256:157dee94b557ffe9a2e13e05669bf48820064cb37d416f547f59baa0d25301d4",
+                "sha256:47f37968afeaefd0ba3fe4d0c70dc830985f9ab11beeb381d4fc0e8f8151d3d6"
             ],
-            "version": "==0.14.2"
+            "version": "==0.14.4"
         },
         "async-timeout": {
             "hashes": [
@@ -137,10 +137,10 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:303879e36b721603cc54604edcac9d20401bdbe31e1e4fdee5b9f98d5d31dfda",
-                "sha256:d747dd3d23d77ef44c6a3526e274af6efeb0a6f1afd5a69ba4d5be4098c8e141"
+                "sha256:26c0b32e437e54a18161324a2fca3c4b9846b74a8dccddd843113109e1116b32",
+                "sha256:c894d57500a4cd2d5c71114aaab77dbab5eabd9022308ce5ac9bb93a60a6f0c7"
             ],
-            "version": "==2019.1"
+            "version": "==2019.2"
         },
         "requests": {
             "hashes": [
@@ -224,10 +224,10 @@
         },
         "arrow": {
             "hashes": [
-                "sha256:03404b624e89ac5e4fc19c52045fa0f3203419fd4dd64f6e8958c522580a574a",
-                "sha256:41be7ea4c53c2cf57bf30f2d614f60c411160133f7a0a8c49111c30fb7e725b5"
+                "sha256:157dee94b557ffe9a2e13e05669bf48820064cb37d416f547f59baa0d25301d4",
+                "sha256:47f37968afeaefd0ba3fe4d0c70dc830985f9ab11beeb381d4fc0e8f8151d3d6"
             ],
-            "version": "==0.14.2"
+            "version": "==0.14.4"
         },
         "async-timeout": {
             "hashes": [
@@ -329,9 +329,11 @@
         },
         "docutils": {
             "hashes": [
-                "sha256:ba4584f9107571ced0d2c7f56a5499c696215ba90797849c92d395979da68521"
+                "sha256:6c4f696463b79f1fb8ba0c594b63840ebd41f059e92b31957c46b74a4599b6d0",
+                "sha256:9e4d7ecfc600058e07ba661411a2b7de2fd0fafa17d1a7f7361cd47b1175c827",
+                "sha256:a2aeea129088da402665e92e0b25b04b073c04b2dce4ab65caaa38b7ce2e1a99"
             ],
-            "version": "==0.15.post1"
+            "version": "==0.15.2"
         },
         "entrypoints": {
             "hashes": [
@@ -371,10 +373,10 @@
         },
         "importlib-metadata": {
             "hashes": [
-                "sha256:6dfd58dfe281e8d240937776065dd3624ad5469c835248219bd16cf2e12dbeb7",
-                "sha256:cb6ee23b46173539939964df59d3d72c3e0c1b5d54b84f1d8a7e912fe43612db"
+                "sha256:23d3d873e008a513952355379d93cbcab874c58f4f034ff657c7a87422fa64e8",
+                "sha256:80d2de76188eabfbfcf27e6a37342c2827801e59c4cc14b0371c56fed43820e3"
             ],
-            "version": "==0.18"
+            "version": "==0.19"
         },
         "jedi": {
             "hashes": [
@@ -503,10 +505,10 @@
         },
         "packaging": {
             "hashes": [
-                "sha256:0c98a5d0be38ed775798ece1b9727178c4469d9c3b4ada66e8e6b7849f8732af",
-                "sha256:9e1cbf8c12b1f1ce0bb5344b8d7ecf66a6f8a6e91bcb0c84593ed6d3ab5c4ab3"
+                "sha256:a7ac867b97fdc07ee80a8058fe4435ccd274ecc3b0ed61d852d7d53055528cf9",
+                "sha256:c491ca87294da7cc01902edbe30a5bc6c4c28172b5138ab4e4aa1b9d7bfaeafe"
             ],
-            "version": "==19.0"
+            "version": "==19.1"
         },
         "parso": {
             "hashes": [
@@ -552,10 +554,10 @@
         },
         "pyparsing": {
             "hashes": [
-                "sha256:530d8bf8cc93a34019d08142593cf4d78a05c890da8cf87ffa3120af53772238",
-                "sha256:f78e99616b6f1a4745c0580e170251ef1bbafc0d0513e270c4bd281bf29d2800"
+                "sha256:6f98a7b9397e206d78cc01df10131398f1c8b8510a2f4d97d9abd82e1aacdd80",
+                "sha256:d9338df12903bbf5d65a0e4e87c2161968b10d2e489652bb47001d82a9b028b4"
             ],
-            "version": "==2.4.1"
+            "version": "==2.4.2"
         },
         "pytest": {
             "hashes": [
@@ -591,10 +593,10 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:303879e36b721603cc54604edcac9d20401bdbe31e1e4fdee5b9f98d5d31dfda",
-                "sha256:d747dd3d23d77ef44c6a3526e274af6efeb0a6f1afd5a69ba4d5be4098c8e141"
+                "sha256:26c0b32e437e54a18161324a2fca3c4b9846b74a8dccddd843113109e1116b32",
+                "sha256:c894d57500a4cd2d5c71114aaab77dbab5eabd9022308ce5ac9bb93a60a6f0c7"
             ],
-            "version": "==2019.1"
+            "version": "==2019.2"
         },
         "requests": {
             "hashes": [
@@ -737,10 +739,10 @@
         },
         "virtualenv": {
             "hashes": [
-                "sha256:50e062b385b6e5fc6e5644ffe14e226550109a4c65e725b47ae7e3b978d320b5",
-                "sha256:fb528e20ecfce349de1dc2c8cbb394d1189b3f9507aea7273fbfb1c2167a4a4e"
+                "sha256:6cb2e4c18d22dbbe283d0a0c31bb7d90771a606b2cb3415323eea008eaee6a9d",
+                "sha256:909fe0d3f7c9151b2df0a2cb53e55bdb7b0d61469353ff7a49fd47b0f0ab9285"
             ],
-            "version": "==16.7.0"
+            "version": "==16.7.2"
         },
         "wcwidth": {
             "hashes": [
