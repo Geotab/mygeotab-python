@@ -16,7 +16,7 @@ mypy = {markers = "python_version >= '3.5'",version = "*"}
 pytest-asyncio = {markers = "python_version >= '3.5'",version = "*"}
 sphinx = {markers = "python_version >= '3'",version = "*"}
 sphinx-rtd-theme = {markers = "python_version >= '3'",version = "*"}
-black = "*"
+black = {markers = "python_version >= '3.6'",version = "*"}
 requests-mock = "*"
 pytest-datadir = "*"
 pytest-benchmark = "*"
