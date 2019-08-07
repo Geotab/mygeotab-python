@@ -10,7 +10,7 @@ jobs:
       - run:
           name: Installing Python dependencies
           command: |
-              sudo pip install --upgrade pip pipenv
+              sudo pip install --upgrade setuptools pip pipenv
               pipenv install --dev -e .
       - run:
           name: Running tests
@@ -33,7 +33,7 @@ jobs:
       - run:
           name: Installing Python dependencies
           command: |
-              sudo pip install --upgrade pip pipenv
+              sudo pip install --upgrade setuptools pip pipenv
               pipenv install --dev -e .
       - run:
           name: Running tests
@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Installing Python dependencies
           command: |
-              sudo pip install --upgrade pip pipenv
+              pip install --upgrade setuptools pip pipenv
               pipenv install --dev -e .
       - run:
           name: Running tests
