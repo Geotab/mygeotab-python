@@ -17,7 +17,7 @@ def mock_api():
 
 class TestApiPerformance:
     @pytest.mark.skipif(sys.version_info < (3, 5), reason="Requires Python 3.5 or higher")
-    def test_timeout_large_json_rapidjson(self, mock_api: api.API, datadir, benchmark):
+    def test_timeout_large_json_rapidjson(self, mock_api, datadir, benchmark):
         server = "https://example.com/apiv1"
         json_response = (datadir / "big_nested_date_response.json").read_text()
 
@@ -28,7 +28,7 @@ class TestApiPerformance:
 
             benchmark(mock_api.get, 'Data')
 
-    def test_timeout_large_json(self, mock_api: api.API, datadir, benchmark, monkeypatch):
+    def test_timeout_large_json(self, mock_api, datadir, benchmark, monkeypatch):
         server = "https://example.com/apiv1"
         json_response = (datadir / "big_nested_date_response.json").read_text()
 

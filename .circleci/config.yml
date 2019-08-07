@@ -15,7 +15,7 @@ jobs:
       - run:
           name: Running tests
           command: |
-              pipenv run py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml tests/
+              pipenv run py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml --benchmark-min-rounds=3 --benchmark-json=$CIRCLE_TEST_REPORTS/ tests/
       - run:
           name: Uploading code coverage results
           command: bash <(curl -s https://codecov.io/bash)
@@ -42,7 +42,7 @@ jobs:
           name: Running tests
           command: |
               . venv/bin/activate
-              py.test --junitxml $CIRCLE_TEST_REPORTS/python2-test-results.xml tests/
+              py.test --junitxml $CIRCLE_TEST_REPORTS/python2-test-results.xml --benchmark-min-rounds=3 tests/
       - store_test_results:
           path: /tmp/circleci-test-results
   pypy2:
@@ -64,7 +64,7 @@ jobs:
           name: Running tests
           command: |
               . venv/bin/activate
-              py.test --junitxml $CIRCLE_TEST_REPORTS/pypy2-test-results.xml tests/
+              py.test --junitxml $CIRCLE_TEST_REPORTS/pypy2-test-results.xml --benchmark-min-rounds=3 tests/
       - store_test_results:
           path: /tmp/circleci-test-results
 workflows:
