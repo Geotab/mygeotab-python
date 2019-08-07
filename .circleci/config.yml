@@ -34,6 +34,7 @@ jobs:
           name: Installing Python dependencies
           command: |
               sudo pip install --upgrade setuptools pip pipenv
+              pipenv lock
               pipenv install --dev -e .
       - run:
           name: Running tests
@@ -52,6 +53,7 @@ jobs:
           name: Installing Python dependencies
           command: |
               pip install --upgrade setuptools pip pipenv
+              pipenv lock
               pipenv install --dev -e .
       - run:
           name: Running tests
