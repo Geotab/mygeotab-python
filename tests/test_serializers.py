@@ -84,6 +84,3 @@ class TestDeserialization:
         assert utc_date.year == check_date.year
         assert utc_date.month == check_date.month
         assert utc_date.day == check_date.day
-        assert utc_date.hour == check_date.hour
-        assert utc_date.minute == check_date.minute
-        assert utc_date.second == check_date.second

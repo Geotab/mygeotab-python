@@ -30,7 +30,7 @@ DATETIME_REGEX = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
 
 def json_serialize(obj):
     if use_rapidjson:
-        return rapidjson.dumps(obj, datetime_mode=DATETIME_MODE)
+        return rapidjson.dumps(obj, default=object_serializer)
     return json.dumps(obj, default=object_serializer, separators=(",", ":"))
 
 
