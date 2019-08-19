@@ -10,12 +10,12 @@ jobs:
       - run:
           name: Installing Python dependencies
           command: |
-              sudo pip install --upgrade pip pipenv
+              sudo pip install --upgrade setuptools pip pipenv
               pipenv install --dev -e .
       - run:
           name: Running tests
           command: |
-              pipenv run py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml tests/
+              pipenv run py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://$CIRCLE_TEST_REPORTS --benchmark-autosave tests/
       - run:
           name: Uploading code coverage results
           command: bash <(curl -s https://codecov.io/bash)
@@ -26,6 +26,7 @@ jobs:
   python2:
     environment:
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      STORAGE-PATH: 
     docker:
       - image: circleci/python:2.7-stretch
     steps:
@@ -33,38 +34,12 @@ jobs:
       - run:
           name: Installing Python dependencies
           command: |
-              pip install virtualenv
-              virtualenv venv
-              . venv/bin/activate
-              pip install .
-              pip install -r dev-requirements.txt
+              sudo pip install --upgrade setuptools pip pipenv
+              pipenv install --skip-lock --dev -e .
       - run:
           name: Running tests
           command: |
-              . venv/bin/activate
-              py.test --junitxml $CIRCLE_TEST_REPORTS/python2-test-results.xml tests/
-      - store_test_results:
-          path: /tmp/circleci-test-results
-  pypy2:
-    environment:
-      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
-    docker:
-      - image: pypy:2
-    steps:
-      - checkout
-      - run:
-          name: Installing Python dependencies
-          command: |
-              pip install virtualenv
-              virtualenv venv
-              . venv/bin/activate
-              pip install .
-              pip install -r dev-requirements.txt
-      - run:
-          name: Running tests
-          command: |
-              . venv/bin/activate
-              py.test --junitxml $CIRCLE_TEST_REPORTS/pypy2-test-results.xml tests/
+              pipenv run py.test --junitxml $CIRCLE_TEST_REPORTS/python2-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://$CIRCLE_TEST_REPORTS --benchmark-autosave tests/
       - store_test_results:
           path: /tmp/circleci-test-results
 workflows:
@@ -73,4 +48,3 @@ workflows:
     jobs:
       - python3
       - python2
-      - pypy2

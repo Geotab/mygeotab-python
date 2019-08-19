@@ -10,7 +10,6 @@ Public objects and methods wrapping the MyGeotab API.
 from __future__ import unicode_literals
 
 import copy
-import json
 import re
 import ssl
 import sys
@@ -23,7 +22,7 @@ from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__
 from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
-from .serializers import object_serializer, object_deserializer
+from .serializers import json_serialize, json_deserialize
 
 DEFAULT_TIMEOUT = 300
 
@@ -312,7 +311,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
         try:
             response = session.post(
                 api_endpoint,
-                data=json.dumps(params, default=object_serializer),
+                data=json_serialize(params),
                 headers=headers,
                 allow_redirects=True,
                 timeout=timeout,
@@ -324,7 +323,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
     content_type = response.headers.get("Content-Type")
     if content_type and "application/json" not in content_type.lower():
         return response.text
-    return _process(response.json(object_hook=object_deserializer))
+    return _process(json_deserialize(response.text))
 
 
 def _process(data):

@@ -12,7 +12,6 @@ import sys
 if sys.version_info < (3, 5):
     raise Exception("Python 3.5+ is required to use the async API")
 import asyncio
-import json
 import ssl
 from concurrent.futures import TimeoutError
 from typing import Awaitable
@@ -22,7 +21,7 @@ import aiohttp
 from mygeotab import api
 from mygeotab.api import DEFAULT_TIMEOUT, get_headers
 from mygeotab.exceptions import MyGeotabException, TimeoutException, AuthenticationException
-from mygeotab.serializers import object_serializer, object_deserializer
+from mygeotab.serializers import json_serialize, json_deserialize
 
 
 class API(api.API):
@@ -232,7 +231,7 @@ async def _query(
         async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
             response = await session.post(
                 api_endpoint,
-                data=json.dumps(params, default=object_serializer),
+                data=json_serialize(params),
                 headers=headers,
                 timeout=timeout,
                 allow_redirects=True,
@@ -244,4 +243,4 @@ async def _query(
         raise TimeoutException(server)
     if content_type and "application/json" not in content_type.lower():
         return body
-    return api._process(json.loads(body, object_hook=object_deserializer))
+    return api._process(json_deserialize(body))

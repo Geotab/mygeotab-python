@@ -37,7 +37,7 @@ setup(
     url="https://github.com/geotab/mygeotab-python",
     description="An unofficial Python client for the MyGeotab API",
     long_description=readme + "\n\n" + changelog,
-    extras_require={"console": ["ipython"], ":python_version>='3.5'": ["aiohttp"]},
+    extras_require={"console": ["ipython"], ":python_version>='3.5'": ["aiohttp", "python-rapidjson"]},
     test_suite="tests",
     include_package_data=True,
     packages=packages,
