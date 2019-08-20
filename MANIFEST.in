@@ -1,6 +1,15 @@
 include LICENSE
+include CHANGELOG.rst
+include README.rst
+include tox.ini
+include pytest.ini
+include Pipfile
+include Pipfile.lock
+include pyproject.toml
 
 graft docs
 graft examples
 graft mygeotab
 graft tests
+
+global-exclude *.py[co] .DS_Store
