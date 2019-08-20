@@ -36,7 +36,7 @@ Features
 
 - Automatic serializing and de-serializing of JSON results
 - Clean, Pythonic API for querying data
-- Cross-platform and compatible with Python 2.7.9+, 3.4+, and pypy 4+
+- Cross-platform and compatible with Python 2.7.9+ and 3.4+
 
 Usage
 -----
