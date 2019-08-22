@@ -44,11 +44,12 @@ setup(
     package_data={"": ["LICENSE"]},
     license="Apache 2.0",
     install_requires=["requests", "click", "pytz", "arrow", "six"],
+    setup_requires=["wheel"],
     entry_points="""
         [console_scripts]
         myg=mygeotab.cli:main
     """,
-    classifiers=(
+    classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Natural Language :: English",
@@ -62,5 +63,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Libraries",
-    ),
+    ],
 )
