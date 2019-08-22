@@ -3,16 +3,27 @@
 Changes
 -------
 
+0.8.4 (2019-08-22)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Fixes issue with serialization of datetime.date objects `#284 <https://github.com/Geotab/mygeotab-python/pull/284>`__.
+
+
 0.8.3 (2019-08-19)
 ++++++++++++++++++
 
 **Improvements**
+
 - Use the high-performance `python-rapidjson <https://github.com/python-rapidjson/python-rapidjson>`__ library to serialize and deserialize JSON parameters and responses in Python 3.5+ `#268 <https://github.com/Geotab/mygeotab-python/pull/268>`__. 
 
 **Bug Fixes**
+
 - Silence warnings from arrow parsing when the library is used interactively or in a Jupyter notebook.
 
 **Housecleaning**
+
 - Added serialization benchmarking in CircleCI tests.
 - Remove PyPy test config.
 
@@ -20,6 +31,7 @@ Changes
 ++++++++++++++++++
 
 **Bug Fixes**
+
 - Remove asyncio-specific default arguments preventing from importing this pacakge in a Python 3.5+ thread `#236 <https://github.com/Geotab/mygeotab-python/issues/236>`__.
 
 0.8.1 (2019-06-03)
