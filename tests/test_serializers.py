@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from datetime import datetime
+from datetime import date, datetime
 
 import pytz
 
@@ -23,15 +23,22 @@ class TestSerialization:
         data_str = json_serialize(data)
         assert data_str == expected_str
 
-    def test_min_date(self):
+    def test_min_datetime(self):
         data = dict(dateTime=dates.MIN_DATE)
         expected_str = '{"dateTime":"0001-01-01T00:00:00.000Z"}'
         data_str = json_serialize(data)
         assert data_str == expected_str
 
-    def test_max_date(self):
+    def test_max_datetime(self):
         data = dict(dateTime=dates.MAX_DATE)
         expected_str = '{"dateTime":"9999-12-31T23:59:59.999Z"}'
+        data_str = json_serialize(data)
+        assert data_str == expected_str
+
+    def test_only_date(self):
+        this_date = date(2016, 2, 22)
+        data = dict(date=this_date)
+        expected_str = '{"date":"2016-02-22"}'
         data_str = json_serialize(data)
         assert data_str == expected_str
 

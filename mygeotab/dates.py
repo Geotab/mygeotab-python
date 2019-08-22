@@ -19,11 +19,13 @@ MAX_DATE = pytz.utc.localize(datetime(9999, 12, 31, 23, 59, 59, 999999))
 def format_iso_datetime(datetime_obj):
     """Formats the given datetime as a UTC-zoned ISO 8601 date string.
 
-    :param datetime_obj: The datetime object.
+    :param datetime_obj: The datetime or date object.
     :type datetime_obj: datetime
     :return: The datetime object in 8601 string form.
     :rtype: datetime
     """
+    if not isinstance(datetime_obj, datetime):
+        return datetime_obj.isoformat()
     datetime_obj = localize_datetime(datetime_obj, pytz.utc)
     if datetime_obj < MIN_DATE:
         datetime_obj = MIN_DATE
