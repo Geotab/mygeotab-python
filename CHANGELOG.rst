@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.8.5 (2019-10-07)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Fixes issue with warnings from Arrow about date parsing `#306 <https://github.com/Geotab/mygeotab-python/pull/306>`__.
+
+
 0.8.4 (2019-08-22)
 ++++++++++++++++++
 
