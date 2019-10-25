@@ -226,11 +226,16 @@ async def _query(
     verify = verify_ssl
     if verify_ssl:
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    conn = aiohttp.TCPConnector(verify_ssl=verify, ssl_context=ssl_context, loop=loop)
+    conn = aiohttp.TCPConnector(ssl_context=ssl_context, loop=loop)
     try:
         async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
             response = await session.post(
-                api_endpoint, data=json_serialize(params), headers=headers, timeout=timeout, allow_redirects=True
+                api_endpoint,
+                data=json_serialize(params),
+                headers=headers,
+                timeout=timeout,
+                allow_redirects=True,
+                ssl_verify=verify,
             )
             response.raise_for_status()
             content_type = response.headers.get("Content-Type")
