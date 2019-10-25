@@ -199,7 +199,6 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
                 headers=headers,
                 timeout=timeout,
                 allow_redirects=True,
-                ssl_verify=verify,
             )
             response.raise_for_status()
             content_type = response.headers.get("Content-Type")
