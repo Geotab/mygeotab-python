@@ -53,24 +53,20 @@ class TestAsyncCallApi:
     @pytest.mark.asyncio
     async def test_get_version(self, async_populated_api):
         version = await async_populated_api.call_async("GetVersion")
-        assert len(version) == 1
-        version_split = version[0].split(".")
+        version_split = version.split(".")
         assert len(version_split) == 4
 
     @pytest.mark.asyncio
     async def test_get_user(self, async_populated_api):
         user = await async_populated_api.get_async("User", name=USERNAME)
         assert len(user) == 1
-        assert len(user[0]) == 1
-        user = user[0][0]
+        user = user[0]
         assert user["name"] == USERNAME
 
     @pytest.mark.asyncio
     async def test_multi_call(self, async_populated_api):
         calls = [["Get", dict(typeName="User", search=dict(name="{0}".format(USERNAME)))], ["GetVersion"]]
         results = await async_populated_api.multi_call_async(calls)
-        assert len(results) == 1
-        results = results[0]
         assert len(results) == 2
         assert results[0] is not None
         assert len(results[0]) == 1
@@ -83,9 +79,8 @@ class TestAsyncCallApi:
     async def test_pythonic_parameters(self, async_populated_api):
         users = async_populated_api.get("User")
         count_users = await async_populated_api.call_async("Get", type_name="User")
-        assert len(count_users) == 1
-        assert len(count_users[0]) >= 1
-        assert len(count_users[0]) == len(users)
+        assert len(count_users) >= 1
+        assert len(count_users) == len(users)
 
     @pytest.mark.asyncio
     async def test_api_from_credentials(self, async_populated_api):
@@ -117,7 +112,6 @@ class TestAsyncCallApi:
         new_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
         user = await new_api.get_async("User", name="{0}".format(USERNAME))
         assert len(user) == 1
-        assert len(user[0]) == 1
 
     @pytest.mark.asyncio
     async def test_bad_parameters(self, async_populated_api):
@@ -129,8 +123,7 @@ class TestAsyncCallApi:
     async def test_get_search_parameter(self, async_populated_api):
         user = await async_populated_api.get_async("User", search=dict(name=USERNAME))
         assert len(user) == 1
-        assert len(user[0]) == 1
-        user = user[0][0]
+        user = user[0]
         assert user["name"] == USERNAME
 
     @pytest.mark.asyncio
@@ -138,14 +131,12 @@ class TestAsyncCallApi:
         async def get_trailer():
             trailers = await async_populated_api_entity.get_async("Trailer", name=TRAILER_NAME)
             assert len(trailers) == 1
-            assert len(trailers[0]) == 1
-            return trailers[0][0]
+            return trailers[0]
 
         user = async_populated_api_entity.get("User", name=USERNAME)[0]
         trailer = {"name": TRAILER_NAME, "groups": user["companyGroups"]}
         trailer_id = await async_populated_api_entity.add_async("Trailer", trailer)
-        assert len(trailer_id) == 1
-        trailer["id"] = trailer_id[0]
+        trailer["id"] = trailer_id
         trailer = await get_trailer()
         assert trailer["name"] == TRAILER_NAME
         comment = "some comment"
@@ -155,8 +146,7 @@ class TestAsyncCallApi:
         assert trailer["comment"] == comment
         await async_populated_api_entity.remove_async("Trailer", trailer)
         trailers = await async_populated_api_entity.get_async("Trailer", name=TRAILER_NAME)
-        assert len(trailers) == 1
-        assert len(trailers[0]) == 0
+        assert len(trailers) == 0
 
 
 @pytest.mark.skipif(
@@ -195,9 +185,8 @@ class TestAuthentication:
 class TestAsyncServerCallApi:
     @pytest.mark.asyncio
     async def test_get_version(self):
-        loop = asyncio.get_event_loop()
         version = await server_call_async("GetVersion", server="my3.geotab.com")
-        version_split = version[0].split(".")
+        version_split = version.split(".")
         assert len(version_split) == 4
 
     @pytest.mark.asyncio
@@ -211,7 +200,6 @@ class TestAsyncServerCallApi:
 
     @pytest.mark.asyncio
     async def test_timeout(self):
-        loop = asyncio.get_event_loop()
         with pytest.raises(TimeoutException) as excinfo:
             await server_call_async("GetVersion", server="my36.geotab.com", timeout=0.01)
         assert "Request timed out @ my36.geotab.com" in str(excinfo.value)
