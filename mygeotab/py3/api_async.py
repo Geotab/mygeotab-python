@@ -29,13 +29,7 @@ class API(api.API):
     """
 
     def __init__(
-        self,
-        username,
-        password=None,
-        database=None,
-        session_id=None,
-        server="my.geotab.com",
-        timeout=DEFAULT_TIMEOUT,
+        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT
     ):
         """
         Initialize the asynchronous MyGeotab API object with credentials.
@@ -160,21 +154,7 @@ class API(api.API):
         )
 
 
-def run(*tasks: Awaitable, loop: asyncio.AbstractEventLoop = None):
-    """Helper to run tasks in the event loop
-
-    :param tasks: Tasks to run in the event loop.
-    :param loop: The event loop.
-    """
-    if not loop:
-        loop = asyncio.get_event_loop()
-    futures = [asyncio.ensure_future(task, loop=loop) for task in tasks]
-    return loop.run_until_complete(asyncio.gather(*futures))
-
-
-async def server_call_async(
-    method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters
-):
+async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters):
     """Makes an asynchronous call to an un-authenticated method on a server.
 
     :param method: The method name.
@@ -194,9 +174,7 @@ async def server_call_async(
     return await _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl)
 
 
-async def _query(
-    server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True
-):
+async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
     """Formats and performs the asynchronous query against the API
 
     :param server: The server to query.
