@@ -19,9 +19,8 @@ pytestmark = pytest.mark.skipif(sys.version_info < (3, 5), reason="Only testing 
 
 @pytest.fixture(scope="session")
 def async_populated_api():
-    loop = asyncio.get_event_loop() or asyncio.new_event_loop()
     if USERNAME and PASSWORD:
-        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=None, loop=loop)
+        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
         try:
             session.authenticate()
         except MyGeotabException as exception:
@@ -86,7 +85,7 @@ class TestAsyncCallApi:
         assert len(count_users[0]) == len(users)
 
     def test_api_from_credentials(self, async_populated_api):
-        new_api = API.from_credentials(async_populated_api.credentials, loop=async_populated_api.loop)
+        new_api = API.from_credentials(async_populated_api.credentials)
         users = run(new_api.get_async("User"), loop=async_populated_api.loop)
         assert len(users) >= 1
 
@@ -98,7 +97,7 @@ class TestAsyncCallApi:
         credentials = async_populated_api.credentials
         credentials.password = PASSWORD
         credentials.session_id = "abc123"
-        test_api = API.from_credentials(credentials, loop=async_populated_api.loop)
+        test_api = API.from_credentials(credentials)
         users = run(test_api.get_async("User"), loop=async_populated_api.loop)
         assert len(users) >= 1
 
@@ -108,7 +107,7 @@ class TestAsyncCallApi:
 
     def test_call_without_credentials(self):
         loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-        new_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=None, loop=loop)
+        new_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
         user = run(new_api.get_async("User", name="{0}".format(USERNAME)), loop=loop)
         assert len(user) == 1
         assert len(user[0]) == 1
