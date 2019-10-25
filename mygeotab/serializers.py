@@ -15,6 +15,7 @@ import six
 use_rapidjson = False
 try:
     import rapidjson
+
     DATETIME_MODE = rapidjson.DM_SHIFT_TO_UTC | rapidjson.DM_ISO8601
 
     use_rapidjson = True

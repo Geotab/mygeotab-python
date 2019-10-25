@@ -230,11 +230,7 @@ async def _query(
     try:
         async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
             response = await session.post(
-                api_endpoint,
-                data=json_serialize(params),
-                headers=headers,
-                timeout=timeout,
-                allow_redirects=True,
+                api_endpoint, data=json_serialize(params), headers=headers, timeout=timeout, allow_redirects=True
             )
             response.raise_for_status()
             content_type = response.headers.get("Content-Type")

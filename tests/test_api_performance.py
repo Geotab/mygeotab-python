@@ -26,7 +26,7 @@ class TestApiPerformance:
         with requests_mock.mock() as m:
             m.post(server, text=json_response)
 
-            benchmark(mock_api.get, 'Data')
+            benchmark(mock_api.get, "Data")
 
     def test_timeout_large_json(self, mock_api, datadir, benchmark, monkeypatch):
         server = "https://example.com/apiv1"
@@ -39,4 +39,4 @@ class TestApiPerformance:
 
             monkeypatch.setattr(serializers, "use_rapidjson", False)
 
-            benchmark(mock_api.get, 'Data')
+            benchmark(mock_api.get, "Data")
