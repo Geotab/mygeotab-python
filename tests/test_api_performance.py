@@ -15,6 +15,7 @@ def mock_api():
     yield api.API(username, database=database, session_id=session_id, server="https://example.com")
 
 
+@pytest.mark.skip("Too slow to run automatically")
 class TestApiPerformance:
     @pytest.mark.skipif(sys.version_info < (3, 5), reason="Requires Python 3.5 or higher")
     def test_timeout_large_json_rapidjson(self, mock_api, datadir, benchmark):
