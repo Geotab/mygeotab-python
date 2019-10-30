@@ -22,7 +22,7 @@ jobs:
         python -m pip install --upgrade setuptools pip pipenv
         pipenv install --skip-lock --dev -e .
     - name: Lint with flake8
-      if: context.matrix.python-version == '3.7'
+      if: matrix.python-version == '3.7'
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
