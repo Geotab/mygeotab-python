@@ -40,10 +40,12 @@ jobs:
       if: matrix.python-version < 3
       run: |
         pipenv run py.test --ignore-glob='*_async.py' --junitxml output/python-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://output/ --benchmark-autosave tests/
-    - name: Uploading code coverage results
+    - name: Upload coverage to Codecov
       if: matrix.python-version >= 3.5
-      run: |
-        bash <(curl -s https://codecov.io/bash)
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: ./output/coverage.xml
     - name: Archive code coverage results
       uses: actions/upload-artifact@v1
       with:
