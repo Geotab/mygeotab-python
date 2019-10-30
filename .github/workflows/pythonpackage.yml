@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade setuptools pip pipenv
-        pipenv install --dev -e .
+        pipenv install --skip-lock --dev -e .
     - name: Lint with flake8
       run: |
         pip install flake8
@@ -30,7 +30,12 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pipenv run py.test --cov-config .coveragerc --cov-report xml:$CIRCLE_TEST_REPORTS/coverage.xml --cov mygeotab --junitxml $CIRCLE_TEST_REPORTS/python3-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://$CIRCLE_TEST_REPORTS --benchmark-autosave tests/
+        pipenv run py.test --cov-config .coveragerc --cov-report xml:output/coverage.xml --cov mygeotab --junitxml output/python-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://output/ --benchmark-autosave tests/
     - name: Uploading code coverage results
       run: |
         bash <(curl -s https://codecov.io/bash)
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v1
+      with:
+        name: output
+        path: output
