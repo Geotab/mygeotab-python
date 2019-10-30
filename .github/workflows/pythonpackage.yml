@@ -4,13 +4,17 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
         python-version: [2.7, 3.7]
-
+    env:
+      MYGEOTAB_DATABASE: ${{ secrets.MYGEOTAB_DATABASE }}
+      MYGEOTAB_USERNAME: ${{ secrets.MYGEOTAB_USERNAME }}
+      MYGEOTAB_PASSWORD: ${{ secrets.MYGEOTAB_PASSWORD }}
+      MYGEOTAB_USERNAME_ASYNC: ${{ secrets.MYGEOTAB_USERNAME_ASYNC }}
+      MYGEOTAB_PASSWORD_ASYNC: ${{ secrets.MYGEOTAB_PASSWORD_ASYNC }}
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
