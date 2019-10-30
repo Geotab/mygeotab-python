@@ -10,7 +10,7 @@ from .api import Credentials
 from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
 
 try:
-    from .py3.api_async import API, server_call_async
+    from .py3.api_async import API, server_call_async  # noqa: F401
 except (SyntaxError, ImportError):
     from .api import API, server_call
 

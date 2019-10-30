@@ -11,10 +11,8 @@ import sys
 
 if sys.version_info < (3, 5):
     raise Exception("Python 3.5+ is required to use the async API")
-import asyncio
 import ssl
 from concurrent.futures import TimeoutError
-from typing import Awaitable
 
 import aiohttp
 
