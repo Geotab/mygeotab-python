@@ -9,7 +9,6 @@ flake8 = "*"
 pytest = "*"
 pytest-cov = "*"
 rope = "*"
-tox = "*"
 mygeotab = {editable = true,path = "."}
 mypy = {markers = "python_version >= '3.5'",version = "*"}
 pytest-asyncio = {markers = "python_version >= '3.5'",version = "*"}

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=invalid-name
 
 """
 mygeotab.api

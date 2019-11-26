@@ -7,7 +7,6 @@
         "**/*.pyc": { "when": "$(basename).py"},
         "**/*.egg-info": true,
         "**/__pycache__": true,
-        "**/.tox": true,
         "**/build": true,
         "**/.cache": true,
         "**/.mypy_cache": true,

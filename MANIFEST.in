@@ -1,7 +1,6 @@
 include LICENSE
 include CHANGELOG.rst
 include README.rst
-include tox.ini
 include pytest.ini
 include Pipfile
 include Pipfile.lock
