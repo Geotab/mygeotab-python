@@ -269,6 +269,11 @@ class EntityList(UserList):
         else:
             return self.data[i]
 
+    def __getslice__(self, i, j):
+        i = max(i, 0)
+        j = max(j, 0)
+        return self.__class__(self.data[i:j], self.type_name)
+
     def __add__(self, other):
         if isinstance(other, UserList):
             return self.__class__(self.data + other.data, self.type_name)
