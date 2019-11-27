@@ -263,6 +263,38 @@ class EntityList(UserList):
                         p.breakable()
                     p.pretty(item)
 
+    def __getitem__(self, i):
+        if isinstance(i, slice):
+            return self.__class__(self.data[i], self.type_name)
+        else:
+            return self.data[i]
+
+    def __add__(self, other):
+        if isinstance(other, UserList):
+            return self.__class__(self.data + other.data, self.type_name)
+        elif isinstance(other, type(self.data)):
+            return self.__class__(self.data + other, self.type_name)
+        return self.__class__(self.data + list(other), self.type_name)
+
+    def __radd__(self, other):
+        if isinstance(other, UserList):
+            return self.__class__(other.data + self.data, self.type_name)
+        elif isinstance(other, type(self.data)):
+            return self.__class__(other + self.data, self.type_name)
+        return self.__class__(list(other) + self.data, self.type_name)
+
+    def __mul__(self, n):
+        return self.__class__(self.data * n, self.type_name)
+
+    __rmul__ = __mul__
+
+    def __copy__(self):
+        inst = self.__class__.__new__(self.__class__, self.type_name)
+        inst.__dict__.update(self.__dict__)
+        # Create a copy and avoid triggering descriptors
+        inst.__dict__["data"] = self.__dict__["data"][:]
+        return inst
+
     def sortby(self, key, reverse=False):
         """Returns an EntityList, sorted by a provided key.
 
