@@ -32,9 +32,11 @@ class TestEntityList:
 
 
 def get_entitylist(type_name="Device", second_device_name="Test Device"):
-    return EntityList([
-        {"id": "NoDeviceId", "name": "**No Device"},
-        {"id": "b123", "name": second_device_name},
-        {"id": "b456", "name": "Another device"},
-    ], type_name)
-
+    return EntityList(
+        [
+            {"id": "NoDeviceId", "name": "**No Device"},
+            {"id": "b123", "name": second_device_name},
+            {"id": "b456", "name": "Another device"},
+        ],
+        type_name,
+    )

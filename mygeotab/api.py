@@ -345,6 +345,7 @@ class EntityList(UserList):
             raise ImportError("The 'pandas' package could not be imported")
         if normalize:
             from pandas.io.json import json_normalize
+
             return json_normalize(self.data)
         return pandas.DataFrame.from_dict(self.data)
 
