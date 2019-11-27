@@ -304,7 +304,7 @@ class EntityList(UserList):
         :type reverse: bool
         :rtype: EntityList
         """
-        return EntityList(sorted(self.data, key=lambda d: d[key], reverse=reverse), type_name=self.type_name)
+        return self.__class__(sorted(self.data, key=lambda d: d[key], reverse=reverse), type_name=self.type_name)
 
     @property
     def first(self):
