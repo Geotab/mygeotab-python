@@ -12,7 +12,7 @@ Querying Data
    :inherited-members:
    :members:
 
-.. autoclass:: ResultList
+.. autoclass:: EntityList
 
 .. autoclass:: MyGeotabException
 
