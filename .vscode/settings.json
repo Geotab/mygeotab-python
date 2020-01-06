@@ -7,10 +7,11 @@
         "**/*.pyc": { "when": "$(basename).py"},
         "**/*.egg-info": true,
         "**/__pycache__": true,
-        "**/.tox": true,
         "**/build": true,
         "**/.cache": true,
-        "**/.mypy_cache": true
+        "**/.mypy_cache": true,
+        "**/pip-wheel-metadata": true,
+        "**/.pytest_cache": true
     },
     "python.testing.promptToConfigure": false,
     "python.testing.unittestEnabled": false,
@@ -20,4 +21,5 @@
     "python.formatting.provider": "black",
     "python.jediEnabled": false,
     "restructuredtext.confPath": "${workspaceFolder}/docs",
+    "python.pythonPath": "/home/aaron/.local/share/virtualenvs/mygeotab-4dSgkTgl/bin/python",
 }
