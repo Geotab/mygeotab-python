@@ -44,13 +44,13 @@ class TestEntityList:
         sorted_by_id = entitylist.sort_by("id", True)
         assert sorted_by_id[0]["id"] == "NoDeviceId"
         assert sorted_by_id[-1]["id"] == "b456"
-    
+
     def test_sort_datetime(self):
         entitylist = get_entitylist()
         sorted_by_id = entitylist.sort_by("dateTime")
         assert sorted_by_id[0]["dateTime"] == datetime(2019, 2, 22, 23, 13, 32)
         assert sorted_by_id[-1]["dateTime"] == datetime(2019, 10, 22, 9, 19, 3)
-    
+
     def test_sort_odometer(self):
         entitylist = get_entitylist()
         sorted_by_id = entitylist.sort_by("odometer")
