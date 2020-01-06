@@ -15,6 +15,7 @@ import ssl
 import sys
 
 import requests
+import six
 from requests.adapters import HTTPAdapter
 from requests.exceptions import Timeout
 from requests.packages import urllib3
@@ -22,8 +23,8 @@ from six.moves import UserList
 from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__
-from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
-from .serializers import json_serialize, json_deserialize
+from .exceptions import AuthenticationException, MyGeotabException, TimeoutException
+from .serializers import json_deserialize, json_serialize
 
 DEFAULT_TIMEOUT = 300
 
@@ -300,7 +301,7 @@ class EntityList(UserList):
         inst.__dict__["data"] = self.__dict__["data"][:]
         return inst
 
-    def sortby(self, key, reverse=False):
+    def sort_by(self, key, reverse=False):
         """Returns an EntityList, sorted by a provided key.
 
         :param key: The key to sort the data with.
@@ -309,7 +310,14 @@ class EntityList(UserList):
         :type reverse: bool
         :rtype: EntityList
         """
-        return self.__class__(sorted(self.data, key=lambda d: d[key], reverse=reverse), type_name=self.type_name)
+
+        def sort_by_key(entity):
+            prop = entity[key]
+            if isinstance(prop, six.string_types):
+                return prop.lower()
+            return prop
+
+        return self.__class__(sorted(self.data, key=sort_by_key, reverse=reverse), type_name=self.type_name)
 
     @property
     def first(self):

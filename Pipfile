@@ -19,6 +19,7 @@ requests-mock = "*"
 pytest-datadir = "*"
 pytest-benchmark = "*"
 pytest-monkeytype = {markers = "python_version >= '3.6'",version = "*"}
+pandas = "*"
 
 [packages]
 mygeotab = {editable = true,path = "."}

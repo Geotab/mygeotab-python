@@ -21,4 +21,5 @@
     "python.formatting.provider": "black",
     "python.jediEnabled": false,
     "restructuredtext.confPath": "${workspaceFolder}/docs",
+    "python.pythonPath": "/home/aaron/.local/share/virtualenvs/mygeotab-4dSgkTgl/bin/python",
 }
