@@ -27,7 +27,7 @@ class API(api.API):
     """
 
     def __init__(
-        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT,proxies=None
+        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT, proxies=None
     ):
         """
         Initialize the asynchronous MyGeotab API object with credentials.
@@ -38,9 +38,10 @@ class API(api.API):
         :param session_id: A session ID, assigned by the server.
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+        :param proxies: The proxies dictionary to apply to the request.
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
-        super().__init__(username, password, database, session_id, server, timeout,proxies=proxies)
+        super().__init__(username, password, database, session_id, server, timeout, proxies=proxies)
 
     async def call_async(self, method, **parameters):
         """Makes an async call to the API.

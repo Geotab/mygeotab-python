@@ -50,7 +50,7 @@ class API(object):
         :type server: str or None
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
         :type timeout: float or None
-        :param proxies: Passes param to underlying requests package for those behind firewalls.
+        :param proxies: The proxies dictionary to apply to the request.
         :type proxies: dict or None
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
@@ -100,7 +100,7 @@ class API(object):
             params["credentials"] = self.credentials.get_param()
 
         try:
-            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl,proxies=self._proxies)
+            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -203,7 +203,7 @@ class API(object):
         )
         auth_data["global"] = is_global
         try:
-            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl,proxies=self._proxies)
+            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
             if result:
                 new_server = result["path"]
                 server = self.credentials.server
@@ -430,7 +430,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     :type timeout: float
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
     :type verify_ssl: bool
-    :param proxies: Passes param to underlying requests package for those behind firewalls.
+    :param proxies: The proxies dictionary to apply to the request.
     :type proxies: dict or None
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
@@ -487,7 +487,7 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxie
     :type timeout: float
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
     :type verify_ssl: bool
-    :param proxies: Passes param to underlying requests package for those behind firewalls.
+    :param proxies: The proxies dictionary to apply to the request.
     :type proxies: dict or None
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
@@ -499,7 +499,7 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxie
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = process_parameters(parameters)
-    return _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl,proxies=proxies)
+    return _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl, proxies=proxies)
 
 
 def process_parameters(parameters):
