@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.8.6 (2020-11-22)
+++++++++++++++++++
+
+**Improvements**
+
+- Adds support for using with proxies `#327 <https://github.com/Geotab/mygeotab-python/pull/327>`__.
+
+
 0.8.5 (2019-10-07)
 ++++++++++++++++++
 
