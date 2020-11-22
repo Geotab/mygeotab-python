@@ -34,7 +34,7 @@ class API(object):
     """
 
     def __init__(
-        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT
+        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT, proxies=None
     ):
         """Initialize the MyGeotab API object with credentials.
 
@@ -50,6 +50,8 @@ class API(object):
         :type server: str or None
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
         :type timeout: float or None
+        :param proxies: The proxies dictionary to apply to the request.
+        :type proxies: dict or None
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         if username is None:
@@ -60,6 +62,7 @@ class API(object):
             username=username, session_id=session_id, database=database, server=server, password=password
         )
         self.timeout = timeout
+        self._proxies = proxies
         self.__reauthorize_count = 0
 
     @property
@@ -97,7 +100,7 @@ class API(object):
             params["credentials"] = self.credentials.get_param()
 
         try:
-            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl)
+            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -200,7 +203,7 @@ class API(object):
         )
         auth_data["global"] = is_global
         try:
-            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl)
+            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
             if result:
                 new_server = result["path"]
                 server = self.credentials.server
@@ -414,7 +417,7 @@ class GeotabHTTPAdapter(HTTPAdapter):
         )
 
 
-def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
+def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None):
     """Formats and performs the query against the API.
 
     :param server: The MyGeotab server.
@@ -427,6 +430,8 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
     :type timeout: float
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
     :type verify_ssl: bool
+    :param proxies: The proxies dictionary to apply to the request.
+    :type proxies: dict or None
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
     :raise urllib2.HTTPError: Raises when there is an HTTP status code that indicates failure.
@@ -445,6 +450,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True)
                 allow_redirects=True,
                 timeout=timeout,
                 verify=verify_ssl,
+                proxies=proxies
             )
         except Timeout:
             raise TimeoutException(server)
@@ -470,7 +476,7 @@ def _process(data):
     return data
 
 
-def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters):
+def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None, **parameters):
     """Makes a call to an un-authenticated method on a server
 
     :param method: The method name.
@@ -481,6 +487,8 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
     :type timeout: float
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
     :type verify_ssl: bool
+    :param proxies: The proxies dictionary to apply to the request.
+    :type proxies: dict or None
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
@@ -491,7 +499,7 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **para
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = process_parameters(parameters)
-    return _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl)
+    return _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl, proxies=proxies)
 
 
 def process_parameters(parameters):
