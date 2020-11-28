@@ -27,7 +27,6 @@ if py_version < (2, 7, 9):
 
 packages = ["mygeotab", "mygeotab.ext"]
 if py_version >= (3, 5, 0):
-    packages.append("mygeotab.async")  # Deprecated
     packages.append("mygeotab.py3")
 
 setup(
