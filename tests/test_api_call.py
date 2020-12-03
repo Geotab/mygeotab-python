@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 
 import pytest
 
 from mygeotab import api
-from mygeotab.exceptions import TimeoutException
+from mygeotab.exceptions import AuthenticationException, TimeoutException
 
 USERNAME = os.environ.get("MYGEOTAB_USERNAME")
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD")
 DATABASE = os.environ.get("MYGEOTAB_DATABASE")
 TRAILER_NAME = "mygeotab-python test trailer"
 
-pytestmark = pytest.mark.skipif(sys.version_info < (3, 5), reason="Only running API call tests on Python 3.5")
+FAKE_USERNAME = "fakeusername"
+FAKE_PASSWORD = "fakepassword"
+FAKE_DATABASE = "fakedatabase"
+FAKE_SESSIONID = "3n8943bsdf768"
 
 
 @pytest.fixture(scope="session")
@@ -145,38 +147,38 @@ class TestEntity:
         assert len(trailers) == 0
 
 
-@pytest.mark.skipif(
-    USERNAME is None or DATABASE is None,
-    reason=(
-        "Can't make calls to the API without the MYGEOTAB_USERNAME "
-        "and MYGEOTAB_PASSWORD environment variables being set"
-    ),
-)
 class TestAuthentication:
     def test_invalid_session(self):
-        test_api = api.API(USERNAME, session_id="abc123", database=DATABASE)
-        assert USERNAME in str(test_api.credentials)
-        assert DATABASE in str(test_api.credentials)
-        with pytest.raises(api.AuthenticationException) as excinfo:
+        test_api = api.API(FAKE_USERNAME, session_id=FAKE_SESSIONID, database=FAKE_DATABASE)
+        assert FAKE_USERNAME in str(test_api.credentials)
+        assert FAKE_DATABASE in str(test_api.credentials)
+        with pytest.raises(AuthenticationException) as excinfo:
             test_api.get("User")
         assert "Cannot authenticate" in str(excinfo.value)
-        assert DATABASE in str(excinfo.value)
-        assert USERNAME in str(excinfo.value)
-
-    def test_auth_exception(self):
-        test_api = api.API(USERNAME, password="abc123", database="this_database_does_not_exist")
-        with pytest.raises(api.MyGeotabException) as excinfo:
-            test_api.authenticate(False)
-        assert excinfo.value.name == "DbUnavailableException"
+        assert FAKE_DATABASE in str(excinfo.value)
+        assert FAKE_USERNAME in str(excinfo.value)
 
     def test_username_password_exists(self):
         with pytest.raises(Exception) as excinfo1:
             api.API(None)
         with pytest.raises(Exception) as excinfo2:
-            api.API(USERNAME)
+            api.API(FAKE_USERNAME)
         assert "username" in str(excinfo1.value)
         assert "password" in str(excinfo2.value)
 
+    def test_call_authenticate_sessionid(self, populated_api):
+        credentials = populated_api.authenticate()
+        assert credentials.username == USERNAME
+        assert credentials.database == DATABASE
+        assert credentials.session_id is not None
+
+    def test_call_authenticate_invalid_sessionid(self):
+        test_api = api.API(FAKE_USERNAME, session_id=FAKE_SESSIONID, database=FAKE_DATABASE)
+        with pytest.raises(AuthenticationException) as excinfo:
+            test_api.authenticate()
+        assert "Cannot authenticate" in str(excinfo.value)
+        assert FAKE_DATABASE in str(excinfo.value)
+    
 
 class TestServerCallApi:
     def test_get_version(self):

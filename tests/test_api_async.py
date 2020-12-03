@@ -7,7 +7,7 @@ import os
 import sys
 
 from mygeotab import API, server_call_async
-from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
+from mygeotab.exceptions import MyGeotabException, TimeoutException
 from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 USERNAME = os.environ.get("MYGEOTAB_USERNAME_ASYNC", USERNAME)
@@ -147,39 +147,6 @@ class TestAsyncCallApi:
         await async_populated_api_entity.remove_async("Trailer", trailer)
         trailers = await async_populated_api_entity.get_async("Trailer", name=TRAILER_NAME)
         assert len(trailers) == 0
-
-
-@pytest.mark.skipif(
-    USERNAME is None or DATABASE is None,
-    reason=(
-        "Can't make calls to the API without the MYGEOTAB_USERNAME "
-        "and MYGEOTAB_PASSWORD environment variables being set"
-    ),
-)
-class TestAuthentication:
-    def test_invalid_session(self):
-        test_api = API(USERNAME, session_id="abc123", database=DATABASE)
-        assert USERNAME in str(test_api.credentials)
-        assert DATABASE in str(test_api.credentials)
-        with pytest.raises(AuthenticationException) as excinfo:
-            test_api.get("User")
-        assert "Cannot authenticate" in str(excinfo.value)
-        assert DATABASE in str(excinfo.value)
-        assert USERNAME in str(excinfo.value)
-
-    def test_auth_exception(self):
-        test_api = API(USERNAME, password="abc123", database="this_database_does_not_exist")
-        with pytest.raises(MyGeotabException) as excinfo:
-            test_api.authenticate(False)
-        assert excinfo.value.name == "DbUnavailableException"
-
-    def test_username_password_exists(self):
-        with pytest.raises(Exception) as excinfo1:
-            API(None)
-        with pytest.raises(Exception) as excinfo2:
-            API(USERNAME)
-        assert "username" in str(excinfo1.value)
-        assert "password" in str(excinfo2.value)
 
 
 class TestAsyncServerCallApi:

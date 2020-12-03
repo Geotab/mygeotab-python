@@ -188,10 +188,9 @@ class API(object):
         """
         return self.call("Remove", type_name=type_name, entity=entity)
 
-    def authenticate(self, is_global=True):
+    def authenticate(self):
         """Authenticates against the API server.
 
-        :param is_global: If True, authenticate globally. Local login if False.
         :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
@@ -201,10 +200,16 @@ class API(object):
         auth_data = dict(
             database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
         )
-        auth_data["global"] = is_global
+        if self.credentials.session_id:
+            # Extend the session if the session ID is already present
+            auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
+
         try:
             result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
             if result:
+                if "path" not in result and self.credentials.session_id:
+                    # Session was extended
+                    return self.credentials
                 new_server = result["path"]
                 server = self.credentials.server
                 if new_server != "ThisServer":
