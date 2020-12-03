@@ -105,8 +105,9 @@ class API(object):
             params["credentials"] = self.credentials.get_param()
 
         try:
-            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl,
-                            proxies=self._proxies)
+            result = _query(
+                self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies
+            )
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -121,7 +122,7 @@ class API(object):
                         self.credentials.username, self.credentials.database, self.credentials.server
                     )
             raise
-    
+
     async def call_async(self, method, **parameters):
         """Makes an async call to the API.
 
@@ -169,7 +170,7 @@ class API(object):
         """
         formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
         return self.call("ExecuteMultiCall", calls=formatted_calls)
- 
+
     async def multi_call_async(self, calls):
         """Performs an async multi-call to the API
 
@@ -306,8 +307,14 @@ class API(object):
             auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
 
         try:
-            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl,
-                            proxies=self._proxies)
+            result = _query(
+                self._server,
+                "Authenticate",
+                auth_data,
+                self.timeout,
+                verify_ssl=self._is_verify_ssl,
+                proxies=self._proxies,
+            )
             if result:
                 if "path" not in result and self.credentials.session_id:
                     # Session was extended
