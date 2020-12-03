@@ -13,13 +13,14 @@ import copy
 import re
 import ssl
 import sys
+from collections import UserList
+from urllib.parse import urlparse
 
 import aiohttp
 import requests
 from requests.adapters import HTTPAdapter
 from requests.exceptions import Timeout
 from requests.packages import urllib3
-from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__
 from .exceptions import AuthenticationException, MyGeotabException, TimeoutException

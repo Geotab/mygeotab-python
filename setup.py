@@ -42,7 +42,7 @@ setup(
     packages=packages,
     package_data={"": ["LICENSE"]},
     license="Apache 2.0",
-    install_requires=["requests", "click", "pytz", "arrow", "six"],
+    install_requires=["requests", "click", "pytz", "arrow"],
     setup_requires=["wheel"],
     entry_points="""
         [console_scripts]
