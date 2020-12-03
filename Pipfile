@@ -20,6 +20,7 @@ pytest-datadir = "*"
 pytest-benchmark = "*"
 pytest-monkeytype = {markers = "python_version >= '3.6'",version = "*"}
 pandas = "*"
+pytest-dotenv = "*"
 
 [packages]
 mygeotab = {editable = true,path = "."}
