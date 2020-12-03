@@ -39,17 +39,17 @@ object:
 
 
 To handle the saving of credentials for later use (a Geotab best practices recommendation), the :func:`authenticate() <mygeotab.API.authenticate>` method returns an instance of the :class:`Credentials <mygeotab.Credentials>` object.
-From this, store the `database`, `username`, and `session_id` properties so they can be used later:
+From this, store the `server`, `database`, `username`, and `session_id` properties so they can be used later:
 
 .. code-block:: python
 
     credentials = api.authenticate()
-    my_save_credentials(username=credentials.username, database=credentials.database, session_id=credentials.session_id)
+    my_save_credentials(username=credentials.username, database=credentials.database, server=credentials.server, session_id=credentials.session_id)
 
     # Continue with api object until your app finishes
 
     local_credentials = my_read_credentials() # Next load of the app
-    new_api = mygeotab.api(username=local_credentials.user, database=local_credentials.database, session_id=saved_session_id)
+    new_api = mygeotab.api(username=local_credentials.user, database=local_credentials.database, server=local_credentials.server, session_id=saved_session_id)
 
 .. note::
     The best practices of saving credentials only applies to some service-based SDK apps. The recommendation is that if the app runs on
