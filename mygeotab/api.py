@@ -200,8 +200,8 @@ class API(object):
         auth_data = dict(
             database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
         )
-        if self.credentials.session_id:
-            # Extend the session if the session ID is already present
+        if self.credentials.session_id and not self.credentials.password:
+            # Extend the session if only the session ID is present
             auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
 
         try:
