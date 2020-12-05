@@ -11,6 +11,10 @@ Changes
 - Adds support for using with proxies `#327 <https://github.com/Geotab/mygeotab-python/pull/327>`__.
 - Calling `authenticate()` on an API instance more than once no longer results in an error `#328 https://github.com/Geotab/mygeotab-python/issues/328`__.
 
+**Bug Fixes**
+
+- Handle `ConnectionError` as errors in feed extension rather than crashing `#130 https://github.com/Geotab/mygeotab-python/issues/130`__.
+
 
 0.8.5 (2019-10-07)
 ++++++++++++++++++

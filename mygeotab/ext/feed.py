@@ -8,11 +8,11 @@ A simple data feed wrapper, written as an extension to the MyGeotab API object.
 """
 
 import abc
-
 from threading import Thread
 from time import sleep
 
 from mygeotab import api
+from requests.exceptions import ConnectionError
 
 
 class DataFeedListener(object):
@@ -79,7 +79,7 @@ class DataFeed(object):
                 )
                 self._version = result["toVersion"]
                 self.listener.on_data(result["data"])
-            except api.MyGeotabException as exception:
+            except (api.MyGeotabException, ConnectionError) as exception:
                 if self.listener.on_error(exception) is False:
                     break
             if not self.running:
