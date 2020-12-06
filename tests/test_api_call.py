@@ -178,7 +178,7 @@ class TestAuthentication:
             test_api.authenticate()
         assert "Cannot authenticate" in str(excinfo.value)
         assert FAKE_DATABASE in str(excinfo.value)
-    
+
 
 class TestServerCallApi:
     def test_get_version(self):

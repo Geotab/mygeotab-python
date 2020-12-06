@@ -3,9 +3,7 @@
 from datetime import datetime
 
 import pytest
-from six.moves import UserList
-
-from mygeotab.api import EntityList
+from mygeotab.ext.entityList import EntityList
 
 
 class TestEntityList:

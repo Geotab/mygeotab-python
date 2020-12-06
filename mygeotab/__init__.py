@@ -6,13 +6,13 @@ __version__ = "0.8.6"
 
 import sys
 
-from .api import Credentials
+from .api import Credentials, server_call
 from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
 
 try:
     from .py3.api_async import API, server_call_async  # noqa: F401
 except (SyntaxError, ImportError):
-    from .api import API, server_call
+    from .api import API
 
 __all__ = ["API", "Credentials", "MyGeotabException", "AuthenticationException", "TimeoutException", "server_call"]
 
