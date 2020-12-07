@@ -11,6 +11,17 @@ class API(api.API):
     """
 
     def get(self, type_name, **parameters):
+        """Gets entities using the API. Shortcut for using call() with the 'Get' method. This returns an EntityList
+        with added convience methods.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param parameters: Additional parameters to send.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: EntityList
+        """
         return EntityList(super().get(type_name, **parameters), type_name=type_name)
 
 
