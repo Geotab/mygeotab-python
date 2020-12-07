@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import pytest
-from mygeotab.ext.entityList import EntityList
+from mygeotab.ext.entitylist import EntityList
 
 
 class TestEntityList:

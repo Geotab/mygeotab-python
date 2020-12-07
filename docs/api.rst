@@ -12,8 +12,6 @@ Querying Data
    :inherited-members:
    :members:
 
-.. autoclass:: EntityList
-
 .. autoclass:: MyGeotabException
 
 .. autoclass:: TimeoutException
@@ -34,6 +32,16 @@ Date Helpers
 
 Extras
 ------
+
+EntityList
+~~~~~~~~~~
+
+.. autoclass:: mygeotab.ext.entitylist.API
+   :inherited-members:
+   :members:
+
+.. autoclass:: mygeotab.ext.entitylist.EntityList
+   :members:
 
 Data Feed
 ~~~~~~~~~

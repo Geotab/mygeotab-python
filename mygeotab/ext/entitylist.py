@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
+
 import six
 from mygeotab import api
 from six.moves import UserList
 
 
 class API(api.API):
+    """An experimental wrapper around the base MyGeotab API class that adds some helper methods to results when
+    retrieving results with `get()`.
+    """
+
     def get(self, type_name, **parameters):
         return EntityList(super().get(type_name, **parameters), type_name=type_name)
 
@@ -133,5 +139,5 @@ class EntityList(UserList):
                 from pandas.io.json import json_normalize
 
                 return json_normalize(self.data)
-                
+
         return pandas.DataFrame.from_dict(self.data)
