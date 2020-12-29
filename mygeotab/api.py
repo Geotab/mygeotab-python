@@ -13,7 +13,7 @@ import copy
 import re
 import ssl
 import sys
-from collections import UserList
+from typing import Optional
 from urllib.parse import urlparse
 
 import aiohttp
@@ -27,331 +27,6 @@ from .exceptions import AuthenticationException, MyGeotabException, TimeoutExcep
 from .serializers import json_deserialize, json_serialize
 
 DEFAULT_TIMEOUT = 300
-
-
-class API(object):
-    """A simple and Pythonic wrapper for the MyGeotab API."""
-
-    def __init__(
-        self,
-        username,
-        password=None,
-        database=None,
-        session_id=None,
-        server="my.geotab.com",
-        timeout=DEFAULT_TIMEOUT,
-        proxies=None,
-    ):
-        """Initialize the MyGeotab API object with credentials.
-
-        :param username: The username used for MyGeotab servers. Usually an email address.
-        :type username: str
-        :param password: The password associated with the username. Optional if `session_id` is provided.
-        :type password: str
-        :param database: The database or company name. Optional as this usually gets resolved upon authentication.
-        :type database: str
-        :param session_id: A session ID, assigned by the server.
-        :type session_id: str
-        :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
-        :type server: str or None
-        :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-        :type timeout: float or None
-        :param proxies: The proxies dictionary to apply to the request.
-        :type proxies: dict or None
-        :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
-        """
-        if username is None:
-            raise Exception("`username` cannot be None")
-        if password is None and session_id is None:
-            raise Exception("`password` and `session_id` must not both be None")
-        self.credentials = Credentials(
-            username=username, session_id=session_id, database=database, server=server, password=password
-        )
-        self.timeout = timeout
-        self._proxies = proxies
-        self.__reauthorize_count = 0
-
-    @property
-    def _server(self):
-        if not self.credentials.server:
-            self.credentials.server = "my.geotab.com"
-        return self.credentials.server
-
-    @property
-    def _is_verify_ssl(self):
-        """Whether or not SSL be verified.
-
-        :rtype: bool
-        :return: True if the calls are being made locally.
-        """
-        return not any(s in get_api_url(self._server) for s in ["127.0.0.1", "localhost"])
-
-    def call(self, method, **parameters):
-        """Makes a call to the API.
-
-        :param method: The method name.
-        :type method: str
-        :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        :return: The results from the server.
-        :rtype: dict or list
-        """
-        if method is None:
-            raise Exception("A method name must be specified")
-        params = process_parameters(parameters)
-        if self.credentials and not self.credentials.session_id:
-            self.authenticate()
-        if "credentials" not in params and self.credentials.session_id:
-            params["credentials"] = self.credentials.get_param()
-
-        try:
-            result = _query(
-                self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies
-            )
-            if result is not None:
-                self.__reauthorize_count = 0
-            return result
-        except MyGeotabException as exception:
-            if exception.name == "InvalidUserException":
-                if self.__reauthorize_count == 0 and self.credentials.password:
-                    self.__reauthorize_count += 1
-                    self.authenticate()
-                    return self.call(method, **parameters)
-                else:
-                    raise AuthenticationException(
-                        self.credentials.username, self.credentials.database, self.credentials.server
-                    )
-            raise
-
-    async def call_async(self, method, **parameters):
-        """Makes an async call to the API.
-
-        :param method: The method name.
-        :param params: Additional parameters to send (for example, search=dict(id='b123') )
-        :return: The JSON result (decoded into a dict) from the server.abs
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        if method is None:
-            raise Exception("A method name must be specified")
-        params = process_parameters(parameters)
-        if self.credentials and not self.credentials.session_id:
-            self.authenticate()
-        if "credentials" not in params and self.credentials.session_id:
-            params["credentials"] = self.credentials.get_param()
-
-        try:
-            result = await _query_async(self._server, method, params, verify_ssl=self._is_verify_ssl)
-            if result is not None:
-                self.__reauthorize_count = 0
-            return result
-        except MyGeotabException as exception:
-            if exception.name == "InvalidUserException":
-                if self.__reauthorize_count == 0 and self.credentials.password:
-                    self.__reauthorize_count += 1
-                    self.authenticate()
-                    return await self.call_async(method, **parameters)
-                else:
-                    raise AuthenticationException(
-                        self.credentials.username, self.credentials.database, self.credentials.server
-                    )
-            raise
-
-    def multi_call(self, calls):
-        """Performs a multi-call to the API.
-
-        :param calls: A list of call 2-tuples with method name and params
-                      (for example, ('Get', dict(typeName='Trip')) ).
-        :type calls: list((str, dict))
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        :return: The results from the server.
-        :rtype: list
-        """
-        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
-        return self.call("ExecuteMultiCall", calls=formatted_calls)
-
-    async def multi_call_async(self, calls):
-        """Performs an async multi-call to the API
-
-        :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
-        :return: The JSON result (decoded into a dict) from the server
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
-        return await self.call_async("ExecuteMultiCall", calls=formatted_calls)
-
-    def get(self, type_name, **parameters):
-        """Gets entities using the API. Shortcut for using call() with the 'Get' method.
-
-        :param type_name: The type of entity.
-        :type type_name: str
-        :param parameters: Additional parameters to send.
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        :return: The results from the server.
-        :rtype: list
-        """
-        if parameters:
-            results_limit = parameters.get("resultsLimit", None)
-            if results_limit is not None:
-                del parameters["resultsLimit"]
-            if "search" in parameters:
-                parameters.update(parameters["search"])
-                del parameters["search"]
-            parameters = dict(search=parameters, resultsLimit=results_limit)
-        return self.call("Get", type_name=type_name, **parameters)
-
-    async def get_async(self, type_name, **parameters):
-        """Gets entities asynchronously using the API. Shortcut for using async_call() with the 'Get' method.
-
-        :param type_name: The type of entity.
-        :param parameters: Additional parameters to send.
-        :return: The JSON result (decoded into a dict) from the server.
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        if parameters:
-            results_limit = parameters.get("resultsLimit", None)
-            if results_limit is not None:
-                del parameters["resultsLimit"]
-            if "search" in parameters:
-                parameters.update(parameters["search"])
-            parameters = dict(search=parameters, resultsLimit=results_limit)
-        return await self.call_async("Get", type_name=type_name, **parameters)
-
-    def add(self, type_name, entity):
-        """Adds an entity using the API. Shortcut for using call() with the 'Add' method.
-
-        :param type_name: The type of entity.
-        :type type_name: str
-        :param entity: The entity to add.
-        :type entity: dict
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        :return: The id of the object added.
-        :rtype: str
-        """
-        return self.call("Add", type_name=type_name, entity=entity)
-
-    async def add_async(self, type_name, entity):
-        """
-        Adds an entity asynchronously using the API. Shortcut for using async_call() with the 'Add' method.
-
-        :param type_name: The type of entity.
-        :param entity: The entity to add.
-        :return: The id of the object added.
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        return await self.call_async("Add", type_name=type_name, entity=entity)
-
-    def set(self, type_name, entity):
-        """Sets an entity using the API. Shortcut for using call() with the 'Set' method.
-
-        :param type_name: The type of entity.
-        :type type_name: str
-        :param entity: The entity to set.
-        :type entity: dict
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        return self.call("Set", type_name=type_name, entity=entity)
-
-    async def set_async(self, type_name, entity):
-        """Sets an entity asynchronously using the API. Shortcut for using async_call() with the 'Set' method.
-
-        :param type_name: The type of entity
-        :param entity: The entity to set
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
-        """
-        return await self.call_async("Set", type_name=type_name, entity=entity)
-
-    def remove(self, type_name, entity):
-        """Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
-
-        :param type_name: The type of entity.
-        :type type_name: str
-        :param entity: The entity to remove.
-        :type entity: dict
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        return self.call("Remove", type_name=type_name, entity=entity)
-
-    async def remove_async(self, type_name, entity):
-        """Removes an entity asynchronously using the API. Shortcut for using async_call() with the 'Remove' method.
-
-        :param type_name: The type of entity.
-        :param entity: The entity to remove.
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        """
-        return await self.call_async("Remove", type_name=type_name, entity=entity)
-
-    def authenticate(self):
-        """Authenticates against the API server.
-
-        :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
-        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-        :raise TimeoutException: Raises when the request does not respond after some time.
-        :return: A Credentials object with a session ID created by the server.
-        :rtype: Credentials
-        """
-        auth_data = dict(
-            database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
-        )
-        if self.credentials.session_id and not self.credentials.password:
-            # Extend the session if only the session ID is present
-            auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
-
-        try:
-            result = _query(
-                self._server,
-                "Authenticate",
-                auth_data,
-                self.timeout,
-                verify_ssl=self._is_verify_ssl,
-                proxies=self._proxies,
-            )
-            if result:
-                if "path" not in result and self.credentials.session_id:
-                    # Session was extended
-                    return self.credentials
-                new_server = result["path"]
-                server = self.credentials.server
-                if new_server != "ThisServer":
-                    server = new_server
-                credentials = result["credentials"]
-                self.credentials = Credentials(
-                    credentials["userName"], credentials["sessionId"], credentials["database"], server
-                )
-                return self.credentials
-        except MyGeotabException as exception:
-            if exception.name == "InvalidUserException":
-                raise AuthenticationException(
-                    self.credentials.username, self.credentials.database, self.credentials.server
-                )
-            raise
-
-    @staticmethod
-    def from_credentials(credentials):
-        """Returns a new API object from an existing Credentials object.
-
-        :param credentials: The existing saved credentials.
-        :type credentials: Credentials
-        :return: A new API object populated with MyGeotab credentials.
-        :rtype: API
-        """
-        return API(
-            username=credentials.username,
-            password=credentials.password,
-            database=credentials.database,
-            session_id=credentials.session_id,
-            server=credentials.server,
-        )
 
 
 class Credentials(object):
@@ -392,6 +67,449 @@ class Credentials(object):
         :rtype: dict
         """
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
+
+
+class APIBase:
+    """A simple and Pythonic wrapper for the MyGeotab API."""
+
+    def __init__(
+        self,
+        username,
+        password=None,
+        database=None,
+        session_id=None,
+        server="my.geotab.com",
+        timeout=DEFAULT_TIMEOUT,
+        proxies=None,
+    ):
+        """Initialize the MyGeotab API object with credentials.
+
+        :param username: The username used for MyGeotab servers. Usually an email address.
+        :type username: str
+        :param password: The password associated with the username. Optional if `session_id` is provided.
+        :type password: str
+        :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+        :type database: str
+        :param session_id: A session ID, assigned by the server.
+        :type session_id: str
+        :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :type server: str or None
+        :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+        :type timeout: float or None
+        :param proxies: The proxies dictionary to apply to the request.
+        :type proxies: dict or None
+        :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
+        """
+        if username is None:
+            raise Exception("`username` cannot be None")
+        if password is None and session_id is None:
+            raise Exception("`password` and `session_id` must not both be None")
+        self.credentials = Credentials(
+            username=username, session_id=session_id, database=database, server=server, password=password
+        )
+        self.timeout = timeout
+        self._proxies = proxies
+        self.__authentication_retry_count = 0
+
+    @property
+    def _server(self):
+        if not self.credentials.server:
+            self.credentials.server = "my.geotab.com"
+        return self.credentials.server
+
+    @property
+    def _is_verify_ssl(self):
+        """Whether or not SSL be verified.
+
+        :rtype: bool
+        :return: True if the calls are being made locally.
+        """
+        return not any(s in get_api_url(self._server) for s in ["127.0.0.1", "localhost"])
+
+    def _set_auth_retry(self, reset=False):
+        if reset:
+            self.__authentication_retry_count = 0
+            return
+        self.__authentication_retry_count += 1
+
+    def _can_retry_auth(self):
+        return self.__authentication_retry_count == 0
+
+    def _handle_auth_result(self, result: dict):
+        if not result:
+            return None
+
+        if "path" not in result and self.credentials.session_id:
+            # Session was extended
+            return self.credentials
+        new_server = result["path"]
+        server = self.credentials.server
+        if new_server != "ThisServer":
+            server = new_server
+        credentials = result["credentials"]
+        self.credentials = Credentials(
+            credentials["userName"], credentials["sessionId"], credentials["database"], server
+        )
+        return self.credentials
+
+    @classmethod
+    def from_credentials(cls, credentials, timeout=DEFAULT_TIMEOUT, proxies=None):
+        """Returns a new API object from an existing Credentials object.
+
+        :param credentials: The existing saved credentials.
+        :type credentials: Credentials
+        :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+        :type timeout: float or None
+        :param proxies: The proxies dictionary to apply to the request.
+        :type proxies: dict or None
+        :return: A new API object populated with MyGeotab credentials.
+        :rtype: API
+        """
+        return cls(
+            username=credentials.username,
+            password=credentials.password,
+            database=credentials.database,
+            session_id=credentials.session_id,
+            server=credentials.server,
+            timeout=timeout,
+            proxies=proxies,
+        )
+
+
+class API(APIBase):
+    """A simple and Pythonic wrapper for the MyGeotab API."""
+
+    def __init__(
+        self,
+        username,
+        password=None,
+        database=None,
+        session_id=None,
+        server="my.geotab.com",
+        timeout=DEFAULT_TIMEOUT,
+        proxies=None,
+    ):
+        """Initialize the MyGeotab API object with credentials.
+
+        :param username: The username used for MyGeotab servers. Usually an email address.
+        :type username: str
+        :param password: The password associated with the username. Optional if `session_id` is provided.
+        :type password: str
+        :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+        :type database: str
+        :param session_id: A session ID, assigned by the server.
+        :type session_id: str
+        :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :type server: str or None
+        :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+        :type timeout: float or None
+        :param proxies: The proxies dictionary to apply to the request.
+        :type proxies: dict or None
+        :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
+        """
+        super().__init__(username, password, database, session_id, server, timeout, proxies)
+
+    def call(self, method, **parameters):
+        """Makes a call to the API.
+
+        :param method: The method name.
+        :type method: str
+        :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: dict or list
+        """
+        if method is None:
+            raise Exception("A method name must be specified")
+        params = process_parameters(parameters)
+        if self.credentials and not self.credentials.session_id:
+            self.authenticate()
+        if "credentials" not in params and self.credentials.session_id:
+            params["credentials"] = self.credentials.get_param()
+
+        try:
+            result = _query(
+                self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies
+            )
+            if result is not None:
+                self._set_auth_retry(True)
+            return result
+        except MyGeotabException as exception:
+            if exception.name == "InvalidUserException":
+                if self._can_retry_auth() and self.credentials.password:
+                    self._set_auth_retry()
+                    self.authenticate()
+                    return self.call(method, **parameters)
+                else:
+                    raise AuthenticationException(
+                        self.credentials.username, self.credentials.database, self.credentials.server
+                    )
+            raise
+
+    def multi_call(self, calls):
+        """Performs a multi-call to the API.
+
+        :param calls: A list of call 2-tuples with method name and params
+                      (for example, ('Get', dict(typeName='Trip')) ).
+        :type calls: list((str, dict))
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: list
+        """
+        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
+        return self.call("ExecuteMultiCall", calls=formatted_calls)
+
+    def get(self, type_name, **parameters):
+        """Gets entities using the API. Shortcut for using call() with the 'Get' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param parameters: Additional parameters to send.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: list
+        """
+        if parameters:
+            results_limit = parameters.get("resultsLimit", None)
+            if results_limit is not None:
+                del parameters["resultsLimit"]
+            if "search" in parameters:
+                parameters.update(parameters["search"])
+                del parameters["search"]
+            parameters = dict(search=parameters, resultsLimit=results_limit)
+        return self.call("Get", type_name=type_name, **parameters)
+
+    def add(self, type_name, entity):
+        """Adds an entity using the API. Shortcut for using call() with the 'Add' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param entity: The entity to add.
+        :type entity: dict
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The id of the object added.
+        :rtype: str
+        """
+        return self.call("Add", type_name=type_name, entity=entity)
+
+    def set(self, type_name, entity):
+        """Sets an entity using the API. Shortcut for using call() with the 'Set' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param entity: The entity to set.
+        :type entity: dict
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        return self.call("Set", type_name=type_name, entity=entity)
+
+    def remove(self, type_name, entity):
+        """Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param entity: The entity to remove.
+        :type entity: dict
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        return self.call("Remove", type_name=type_name, entity=entity)
+
+    def authenticate(self):
+        """Authenticates against the API server.
+
+        :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: A Credentials object with a session ID created by the server.
+        :rtype: Credentials
+        """
+        auth_data = dict(
+            database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
+        )
+        if self.credentials.session_id and not self.credentials.password:
+            # Extend the session if only the session ID is present
+            auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
+
+        try:
+            return self._handle_auth_result(
+                _query(
+                    self._server,
+                    "Authenticate",
+                    auth_data,
+                    self.timeout,
+                    verify_ssl=self._is_verify_ssl,
+                    proxies=self._proxies,
+                ),
+            )
+        except MyGeotabException as exception:
+            if exception.name == "InvalidUserException":
+                raise AuthenticationException(
+                    self.credentials.username, self.credentials.database, self.credentials.server
+                )
+            raise
+
+
+class AsyncAPI(APIBase):
+    """A simple and Pythonic wrapper for the MyGeotab API."""
+
+    def __init__(
+        self,
+        username,
+        password=None,
+        database=None,
+        session_id=None,
+        server="my.geotab.com",
+        timeout=DEFAULT_TIMEOUT,
+        proxies=None,
+    ):
+        """Initialize the MyGeotab API object with credentials.
+
+        :param username: The username used for MyGeotab servers. Usually an email address.
+        :type username: str
+        :param password: The password associated with the username. Optional if `session_id` is provided.
+        :type password: str
+        :param database: The database or company name. Optional as this usually gets resolved upon authentication.
+        :type database: str
+        :param session_id: A session ID, assigned by the server.
+        :type session_id: str
+        :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :type server: str or None
+        :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+        :type timeout: float or None
+        :param proxies: The proxies dictionary to apply to the request.
+        :type proxies: dict or None
+        :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
+        """
+        super().__init__(username, password, database, session_id, server, timeout, proxies)
+
+    async def call(self, method, **parameters):
+        """Makes an async call to the API.
+
+        :param method: The method name.
+        :param params: Additional parameters to send (for example, search=dict(id='b123') )
+        :return: The JSON result (decoded into a dict) from the server.abs
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        if method is None:
+            raise Exception("A method name must be specified")
+        params = process_parameters(parameters)
+        if self.credentials and not self.credentials.session_id:
+            await self.authenticate()
+        if "credentials" not in params and self.credentials.session_id:
+            params["credentials"] = self.credentials.get_param()
+
+        try:
+            result = await _query_async(self._server, method, params, verify_ssl=self._is_verify_ssl)
+            if result is not None:
+                self._set_auth_retry(True)
+            return result
+        except MyGeotabException as exception:
+            if exception.name == "InvalidUserException":
+                if self._can_retry_auth() and self.credentials.password:
+                    self._set_auth_retry()
+                    await self.authenticate()
+                    return await self.call(method, **parameters)
+                else:
+                    raise AuthenticationException(
+                        self.credentials.username, self.credentials.database, self.credentials.server
+                    )
+            raise
+
+    async def multi_call(self, calls):
+        """Performs an async multi-call to the API
+
+        :param calls: A list of call 2-tuples with method name and params (for example, ('Get', dict(typeName='Trip')) )
+        :return: The JSON result (decoded into a dict) from the server
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
+        return await self.call("ExecuteMultiCall", calls=formatted_calls)
+
+    async def get(self, type_name, **parameters):
+        """Gets entities asynchronously using the API. Shortcut for using call() with the 'Get' method.
+
+        :param type_name: The type of entity.
+        :param parameters: Additional parameters to send.
+        :return: The JSON result (decoded into a dict) from the server.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        if parameters:
+            results_limit = parameters.get("resultsLimit", None)
+            if results_limit is not None:
+                del parameters["resultsLimit"]
+            if "search" in parameters:
+                parameters.update(parameters["search"])
+            parameters = dict(search=parameters, resultsLimit=results_limit)
+        return await self.call("Get", type_name=type_name, **parameters)
+
+    async def add(self, type_name, entity):
+        """
+        Adds an entity asynchronously using the API. Shortcut for using call() with the 'Add' method.
+
+        :param type_name: The type of entity.
+        :param entity: The entity to add.
+        :return: The id of the object added.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        return await self.call("Add", type_name=type_name, entity=entity)
+
+    async def set(self, type_name, entity):
+        """Sets an entity asynchronously using the API. Shortcut for using call() with the 'Set' method.
+
+        :param type_name: The type of entity
+        :param entity: The entity to set
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+        """
+        return await self.call("Set", type_name=type_name, entity=entity)
+
+    async def remove(self, type_name, entity):
+        """Removes an entity asynchronously using the API. Shortcut for using call() with the 'Remove' method.
+
+        :param type_name: The type of entity.
+        :param entity: The entity to remove.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        return await self.call("Remove", type_name=type_name, entity=entity)
+
+    async def authenticate(self) -> Optional[Credentials]:
+        """Authenticates asyncronously against the API server.
+
+        :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: A Credentials object with a session ID created by the server.
+        :rtype: Credentials
+        """
+        auth_data = dict(
+            database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
+        )
+        if self.credentials.session_id and not self.credentials.password:
+            # Extend the session if only the session ID is present
+            auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
+
+        try:
+            return self._handle_auth_result(
+                await _query_async(
+                    self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl
+                ),
+            )
+        except MyGeotabException as exception:
+            if exception.name == "InvalidUserException":
+                raise AuthenticationException(
+                    self.credentials.username, self.credentials.database, self.credentials.server
+                )
+            raise
 
 
 class GeotabHTTPAdapter(HTTPAdapter):
@@ -479,7 +597,7 @@ async def _query_async(server, method, parameters, timeout=DEFAULT_TIMEOUT, veri
     return _process(json_deserialize(body))
 
 
-def _process(data):
+def _process(data) -> dict:
     """Processes the returned JSON from the server.
 
     :param data: The JSON data in dict form.
@@ -588,4 +706,4 @@ def get_headers():
     }
 
 
-__all__ = ["API", "Credentials", "MyGeotabException", "AuthenticationException"]
+__all__ = ["API", "AsyncAPI", "Credentials", "MyGeotabException", "AuthenticationException"]
