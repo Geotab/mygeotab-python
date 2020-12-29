@@ -23,7 +23,7 @@ pandas = "*"
 pytest-dotenv = "*"
 
 [packages]
-mygeotab = {editable = true,path = "."}
+mygeotab = {path = "."}
 
 [pipenv]
 allow_prereleases = true

@@ -126,7 +126,7 @@ class TestAsyncCallApi:
 
     @pytest.mark.asyncio
     async def test_pythonic_parameters(self, async_populated_api: AsyncAPI):
-        users = async_populated_api.get("User")
+        users = await async_populated_api.get("User")
         count_users = await async_populated_api.call("Get", type_name="User")
         assert len(count_users) >= 1
         assert len(count_users) == len(users)

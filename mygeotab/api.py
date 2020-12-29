@@ -11,16 +11,11 @@ from __future__ import unicode_literals
 
 import copy
 import re
-import ssl
 import sys
 from typing import Optional
 from urllib.parse import urlparse
 
-import aiohttp
-import requests
-from requests.adapters import HTTPAdapter
-from requests.exceptions import Timeout
-from requests.packages import urllib3
+import httpx
 
 from . import __title__, __version__
 from .exceptions import AuthenticationException, MyGeotabException, TimeoutException
@@ -512,15 +507,6 @@ class AsyncAPI(APIBase):
             raise
 
 
-class GeotabHTTPAdapter(HTTPAdapter):
-    """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
-
-    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        self.poolmanager = urllib3.poolmanager.PoolManager(
-            num_pools=connections, maxsize=maxsize, block=block, ssl_version=ssl.PROTOCOL_TLSv1_2, **pool_kwargs
-        )
-
-
 def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None):
     """Formats and performs the query against the API.
 
@@ -544,19 +530,12 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters or {})
     headers = get_headers()
-    with requests.Session() as session:
-        session.mount("https://", GeotabHTTPAdapter())
+    with httpx.Client(http2=True, verify=verify_ssl, proxies=proxies) as client:
         try:
-            response = session.post(
-                api_endpoint,
-                data=json_serialize(params),
-                headers=headers,
-                allow_redirects=True,
-                timeout=timeout,
-                verify=verify_ssl,
-                proxies=proxies,
+            response = client.post(
+                api_endpoint, data=json_serialize(params), headers=headers, allow_redirects=True, timeout=timeout,
             )
-        except Timeout:
+        except httpx.TimeoutException:
             raise TimeoutException(server)
     response.raise_for_status()
     content_type = response.headers.get("Content-Type")
@@ -565,36 +544,41 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     return _process(json_deserialize(response.text))
 
 
-async def _query_async(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True):
-    """Formats and performs the asynchronous query against the API
+async def _query_async(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None):
+    """Formats and performs the query against the API.
 
-    :param server: The server to query.
+    :param server: The MyGeotab server.
+    :type server: str
     :param method: The method name.
-    :param parameters: A dict of parameters to send
+    :type method: str
+    :param parameters: The parameters to send with the query.
+    :type parameters: dict
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-    :param verify_ssl: Whether or not to verify SSL connections
-    :return: The JSON-decoded result from the server
-    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
+    :type timeout: float
+    :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
+    :type verify_ssl: bool
+    :param proxies: The proxies dictionary to apply to the request.
+    :type proxies: dict or None
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
-    :raise aiohttp.ClientResponseError: Raises when there is an HTTP status code that indicates failure.
+    :raise urllib2.HTTPError: Raises when there is an HTTP status code that indicates failure.
+    :return: The JSON-decoded result from the server.
     """
     api_endpoint = get_api_url(server)
-    params = dict(id=-1, method=method, params=parameters)
+    params = dict(id=-1, method=method, params=parameters or {})
     headers = get_headers()
-    conn = aiohttp.TCPConnector(ssl=ssl.SSLContext(ssl.PROTOCOL_TLSv1_2) if verify_ssl else False)
-    try:
-        async with aiohttp.ClientSession(connector=conn) as session:
-            response = await session.post(
-                api_endpoint, data=json_serialize(params), headers=headers, timeout=timeout, allow_redirects=True
+    async with httpx.AsyncClient(http2=True, verify=verify_ssl, proxies=proxies) as client:
+        try:
+            response = await client.post(
+                api_endpoint, data=json_serialize(params), headers=headers, allow_redirects=True, timeout=timeout
             )
-            response.raise_for_status()
-            content_type = response.headers.get("Content-Type")
-            body = await response.text()
-    except TimeoutError:
-        raise TimeoutException(server)
+        except httpx.TimeoutException:
+            raise TimeoutException(server)
+    response.raise_for_status()
+    content_type = response.headers.get("Content-Type")
     if content_type and "application/json" not in content_type.lower():
-        return body
-    return _process(json_deserialize(body))
+        return response.text
+    return _process(json_deserialize(response.text))
 
 
 def _process(data) -> dict:
