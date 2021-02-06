@@ -4,24 +4,14 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 
 [dev-packages]
-coverage = "*"
-flake8 = "*"
 pytest = "*"
 pytest-cov = "*"
-rope = "*"
-mygeotab = {editable = true,path = "."}
-mypy = "*"
+pytest-flake8 = "*"
+pytest-mypy = "*"
 pytest-asyncio = "*"
-black = "*"
-requests-mock = "*"
-pytest-datadir = "*"
-pytest-benchmark = "*"
-pytest-monkeytype = "*"
-pandas = "*"
+pytest-black = "*"
 pytest-dotenv = "*"
-setuptools = "*"
-setuptools-scm = {extras = ["toml"], version = "*"}
-setuptools-scm-git-archive = "*"
+mygeotab = {editable = true,path = "."}
 
 [packages]
 mygeotab = {path = "."}
