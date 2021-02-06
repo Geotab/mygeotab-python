@@ -17,6 +17,7 @@ lib64/
 parts/
 sdist/
 var/
+.eggs/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -55,3 +56,6 @@ docs/_build/
 
 # Env
 .env
+
+# Version
+mygeotab/version.py
