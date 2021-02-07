@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import json
 from datetime import date, datetime
 
 import pytz
-
-from mygeotab import serializers, dates
-from mygeotab.serializers import json_serialize, json_deserialize
+from mygeotab import dates
+from mygeotab.serializers import json_deserialize, json_serialize
 
 
 class TestSerialization:

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-
-import os
-import sys
+# flake8: noqa: E501
 
 import pytest
-
 from mygeotab import api
 
 
