@@ -85,6 +85,7 @@ class TestAsyncAuthentication:
     @pytest.mark.asyncio
     async def test_call_authenticate_sessionid(self, async_populated_api: AsyncAPI):
         credentials = await async_populated_api.authenticate()
+        assert credentials is not None
         assert credentials.username == USERNAME
         assert credentials.database == DATABASE
         assert credentials.session_id is not None

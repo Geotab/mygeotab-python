@@ -19,7 +19,6 @@
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
-    "python.jediEnabled": false,
     "restructuredtext.confPath": "${workspaceFolder}/docs",
     "python.pythonPath": "/home/aarontoth/.cache/pypoetry/virtualenvs/mygeotab-python-_SDYG2Nl-py3.8/bin/python",
     "python.languageServer": "Pylance",

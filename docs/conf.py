@@ -15,6 +15,7 @@
 import sys
 import os
 import datetime
+from typing import Dict
 import mygeotab
 import sphinx_rtd_theme
 
@@ -187,7 +188,7 @@ htmlhelp_basename = 'MyGeotabPythonSDKdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+latex_elements: Dict[str, str] = {
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
 
