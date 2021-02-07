@@ -5,8 +5,7 @@ __author__ = "Aaron Toth"
 __version__ = "0.0.0"
 
 from .api import API, AsyncAPI, Credentials, server_call, server_call_async
-from .exceptions import (AuthenticationException, MyGeotabException,
-                         TimeoutException)
+from .exceptions import AuthenticationException, MyGeotabException, TimeoutException
 
 __all__ = [
     "API",
