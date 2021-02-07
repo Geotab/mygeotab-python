@@ -21,6 +21,6 @@
     "python.formatting.provider": "black",
     "python.jediEnabled": false,
     "restructuredtext.confPath": "${workspaceFolder}/docs",
-    "python.pythonPath": "/home/aarontoth/.local/share/virtualenvs/mygeotab-python-0imvwKXF/bin/python",
+    "python.pythonPath": "/home/aarontoth/.cache/pypoetry/virtualenvs/mygeotab-python-_SDYG2Nl-py3.8/bin/python",
     "python.languageServer": "Pylance",
 }

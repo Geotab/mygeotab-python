@@ -56,6 +56,3 @@ docs/_build/
 
 # Env
 .env
-
-# Version
-mygeotab/version.py
