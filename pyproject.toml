@@ -32,6 +32,9 @@ include = [
     "README.rst",
     "CHANGELOG.rst"
 ]
+packages = [
+    { include = "mygeotab" }
+]
 
 [tool.poetry.urls]
 "Issue Tracker" = "https://github.com/geotab/mygeotab-python/issues"
@@ -53,6 +56,8 @@ pytest-asyncio = "^0.14.0"
 pytest-black = "^0.3.12"
 pytest-dotenv = "^0.5.2"
 pandas = "^1.1.0"
+poetry-dynamic-versioning = "^0.12.2"
+build = "^0.1.0"
 
 [tool.poetry.scripts]
 myg = "mygeotab.cli:main"
@@ -83,6 +88,8 @@ testpaths = "tests"
 
 [tool.poetry-dynamic-versioning]
 enable = true
+style = "pep440"
+bump = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
