@@ -55,6 +55,7 @@ jobs:
         token: ${{secrets.CODECOV_TOKEN}}
         file: ./output/coverage.xml
     - name: Archive code coverage results
+      if: matrix.python-version >= 3.9
       uses: actions/upload-artifact@v1
       with:
         name: output
