@@ -10,6 +10,8 @@ from mygeotab import API, server_call_async
 from mygeotab.exceptions import MyGeotabException, TimeoutException
 from tests.test_api_call import SERVER, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
+ASYNC_TRAILER_NAME = "async {name}".format(name=TRAILER_NAME)
+
 USERNAME = os.environ.get("MYGEOTAB_USERNAME_ASYNC", USERNAME)
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD_ASYNC", PASSWORD)
 
@@ -38,7 +40,7 @@ def async_populated_api():
 def async_populated_api_entity(async_populated_api):
     def clean_trailers():
         try:
-            trailers = async_populated_api.get("Trailer", name=TRAILER_NAME)
+            trailers = async_populated_api.get("Trailer", name=ASYNC_TRAILER_NAME)
             for trailer in trailers:
                 async_populated_api.remove("Trailer", trailer)
         except Exception:
@@ -129,23 +131,23 @@ class TestAsyncCallApi:
     @pytest.mark.asyncio
     async def test_add_edit_remove(self, async_populated_api_entity):
         async def get_trailer():
-            trailers = await async_populated_api_entity.get_async("Trailer", name=TRAILER_NAME)
+            trailers = await async_populated_api_entity.get_async("Trailer", name=ASYNC_TRAILER_NAME)
             assert len(trailers) == 1
             return trailers[0]
 
         user = async_populated_api_entity.get("User", name=USERNAME)[0]
-        trailer = {"name": TRAILER_NAME, "groups": user["companyGroups"]}
+        trailer = {"name": ASYNC_TRAILER_NAME, "groups": user["companyGroups"]}
         trailer_id = await async_populated_api_entity.add_async("Trailer", trailer)
         trailer["id"] = trailer_id
         trailer = await get_trailer()
-        assert trailer["name"] == TRAILER_NAME
+        assert trailer["name"] == ASYNC_TRAILER_NAME
         comment = "some comment"
         trailer["comment"] = comment
         await async_populated_api_entity.set_async("Trailer", trailer)
         trailer = await get_trailer()
         assert trailer["comment"] == comment
         await async_populated_api_entity.remove_async("Trailer", trailer)
-        trailers = await async_populated_api_entity.get_async("Trailer", name=TRAILER_NAME)
+        trailers = await async_populated_api_entity.get_async("Trailer", name=ASYNC_TRAILER_NAME)
         assert len(trailers) == 0
 
 
