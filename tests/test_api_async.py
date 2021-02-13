@@ -3,17 +3,13 @@
 import pytest
 
 asyncio = pytest.importorskip("asyncio")
-import os
 
 from mygeotab import AsyncAPI, server_call_async
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
-from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+
+from .test_api_call import DATABASE, PASSWORD, SERVER, TRAILER_NAME, USERNAME
 
 ASYNC_TRAILER_NAME = f"async {TRAILER_NAME}"
-
-USERNAME = os.environ.get("MYGEOTAB_USERNAME", USERNAME)
-PASSWORD = os.environ.get("MYGEOTAB_PASSWORD", PASSWORD)
-
 FAKE_USERNAME = "fakeusername"
 FAKE_PASSWORD = "fakepassword"
 FAKE_DATABASE = "fakedatabase"
@@ -31,7 +27,7 @@ def event_loop():
 @pytest.fixture(scope="session")
 async def async_populated_api(event_loop):
     if USERNAME and PASSWORD:
-        session = AsyncAPI(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        session = AsyncAPI(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         try:
             await session.authenticate()
         except MyGeotabException as exception:
@@ -159,7 +155,7 @@ class TestAsyncCallApi:
 
     @pytest.mark.asyncio
     async def test_call_without_credentials(self):
-        new_api = AsyncAPI(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        new_api = AsyncAPI(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         user = await new_api.get("User", name="{0}".format(USERNAME))
         assert len(user) == 1
 
