@@ -1,8 +1,8 @@
 MyGeotab
 ========
 
-.. image:: https://img.shields.io/circleci/project/github/Geotab/mygeotab-python/master.svg?style=flat
-    :target: https://circleci.com/gh/Geotab/mygeotab-python
+.. image:: https://github.com/Geotab/mygeotab-python/workflows/Python%20package/badge.svg
+    :target: https://github.com/Geotab/mygeotab-python
     :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
