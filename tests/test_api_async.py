@@ -8,7 +8,7 @@ import sys
 
 from mygeotab import API, server_call_async
 from mygeotab.exceptions import MyGeotabException, TimeoutException
-from tests.test_api_call import USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+from tests.test_api_call import SERVER, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
 
 USERNAME = os.environ.get("MYGEOTAB_USERNAME_ASYNC", USERNAME)
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD_ASYNC", PASSWORD)
@@ -19,7 +19,7 @@ pytestmark = pytest.mark.skipif(sys.version_info < (3, 5), reason="Only testing 
 @pytest.fixture(scope="session")
 def async_populated_api():
     if USERNAME and PASSWORD:
-        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         try:
             session.authenticate()
         except MyGeotabException as exception:
@@ -109,7 +109,7 @@ class TestAsyncCallApi:
 
     @pytest.mark.asyncio
     async def test_call_without_credentials(self):
-        new_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        new_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         user = await new_api.get_async("User", name="{0}".format(USERNAME))
         assert len(user) == 1
 

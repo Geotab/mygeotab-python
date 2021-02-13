@@ -10,6 +10,7 @@ from mygeotab.exceptions import AuthenticationException, TimeoutException
 USERNAME = os.environ.get("MYGEOTAB_USERNAME")
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD")
 DATABASE = os.environ.get("MYGEOTAB_DATABASE")
+SERVER = os.environ.get("MYGEOTAB_SERVER")
 TRAILER_NAME = "mygeotab-python test trailer"
 
 FAKE_USERNAME = "fakeusername"
@@ -21,7 +22,7 @@ FAKE_SESSIONID = "3n8943bsdf768"
 @pytest.fixture(scope="session")
 def populated_api():
     if USERNAME and PASSWORD:
-        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         try:
             session.authenticate()
         except api.MyGeotabException as exception:
@@ -108,7 +109,7 @@ class TestCallApi:
                 "MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD "
                 "environment variables being set"
             )
-        new_api = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=None)
+        new_api = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         user = new_api.get("User", name="{0}".format(USERNAME))
         assert len(user) == 1
 
