@@ -50,7 +50,7 @@ jobs:
         poetry run py.test --black --cov-config .coveragerc --cov-report xml:output/coverage.xml --cov mygeotab --junitxml output/python-test-results.xml
     - name: Upload coverage to Codecov
       if: matrix.python-version >= 3.9
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: ./output/coverage.xml
