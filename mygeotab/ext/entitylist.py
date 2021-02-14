@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from collections import UserList
 
 from mygeotab import api
