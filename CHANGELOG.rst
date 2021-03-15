@@ -3,7 +3,7 @@
 Changes
 -------
 
-0.8.6 (2020-12-05)
+0.8.6 (2021-03-15)
 ++++++++++++++++++
 
 **Improvements**
@@ -15,6 +15,7 @@ Changes
 **Bug Fixes**
 
 - Handle `ConnectionError` as errors in feed extension rather than crashing `#130 https://github.com/Geotab/mygeotab-python/issues/130`__.
+- Remove extraneous "search" parameter from `API.get()`.
 
 
 0.8.5 (2019-10-07)
