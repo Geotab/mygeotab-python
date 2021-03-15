@@ -103,6 +103,7 @@ class API(api.API):
                 del parameters["resultsLimit"]
             if "search" in parameters:
                 parameters.update(parameters["search"])
+                del parameters["search"]
             parameters = dict(search=parameters, resultsLimit=results_limit)
         return await self.call_async("Get", type_name=type_name, **parameters)
 

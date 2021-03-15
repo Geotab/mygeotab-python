@@ -145,6 +145,7 @@ class API(object):
                 del parameters["resultsLimit"]
             if "search" in parameters:
                 parameters.update(parameters["search"])
+                del parameters["search"]
             parameters = dict(search=parameters, resultsLimit=results_limit)
         return self.call("Get", type_name=type_name, **parameters)
 
