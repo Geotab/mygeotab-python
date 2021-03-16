@@ -210,7 +210,6 @@ class TestAsyncServerCallApi:
         assert "server" in str(excinfo2.value)
 
     @pytest.mark.asyncio
-    @pytest.mark.skip("No longer times out")
     async def test_timeout(self):
         with pytest.raises(TimeoutException) as excinfo:
             await server_call_async("GetVersion", server="my36.geotab.com", timeout=0.01)
