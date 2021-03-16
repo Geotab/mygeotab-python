@@ -7,6 +7,8 @@ mygeotab.py3.api_async
 Async/Await-able (Python 3.5+) public objects and methods wrapping the MyGeotab API.
 """
 
+import asyncio
+from copy import Error
 import sys
 
 if sys.version_info < (3, 5):
@@ -199,7 +201,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
             response.raise_for_status()
             content_type = response.headers.get("Content-Type")
             body = await response.text()
-    except TimeoutError:
+    except (TimeoutError, asyncio.TimeoutError):
         raise TimeoutException(server)
     if content_type and "application/json" not in content_type.lower():
         return body
