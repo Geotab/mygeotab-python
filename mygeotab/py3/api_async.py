@@ -8,7 +8,6 @@ Async/Await-able (Python 3.5+) public objects and methods wrapping the MyGeotab 
 """
 
 import asyncio
-from copy import Error
 import sys
 
 if sys.version_info < (3, 5):
@@ -25,11 +24,17 @@ from mygeotab.serializers import json_serialize, json_deserialize
 
 
 class API(api.API):
-    """A simple, asynchronous, and Pythonic wrapper for the MyGeotab API.
-    """
+    """A simple, asynchronous, and Pythonic wrapper for the MyGeotab API."""
 
     def __init__(
-        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT, proxies=None
+        self,
+        username,
+        password=None,
+        database=None,
+        session_id=None,
+        server="my.geotab.com",
+        timeout=DEFAULT_TIMEOUT,
+        proxies=None,
     ):
         """
         Initialize the asynchronous MyGeotab API object with credentials.

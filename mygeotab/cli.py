@@ -21,12 +21,10 @@ from six.moves import configparser
 
 
 class Session(object):
-    """The console session object.
-    """
+    """The console session object."""
 
     def __init__(self):
-        """Initialize the console session object.
-        """
+        """Initialize the console session object."""
         self.credentials = None
 
     @staticmethod

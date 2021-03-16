@@ -16,8 +16,7 @@ from requests.exceptions import ConnectionError
 
 
 class DataFeedListener(object):
-    """The abstract DataFeedListener to override
-    """
+    """The abstract DataFeedListener to override"""
 
     __metaclass__ = abc.ABCMeta
 
@@ -66,8 +65,7 @@ class DataFeed(object):
         self._thread = None
 
     def _run(self):
-        """Runner for the Data Feed.
-        """
+        """Runner for the Data Feed."""
         while self.running:
             try:
                 result = self.client_api.call(

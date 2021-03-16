@@ -9,8 +9,7 @@ Exceptions thrown by the MyGeotab API.
 
 
 class MyGeotabException(IOError):
-    """There was an exception while handling your call.
-    """
+    """There was an exception while handling your call."""
 
     def __init__(self, full_error, *args, **kwargs):
         """Initialize MyGeotabException with the full error from the server.
@@ -33,8 +32,7 @@ class MyGeotabException(IOError):
 
 
 class AuthenticationException(IOError):
-    """Unsuccessful authentication with the server.
-    """
+    """Unsuccessful authentication with the server."""
 
     def __init__(self, username, database, server, *args, **kwargs):
         """Initialize AuthenticationException with username, database, and server.
@@ -53,14 +51,12 @@ class AuthenticationException(IOError):
 
     @property
     def message(self):
-        """The exception message.
-        """
+        """The exception message."""
         return "Cannot authenticate '{0} @ {1}/{2}'".format(self.username, self.server, self.database)
 
 
 class TimeoutException(IOError):
-    """The request timed out while handling your request.
-    """
+    """The request timed out while handling your request."""
 
     def __init__(self, server, *args, **kwargs):
         """Initialize TimeoutException with the server name.
@@ -75,6 +71,5 @@ class TimeoutException(IOError):
 
     @property
     def message(self):
-        """The excepton message.
-        """
+        """The excepton message."""
         return "Request timed out @ {0}".format(self.server)

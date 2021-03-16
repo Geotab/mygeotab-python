@@ -28,11 +28,17 @@ DEFAULT_TIMEOUT = 300
 
 
 class API(object):
-    """A simple and Pythonic wrapper for the MyGeotab API.
-    """
+    """A simple and Pythonic wrapper for the MyGeotab API."""
 
     def __init__(
-        self, username, password=None, database=None, session_id=None, server="my.geotab.com", timeout=DEFAULT_TIMEOUT, proxies=None
+        self,
+        username,
+        password=None,
+        database=None,
+        session_id=None,
+        server="my.geotab.com",
+        timeout=DEFAULT_TIMEOUT,
+        proxies=None,
     ):
         """Initialize the MyGeotab API object with credentials.
 
@@ -98,7 +104,9 @@ class API(object):
             params["credentials"] = self.credentials.get_param()
 
         try:
-            result = _query(self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
+            result = _query(
+                self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies
+            )
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -204,7 +212,14 @@ class API(object):
             auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
 
         try:
-            result = _query(self._server, "Authenticate", auth_data, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies)
+            result = _query(
+                self._server,
+                "Authenticate",
+                auth_data,
+                self.timeout,
+                verify_ssl=self._is_verify_ssl,
+                proxies=self._proxies,
+            )
             if result:
                 if "path" not in result and self.credentials.session_id:
                     # Session was extended
@@ -244,8 +259,7 @@ class API(object):
 
 
 class Credentials(object):
-    """The MyGeotab Credentials object.
-    """
+    """The MyGeotab Credentials object."""
 
     def __init__(self, username, session_id, database, server, password=None):
         """Initialize the Credentials object.
@@ -285,8 +299,7 @@ class Credentials(object):
 
 
 class GeotabHTTPAdapter(HTTPAdapter):
-    """HTTP adapter to force use of TLS 1.2 for HTTPS connections.
-    """
+    """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         self.poolmanager = urllib3.poolmanager.PoolManager(
@@ -327,7 +340,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
                 allow_redirects=True,
                 timeout=timeout,
                 verify=verify_ssl,
-                proxies=proxies
+                proxies=proxies,
             )
         except Timeout:
             raise TimeoutException(server)
