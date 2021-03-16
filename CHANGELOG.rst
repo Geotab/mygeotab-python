@@ -10,11 +10,11 @@ Changes
 
 - Added new experimental API class (in the `mygeotab.ext` module) for more intuitive ways of using results from `client.get()` like `get_dataframe()` to easily get a Pandas DataFrame from the result set.
 - Adds support for using with proxies `#327 <https://github.com/Geotab/mygeotab-python/pull/327>`__.
-- Calling `authenticate()` on an API instance more than once no longer results in an error `#328 https://github.com/Geotab/mygeotab-python/issues/328`__.
+- Calling `authenticate()` on an API instance more than once no longer results in an error `#328 <https://github.com/Geotab/mygeotab-python/issues/328>`__.
 
 **Bug Fixes**
 
-- Handle `ConnectionError` as errors in feed extension rather than crashing `#130 https://github.com/Geotab/mygeotab-python/issues/130`__.
+- Handle `ConnectionError` as errors in feed extension rather than crashing `#130 <https://github.com/Geotab/mygeotab-python/issues/130>`__.
 - Remove extraneous "search" parameter from `API.get()`.
 
 
