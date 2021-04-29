@@ -41,10 +41,10 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-httpx = {extras = ["http2", "brotli"], version = "^0.16.1"}
-click = "^7.1.2"
-pytz = "^2021.1"
-arrow = "^0.17.0"
+httpx = {extras = ["http2", "brotli"], version = "^0.18"}
+click = "^7.1"
+pytz = ">=2018.9"
+arrow = "^1.0"
 python-rapidjson = "^1.0"
 
 [tool.poetry.dev-dependencies]
