@@ -8,6 +8,7 @@ JSON serialization and deserialization helper objects for the MyGeotab API.
 """
 
 import re
+from datetime import time
 
 import arrow
 import six
@@ -36,7 +37,7 @@ def json_serialize(obj):
 
 def json_deserialize(json_str):
     if use_rapidjson:
-        return rapidjson.loads(json_str, datetime_mode=DATETIME_MODE)
+        return rapidjson.loads(json_str, object_hook=duration_deserializer, datetime_mode=DATETIME_MODE)
     return json.loads(json_str, object_hook=object_deserializer)
 
 
@@ -58,5 +59,15 @@ def object_deserializer(obj):
             try:
                 obj[key] = dates.localize_datetime(arrow.get(val).datetime)
             except (ValueError, arrow.parser.ParserError):
+                obj[key] = val
+    return obj
+
+
+def duration_deserializer(obj):
+    for key, val in obj.items():
+        if "duration" in key.lower() and isinstance(val, time):
+            try:
+                obj[key] = val.strftime("%H:%M:%S.%f")
+            except ValueError:
                 obj[key] = val
     return obj

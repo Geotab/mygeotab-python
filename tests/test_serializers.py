@@ -91,3 +91,27 @@ class TestDeserialization:
         assert utc_date.year == check_date.year
         assert utc_date.month == check_date.month
         assert utc_date.day == check_date.day
+
+    def test_duration(self):
+        duration_str = "12:49:24.004000"
+        data_str = '{{"duration": "{}"}}'.format(duration_str)
+        data = json_deserialize(data_str)
+        duration = data.get("duration")
+        assert duration is not None
+        assert duration == duration_str
+
+    def test_duration_with_name(self):
+        duration_str = "02:33:24.004403"
+        data_str = '{{"drivingDuration": "{}"}}'.format(duration_str)
+        data = json_deserialize(data_str)
+        duration = data.get("drivingDuration")
+        assert duration is not None
+        assert duration == duration_str
+
+    def test_long_duration(self):
+        duration_str = "2.12:49:24.004000"
+        data_str = '{{"duration": "{}"}}'.format(duration_str)
+        data = json_deserialize(data_str)
+        duration = data.get("duration")
+        assert duration is not None
+        assert duration == duration_str
