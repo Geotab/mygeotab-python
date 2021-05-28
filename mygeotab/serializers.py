@@ -59,15 +59,12 @@ def object_deserializer(obj):
             try:
                 obj[key] = dates.localize_datetime(arrow.get(val).datetime)
             except (ValueError, arrow.parser.ParserError):
-                obj[key] = val
+                pass
     return obj
 
 
 def duration_deserializer(obj):
     for key, val in obj.items():
         if "duration" in key.lower() and isinstance(val, time):
-            try:
-                obj[key] = val.strftime("%H:%M:%S.%f")
-            except ValueError:
-                obj[key] = val
+            obj[key] = val.strftime("%H:%M:%S.%f")
     return obj
