@@ -41,3 +41,28 @@ class TestApiPerformance:
             monkeypatch.setattr(serializers, "use_rapidjson", False)
 
             benchmark(mock_api.get, "Data")
+
+    @pytest.mark.skipif(sys.version_info < (3, 5), reason="Requires Python 3.5 or higher")
+    def test_dsls_response_json_rapidjson(self, mock_api, datadir, benchmark):
+        server = "https://example.com/apiv1"
+        json_response = (datadir / "dsls.json").read_text()
+
+        mock_api.timeout = 0.0001
+
+        with requests_mock.mock() as m:
+            m.post(server, text=json_response)
+
+            benchmark(mock_api.get, "Data")
+
+    def test_dsls_response_json(self, mock_api, datadir, benchmark, monkeypatch):
+        server = "https://example.com/apiv1"
+        json_response = (datadir / "dsls.json").read_text()
+
+        mock_api.timeout = 0.0001
+
+        with requests_mock.mock() as m:
+            m.post(server, text=json_response)
+
+            monkeypatch.setattr(serializers, "use_rapidjson", False)
+
+            benchmark(mock_api.get, "Data")
