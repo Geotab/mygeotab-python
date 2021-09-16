@@ -225,23 +225,23 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "h2"
-version = "3.2.0"
+version = "4.0.0"
 description = "HTTP/2 State-Machine based protocol implementation"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6.1"
 
 [package.dependencies]
-hpack = ">=3.0,<4"
-hyperframe = ">=5.2.0,<6"
+hpack = ">=4.0,<5"
+hyperframe = ">=6.0,<7"
 
 [[package]]
 name = "hpack"
-version = "3.0.0"
+version = "4.0.0"
 description = "Pure-Python HPACK header compression"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6.1"
 
 [[package]]
 name = "httpcore"
@@ -284,11 +284,11 @@ http2 = ["h2 (>=3,<5)"]
 
 [[package]]
 name = "hyperframe"
-version = "5.2.0"
+version = "6.0.1"
 description = "HTTP/2 framing layer for Python"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6.1"
 
 [[package]]
 name = "idna"
@@ -736,6 +736,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-pytz"
+version = "2021.1.2"
+description = "Typing stubs for pytz"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "3.10.0.2"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -758,7 +766,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "edaa7353d1030a0fa9d17212601f9dd9a32f56fd2ea8453d7bfd9a261cb8757f"
+content-hash = "607f0ded2428aa10610d4dce970455326955dde1fb6599f832c8466f670e9952"
 
 [metadata.files]
 appdirs = [
@@ -1010,12 +1018,12 @@ h11 = [
     {file = "h11-0.12.0.tar.gz", hash = "sha256:47222cb6067e4a307d535814917cd98fd0a57b6788ce715755fa2b6c28b56042"},
 ]
 h2 = [
-    {file = "h2-3.2.0-py2.py3-none-any.whl", hash = "sha256:61e0f6601fa709f35cdb730863b4e5ec7ad449792add80d1410d4174ed139af5"},
-    {file = "h2-3.2.0.tar.gz", hash = "sha256:875f41ebd6f2c44781259005b157faed1a5031df3ae5aa7bcb4628a6c0782f14"},
+    {file = "h2-4.0.0-py3-none-any.whl", hash = "sha256:ac9e293a1990b339d5d71b19c5fe630e3dd4d768c620d1730d355485323f1b25"},
+    {file = "h2-4.0.0.tar.gz", hash = "sha256:bb7ac7099dd67a857ed52c815a6192b6b1f5ba6b516237fc24a085341340593d"},
 ]
 hpack = [
-    {file = "hpack-3.0.0-py2.py3-none-any.whl", hash = "sha256:0edd79eda27a53ba5be2dfabf3b15780928a0dff6eb0c60a3d6767720e970c89"},
-    {file = "hpack-3.0.0.tar.gz", hash = "sha256:8eec9c1f4bfae3408a3f30500261f7e6a65912dc138526ea054f9ad98892e9d2"},
+    {file = "hpack-4.0.0-py3-none-any.whl", hash = "sha256:84a076fad3dc9a9f8063ccb8041ef100867b1878b25ef0ee63847a5d53818a6c"},
+    {file = "hpack-4.0.0.tar.gz", hash = "sha256:fc41de0c63e687ebffde81187a948221294896f6bdc0ae2312708df339430095"},
 ]
 httpcore = [
     {file = "httpcore-0.13.3-py3-none-any.whl", hash = "sha256:ff614f0ef875b9e5fe0bdd459b31ea0eea282ff12dc82add83d68b3811ee94ad"},
@@ -1026,8 +1034,8 @@ httpx = [
     {file = "httpx-1.0.0b0.tar.gz", hash = "sha256:78bf0260283a9c10682b1dc2d6d753f154eb876df669518f18dfa8a0e8700dc5"},
 ]
 hyperframe = [
-    {file = "hyperframe-5.2.0-py2.py3-none-any.whl", hash = "sha256:5187962cb16dcc078f23cb5a4b110098d546c3f41ff2d4038a9896893bbd0b40"},
-    {file = "hyperframe-5.2.0.tar.gz", hash = "sha256:a9f5c17f2cc3c719b917c4f33ed1c61bd1f8dfac4b1bd23b7c80b3400971b41f"},
+    {file = "hyperframe-6.0.1-py3-none-any.whl", hash = "sha256:0ec6bafd80d8ad2195c4f03aacba3a8265e57bc4cff261e802bf39970ed02a15"},
+    {file = "hyperframe-6.0.1.tar.gz", hash = "sha256:ae510046231dc8e9ecb1a6586f63d2347bf4c8905914aa84ba585ae85f28a914"},
 ]
 idna = [
     {file = "idna-3.2-py3-none-any.whl", hash = "sha256:14475042e284991034cb48e06f6851428fb14c4dc953acd9be9a5e95c7b6dd7a"},
@@ -1437,6 +1445,10 @@ typed-ast = [
     {file = "typed_ast-1.4.3-cp39-cp39-win32.whl", hash = "sha256:209596a4ec71d990d71d5e0d312ac935d86930e6eecff6ccc7007fe54d703808"},
     {file = "typed_ast-1.4.3-cp39-cp39-win_amd64.whl", hash = "sha256:9c6d1a54552b5330bc657b7ef0eae25d00ba7ffe85d9ea8ae6540d2197a3788c"},
     {file = "typed_ast-1.4.3.tar.gz", hash = "sha256:fb1bbeac803adea29cedd70781399c99138358c26d05fcbd23c13016b7f5ec65"},
+]
+types-pytz = [
+    {file = "types-pytz-2021.1.2.tar.gz", hash = "sha256:448828a06f2aaa840e57364d866c661645a045e532f817e4f10c8c3ab2b66651"},
+    {file = "types_pytz-2021.1.2-py3-none-any.whl", hash = "sha256:28fb1c0f77f59aebe9b792d073ebfbbbf7b329f9d4af6a6079713a618a1c0f31"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.2-py2-none-any.whl", hash = "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7"},

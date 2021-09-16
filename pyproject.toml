@@ -58,6 +58,8 @@ pytest-dotenv = "^0.5.2"
 pandas = "^1.1.0"
 poetry-dynamic-versioning = "^0.12.2"
 build = "^0.1.0"
+mypy = "^0.910"
+types-pytz = "^2021.1.2"
 
 [tool.poetry.scripts]
 myg = "mygeotab.cli:main"
