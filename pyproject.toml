@@ -41,7 +41,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-httpx = {extras = ["http2", "brotli"], version = "^0.18"}
+httpx = {version = "^1.0.0b0", extras = ["http2", "brotli"], allow-prereleases = true}
 click = "^7.1"
 pytz = ">=2018.9"
 arrow = "^1.0"
