@@ -535,7 +535,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
                 api_endpoint,
                 data=json_serialize(params),
                 headers=headers,
-                allow_redirects=True,
+                follow_redirects=True,
                 timeout=timeout,
             )
         except httpx.TimeoutException:
@@ -573,7 +573,7 @@ async def _query_async(server, method, parameters, timeout=DEFAULT_TIMEOUT, veri
     async with httpx.AsyncClient(http2=True, verify=verify_ssl, proxies=proxies) as client:
         try:
             response = await client.post(
-                api_endpoint, data=json_serialize(params), headers=headers, allow_redirects=True, timeout=timeout
+                api_endpoint, data=json_serialize(params), headers=headers, follow_redirects=True, timeout=timeout
             )
         except httpx.TimeoutException:
             raise TimeoutException(server)
