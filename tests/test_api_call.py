@@ -11,6 +11,9 @@ USERNAME = os.environ.get("MYGEOTAB_USERNAME")
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD")
 DATABASE = os.environ.get("MYGEOTAB_DATABASE")
 SERVER = os.environ.get("MYGEOTAB_SERVER")
+CER_FILE = os.environ.get("MYGEOTAB_CERTIFICATE_CER")
+KEY_FILE = os.environ.get("MYGEOTAB_CERTIFICATE_KEY")
+PEM_FILE = os.environ.get("MYGEOTAB_CERTIFICATE_PEM")
 TRAILER_NAME = "mygeotab-python test trailer"
 
 FAKE_USERNAME = "fakeusername"
@@ -21,8 +24,13 @@ FAKE_SESSIONID = "3n8943bsdf768"
 
 @pytest.fixture(scope="session")
 def populated_api():
+    cert = None
+    if CER_FILE and KEY_FILE:
+        cert = (CER_FILE, KEY_FILE)
+    elif PEM_FILE:
+        cert = PEM_FILE
     if USERNAME and PASSWORD:
-        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, cert=cert)
         try:
             session.authenticate()
         except api.MyGeotabException as exception:

@@ -39,6 +39,7 @@ class API(object):
         server="my.geotab.com",
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
+        cert=None
     ):
         """Initialize the MyGeotab API object with credentials.
 
@@ -56,6 +57,8 @@ class API(object):
         :type timeout: float or None
         :param proxies: The proxies dictionary to apply to the request.
         :type proxies: dict or None
+        :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .key file).
+        :type cert: str or Tuple or None
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         if username is None:
@@ -68,6 +71,7 @@ class API(object):
         self.timeout = timeout
         self._proxies = proxies
         self.__reauthorize_count = 0
+        self._cert = cert
 
     @property
     def _server(self):
@@ -105,7 +109,12 @@ class API(object):
 
         try:
             result = _query(
-                self._server, method, params, self.timeout, verify_ssl=self._is_verify_ssl, proxies=self._proxies
+                self._server,
+                method, params,
+                self.timeout,
+                verify_ssl=self._is_verify_ssl,
+                proxies=self._proxies,
+                cert=self._cert
             )
             if result is not None:
                 self.__reauthorize_count = 0
@@ -219,6 +228,7 @@ class API(object):
                 self.timeout,
                 verify_ssl=self._is_verify_ssl,
                 proxies=self._proxies,
+                cert=self._cert
             )
             if result:
                 if "path" not in result and self.credentials.session_id:
@@ -307,7 +317,7 @@ class GeotabHTTPAdapter(HTTPAdapter):
         )
 
 
-def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None):
+def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None, cert=None):
     """Formats and performs the query against the API.
 
     :param server: The MyGeotab server.
@@ -332,6 +342,8 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     headers = get_headers()
     with requests.Session() as session:
         session.mount("https://", GeotabHTTPAdapter())
+        if cert:
+            session.cert = cert
         try:
             response = session.post(
                 api_endpoint,
