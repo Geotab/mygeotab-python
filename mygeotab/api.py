@@ -332,6 +332,8 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     :type verify_ssl: bool
     :param proxies: The proxies dictionary to apply to the request.
     :type proxies: dict or None
+    :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .pem file)
+    :type cert: str or Tuple or None
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
     :raise urllib2.HTTPError: Raises when there is an HTTP status code that indicates failure.

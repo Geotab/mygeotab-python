@@ -8,7 +8,7 @@ import sys
 
 from mygeotab import API, server_call_async
 from mygeotab.exceptions import MyGeotabException, TimeoutException
-from tests.test_api_call import SERVER, USERNAME, PASSWORD, DATABASE, TRAILER_NAME
+from tests.test_api_call import SERVER, USERNAME, PASSWORD, DATABASE, CER_FILE, KEY_FILE, PEM_FILE, TRAILER_NAME
 
 ASYNC_TRAILER_NAME = "async {name}".format(name=TRAILER_NAME)
 
@@ -20,8 +20,13 @@ pytestmark = pytest.mark.skipif(sys.version_info < (3, 5), reason="Only testing 
 
 @pytest.fixture(scope="session")
 def async_populated_api():
+    cert = None
+    if CER_FILE and KEY_FILE:
+        cert = (CER_FILE, KEY_FILE)
+    elif PEM_FILE:
+        cert = PEM_FILE
     if USERNAME and PASSWORD:
-        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, cert=cert)
         try:
             session.authenticate()
         except MyGeotabException as exception:
