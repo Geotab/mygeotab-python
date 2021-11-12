@@ -117,7 +117,6 @@ class Session(object):
             with open(self._get_config_file(), "w") as configfile:
                 config.write(configfile)
         self.credentials = None
-        sys.exit(0)
 
 
 def login(session, user, password, database=None, server=None):
@@ -146,19 +145,30 @@ def login(session, user, password, database=None, server=None):
         sys.exit(0)
 
 
-@click.group(invoke_without_command=True, help="Lists active sessions")
-@click.pass_obj
-def sessions(session):
-    """Shows the current logged in sessions.
-
-    :param session: The current Session object.
-    """
+def list_active_sessions(session):
     active_sessions = session.get_sessions()
     if not active_sessions:
         click.echo("(No active sessions)")
         return
     for active_session in active_sessions:
         click.echo(active_session)
+
+
+@click.group(invoke_without_command=True, help="Lists and manages active session credentials")
+@click.option("--list", "-l", is_flag=True, help="Display active sessions")
+@click.pass_obj
+def sessions(session, list):
+    """Shows the current logged in sessions.
+
+    :param session: The current Session object.
+    """
+    if list:
+        list_active_sessions(session)
+        return
+    ctx = click.get_current_context()
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+        ctx.exit()
 
 
 @click.command(help="Log out from a MyGeotab server")
@@ -172,6 +182,7 @@ def remove(session, database):
     """
     session.load(database)
     session.logout()
+    list_active_sessions(session)
 
 
 @click.command(help="Launch an interactive MyGeotab console")
@@ -183,9 +194,9 @@ def remove(session, database):
 def console(session, database=None, user=None, password=None, server=None):
     """An interactive Python API console for MyGeotab
 
-    If IPython is installed, it will launch an interactive IPython console instead of the built-in Python console. The
-    IPython console has numerous advantages over the stock Python console, including: colors, pretty printing,
-    command auto-completion, and more.
+    If either IPython or ptpython are installed, it will launch an interactive console using those libraries instead of 
+    the built-in Python console. Using IPython or ptpython has numerous advantages over the stock Python console,
+    including: colors, pretty printing, command auto-completion, and more.
 
     By default, all library objects are available as locals in the script, with 'myg' being the active API object.
 
@@ -196,17 +207,27 @@ def console(session, database=None, user=None, password=None, server=None):
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
     local_vars = _populate_locals(database, password, server, session, user)
-    version = "MyGeotab Console {0} [Python {1}]".format(mygeotab.__version__, sys.version.replace("\n", ""))
+    myg_console_version = "MyGeotab Console {0}".format(mygeotab.__version__)
+    version = "{0} [Python {1}]".format(myg_console_version, sys.version.replace("\n", ""))
     auth_line = ("Logged in as: %s" % session.credentials) if session.credentials else "Not logged in"
     banner = "\n".join([version, auth_line])
     try:
-        from IPython import embed
+        from ptpython.repl import embed
 
-        embed(banner1=banner, user_ns=local_vars)
+        def configure(repl):
+            repl.prompt_style = "ipython"
+
+        embed(globals=globals(), locals=local_vars, title="{0}. {1}".format(myg_console_version, auth_line),
+              configure=configure)
     except ImportError:
-        import code
+        try:
+            from IPython import embed
 
-        code.interact(banner, local=local_vars)
+            embed(banner1=banner, user_ns=local_vars, colors="neutral")
+        except ImportError:
+            import code
+
+            code.interact(banner, local=local_vars)
 
 
 @click.group()
