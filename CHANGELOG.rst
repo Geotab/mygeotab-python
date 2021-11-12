@@ -3,6 +3,15 @@
 Changes
 -------
 
+0.8.7 (2021-11-11)
+++++++++++++++++++
+
+**Improvements**
+
+- Added support for client-side certificates `#1 <https://github.com/Geotab/mygeotab-python/issues/1>`__.
+- Console improvements using ptpython (if installed) and better handling of sessions.
+
+
 0.8.6 (2021-03-15)
 ++++++++++++++++++
 
