@@ -307,13 +307,24 @@ class Credentials(object):
         """
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
+#https://ciphersuite.info/
+CIPHERS = (
+    'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256' +
+    ':ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256'
+)
 
 class GeotabHTTPAdapter(HTTPAdapter):
     """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
+    
+    def __init__(self, ssl_options=0, **kwargs):
+        self.ssl_options = ssl_options
+        super(TlsAdapter, self).__init__(**kwargs)
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        ctx = ssl_.create_urllib3_context(ciphers=CIPHERS, cert_reqs=ssl.CERT_REQUIRED, options=self.ssl_options)
+        
         self.poolmanager = urllib3.poolmanager.PoolManager(
-            num_pools=connections, maxsize=maxsize, block=block, ssl_version=ssl.PROTOCOL_TLSv1_2, **pool_kwargs
+            num_pools=connections, maxsize=maxsize, block=block, ssl_context=ctx, **pool_kwargs
         )
 
 
@@ -343,7 +354,8 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     params = dict(id=-1, method=method, params=parameters or {})
     headers = get_headers()
     with requests.Session() as session:
-        session.mount("https://", GeotabHTTPAdapter())
+        adapter = GeotabHTTPAdapter(ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 )
+        session.mount("https://", adapter)
         if cert:
             session.cert = cert
         try:
