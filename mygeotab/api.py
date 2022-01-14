@@ -347,8 +347,7 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
     params = dict(id=-1, method=method, params=parameters or {})
     headers = get_headers()
     with requests.Session() as session:
-        adapter = GeotabHTTPAdapter(ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 )
-        session.mount("https://", adapter)
+        session.mount("https://", GeotabHTTPAdapter())
         if cert:
             session.cert = cert
         try:
