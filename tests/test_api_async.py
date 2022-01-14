@@ -60,8 +60,8 @@ class TestAsyncCallApi:
     @pytest.mark.asyncio
     async def test_get_version(self, async_populated_api):
         version = await async_populated_api.call_async("GetVersion")
-        version_split = version.split(".")
-        assert len(version_split) == 4
+        version_len = len(version.split("."))
+        assert 3 <= version_len <= 4
 
     @pytest.mark.asyncio
     async def test_get_user(self, async_populated_api):

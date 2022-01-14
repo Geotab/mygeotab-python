@@ -63,8 +63,8 @@ def populated_api_entity(populated_api):
 class TestCallApi:
     def test_get_version(self, populated_api):
         version = populated_api.call("GetVersion")
-        version_split = version.split(".")
-        assert len(version_split) == 4
+        version_len = len(version.split("."))
+        assert 3 <= version_len <= 4
 
     def test_get_user(self, populated_api):
         user = populated_api.get("User", name=USERNAME)
