@@ -307,24 +307,17 @@ class Credentials(object):
         """
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
-#https://ciphersuite.info/
-CIPHERS = (
-    'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256' +
-    ':ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256'
-)
-
 class GeotabHTTPAdapter(HTTPAdapter):
-    """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
-    
-    def __init__(self, ssl_options=0, **kwargs):
-        self.ssl_options = ssl_options
-        super(TlsAdapter, self).__init__(**kwargs)
+    """HTTP adapter to force use of TLS 1.2+ for HTTPS connections."""
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        ctx = ssl_.create_urllib3_context(ciphers=CIPHERS, cert_reqs=ssl.CERT_REQUIRED, options=self.ssl_options)
-        
+        ctx = create_urllib3_context()
+        ctx.load_default_certs()
+        ctx.set_ciphers('ECDHE+AESGCM:!ECDSA')
+        ctx.set_ecdh_curve("secp521r1:secp384r1")
+
         self.poolmanager = urllib3.poolmanager.PoolManager(
-            num_pools=connections, maxsize=maxsize, block=block, ssl_context=ctx, **pool_kwargs
+            num_pools=connections, maxsize=maxsize, block=block, ssl_minimum_version=ssl.TLSVersion.TLSv1_2, ssl_context=ctx, **pool_kwargs
         )
 
 
