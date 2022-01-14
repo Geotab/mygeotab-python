@@ -323,7 +323,7 @@ class GeotabHTTPAdapter(HTTPAdapter):
         ctx.options |= ssl.OP_NO_TLSv1_1
         ctx.options |= ssl.PROTOCOL_TLS
 
-        ctx.set_ecdh_curve('secp521r1')
+        ctx.set_ecdh_curve('secp384r1')
 
         self.poolmanager = urllib3.poolmanager.PoolManager(
             num_pools=connections, maxsize=maxsize, block=block, ssl_context=ctx, **pool_kwargs
