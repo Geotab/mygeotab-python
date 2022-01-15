@@ -80,8 +80,8 @@ class TestCallApi:
         assert len(results[0]) == 1
         assert results[0][0]["name"] == USERNAME
         assert results[1] is not None
-        version_split = results[1].split(".")
-        assert len(version_split) == 4
+        version_len = len(results[1].split("."))
+        assert 3 <= version_len <= 4
 
     def test_pythonic_parameters(self, populated_api):
         users = populated_api.get("User")
