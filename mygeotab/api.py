@@ -18,6 +18,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.exceptions import Timeout
 from requests.packages import urllib3
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 from six.moves.urllib.parse import urlparse
 
 from . import __title__, __version__
@@ -312,8 +313,13 @@ class GeotabHTTPAdapter(HTTPAdapter):
     """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        ssl_context = create_urllib3_context(ssl_version=ssl.PROTOCOL_TLS)
+        ssl_context.options |= ssl.OP_NO_SSLv2
+        ssl_context.options |= ssl.OP_NO_SSLv3
+        ssl_context.options |= ssl.OP_NO_TLSv1
+        ssl_context.options |= ssl.OP_NO_TLSv1_1
         self.poolmanager = urllib3.poolmanager.PoolManager(
-            num_pools=connections, maxsize=maxsize, block=block, ssl_version=ssl.PROTOCOL_TLSv1_2, **pool_kwargs
+            num_pools=connections, maxsize=maxsize, block=block, ssl_context=ssl_context, **pool_kwargs
         )
 
 
