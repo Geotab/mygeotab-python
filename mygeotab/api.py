@@ -315,13 +315,40 @@ class GeotabHTTPAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         ctx = create_urllib3_context()
         ctx.load_default_certs()
-        ctx.set_ciphers('ECDHE+AESGCM:!ECDSA')
         
+        # disabled SSL2.0 as per:
+        # Sean Tuner, President, IECA
+        # Tim Polk, , Computer Scientist, Computer Security Division, NIST
+        # https://datatracker.ietf.org/doc/rfc6176/
+        # rfc6176
         ctx.options |= ssl.OP_NO_SSLv2
+        
+        # disabled SSL3.0 as per:
+        # Richard Barnes, (former) Security Engineering, Mozilla
+        # Martin Thomson, Distinguished Engineer, Mozilla
+        # Alfredo Pironti, Cyber Security Specialist, Secure Distributed Computing, INRIA
+        # Adam Langley, Senior Staff Software Engineer, Google
+        # rfc7568
+        # https://datatracker.ietf.org/doc/html/rfc7568
         ctx.options |= ssl.OP_NO_SSLv3
+        
+        # disabled TLSv1.0 and TLSv1.1 as per: 
+        # Kathleen Moriarty, CTO, Center for Internet Security
+        # Stephen Farrell, Research Fellow, Computer Science, Trinity College Dublin
+        # RFC 8996
+        # https://datatracker.ietf.org/doc/rfc8996/
         ctx.options |= ssl.OP_NO_TLSv1
         ctx.options |= ssl.OP_NO_TLSv1_1
+        
+        #enabled TLS1.2 + TLS1.3 as per:
+        # tbd
         ctx.options |= ssl.PROTOCOL_TLS
+
+        #disabled ECDSA as per
+        # tbd
+        #enabled ECDHE+AESGCM as per 
+        # tbd
+        ctx.set_ciphers('ECDHE+AESGCM:!ECDSA')
 
         ctx.set_ecdh_curve('secp384r1')
 
