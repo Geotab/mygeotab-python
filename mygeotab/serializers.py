@@ -45,7 +45,7 @@ def object_serializer(obj):
 
     :param obj: The object.
     """
-    return dates.format_iso_datetime(obj) if hasattr(obj, "isoformat") else obj
+    return dates.format_iso_datetime(obj) if ((type(obj) is dict) and 'isoformat' in obj) else obj
 
 
 def object_deserializer(obj):
