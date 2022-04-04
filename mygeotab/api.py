@@ -40,7 +40,7 @@ class API(object):
         server="my.geotab.com",
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
-        cert=None
+        cert=None,
     ):
         """Initialize the MyGeotab API object with credentials.
 
@@ -111,17 +111,20 @@ class API(object):
         try:
             result = _query(
                 self._server,
-                method, params,
+                method,
+                params,
                 self.timeout,
                 verify_ssl=self._is_verify_ssl,
                 proxies=self._proxies,
-                cert=self._cert
+                cert=self._cert,
             )
             if result is not None:
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == "InvalidUserException":
+            if exception.name == "InvalidUserException" or (
+                exception.name == "DbUnavailableException" and "Initializing" in exception.message
+            ):
                 if self.__reauthorize_count == 0 and self.credentials.password:
                     self.__reauthorize_count += 1
                     self.authenticate()
@@ -229,7 +232,7 @@ class API(object):
                 self.timeout,
                 verify_ssl=self._is_verify_ssl,
                 proxies=self._proxies,
-                cert=self._cert
+                cert=self._cert,
             )
             if result:
                 if "path" not in result and self.credentials.session_id:
@@ -245,7 +248,9 @@ class API(object):
                 )
                 return self.credentials
         except MyGeotabException as exception:
-            if exception.name == "InvalidUserException":
+            if exception.name == "InvalidUserException" or (
+                exception.name == "DbUnavailableException" and "Initializing" in exception.message
+            ):
                 raise AuthenticationException(
                     self.credentials.username, self.credentials.database, self.credentials.server
                 )

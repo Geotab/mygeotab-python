@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import random
+import string
 
 import pytest
 
@@ -14,12 +16,25 @@ SERVER = os.environ.get("MYGEOTAB_SERVER")
 CER_FILE = os.environ.get("MYGEOTAB_CERTIFICATE_CER")
 KEY_FILE = os.environ.get("MYGEOTAB_CERTIFICATE_KEY")
 PEM_FILE = os.environ.get("MYGEOTAB_CERTIFICATE_PEM")
-TRAILER_NAME = "mygeotab-python test trailer"
+ZONETYPE_NAME = "mygeotab-python test zonetype"
 
 FAKE_USERNAME = "fakeusername"
 FAKE_PASSWORD = "fakepassword"
 FAKE_DATABASE = "fakedatabase"
 FAKE_SESSIONID = "3n8943bsdf768"
+
+
+def get_random_str(str_length):
+    return "".join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(str_length))
+
+
+def generate_fake_credentials():
+    return dict(
+        username=FAKE_USERNAME + get_random_str(20),
+        password=FAKE_PASSWORD + get_random_str(20),
+        database=FAKE_DATABASE + get_random_str(20),
+        sessionid=FAKE_SESSIONID + get_random_str(30),
+    )
 
 
 @pytest.fixture(scope="session")
@@ -47,17 +62,14 @@ def populated_api():
 
 @pytest.fixture(scope="session")
 def populated_api_entity(populated_api):
-    def clean_trailers():
-        try:
-            trailers = populated_api.get("Trailer", name=TRAILER_NAME)
-            for trailer in trailers:
-                populated_api.remove("Trailer", trailer)
-        except Exception:
-            pass
+    def clean_zonetypes():
+        zonetypes = populated_api.get("ZoneType", name=ZONETYPE_NAME)
+        for zonetype in zonetypes:
+            populated_api.remove("ZoneType", zonetype)
 
-    clean_trailers()
+    clean_zonetypes()
     yield populated_api
-    clean_trailers()
+    clean_zonetypes()
 
 
 class TestCallApi:
@@ -135,43 +147,48 @@ class TestCallApi:
 
 class TestEntity:
     def test_add_edit_remove(self, populated_api_entity):
-        def get_trailer():
-            trailers = populated_api_entity.get("Trailer", name=TRAILER_NAME)
-            assert len(trailers) == 1
-            return trailers[0]
+        def get_zonetype():
+            zonetypes = populated_api_entity.get("ZoneType", name=ZONETYPE_NAME)
+            assert len(zonetypes) == 1
+            return zonetypes[0]
 
-        user = populated_api_entity.get("User", name=USERNAME)[0]
-        trailer = {"name": TRAILER_NAME, "groups": user["companyGroups"]}
-        trailer["id"] = populated_api_entity.add("Trailer", trailer)
-        assert trailer["id"] is not None
-        trailer = get_trailer()
-        assert trailer["name"] == TRAILER_NAME
+        zonetype = {"name": ZONETYPE_NAME}
+        zonetype["id"] = populated_api_entity.add("ZoneType", zonetype)
+        assert zonetype["id"] is not None
+        zonetype = get_zonetype()
+        assert zonetype["name"] == ZONETYPE_NAME
         comment = "some comment"
-        trailer["comment"] = comment
-        populated_api_entity.set("Trailer", trailer)
-        trailer = get_trailer()
-        assert trailer["comment"] == comment
-        populated_api_entity.remove("Trailer", trailer)
-        trailers = populated_api_entity.get("Trailer", name=TRAILER_NAME)
-        assert len(trailers) == 0
+        zonetype["comment"] = comment
+        populated_api_entity.set("ZoneType", zonetype)
+        zonetype = get_zonetype()
+        assert zonetype["comment"] == comment
+        populated_api_entity.remove("ZoneType", zonetype)
+        zonetypes = populated_api_entity.get("ZoneType", name=ZONETYPE_NAME)
+        assert len(zonetypes) == 0
 
 
 class TestAuthentication:
     def test_invalid_session(self):
-        test_api = api.API(FAKE_USERNAME, session_id=FAKE_SESSIONID, database=FAKE_DATABASE)
-        assert FAKE_USERNAME in str(test_api.credentials)
-        assert FAKE_DATABASE in str(test_api.credentials)
+        fake_credentials = generate_fake_credentials()
+        test_api = api.API(
+            fake_credentials["username"],
+            session_id=fake_credentials["sessionid"],
+            database=fake_credentials["database"],
+        )
+        assert fake_credentials["username"] in str(test_api.credentials)
+        assert fake_credentials["database"] in str(test_api.credentials)
         with pytest.raises(AuthenticationException) as excinfo:
             test_api.get("User")
         assert "Cannot authenticate" in str(excinfo.value)
-        assert FAKE_DATABASE in str(excinfo.value)
-        assert FAKE_USERNAME in str(excinfo.value)
+        assert fake_credentials["database"] in str(excinfo.value)
+        assert fake_credentials["username"] in str(excinfo.value)
 
     def test_username_password_exists(self):
+        fake_credentials = generate_fake_credentials()
         with pytest.raises(Exception) as excinfo1:
             api.API(None)
         with pytest.raises(Exception) as excinfo2:
-            api.API(FAKE_USERNAME)
+            api.API(fake_credentials["username"])
         assert "username" in str(excinfo1.value)
         assert "password" in str(excinfo2.value)
 
@@ -182,18 +199,23 @@ class TestAuthentication:
         assert credentials.session_id is not None
 
     def test_call_authenticate_invalid_sessionid(self):
-        test_api = api.API(FAKE_USERNAME, session_id=FAKE_SESSIONID, database=FAKE_DATABASE)
+        fake_credentials = generate_fake_credentials()
+        test_api = api.API(
+            fake_credentials["username"],
+            session_id=fake_credentials["sessionid"],
+            database=fake_credentials["database"],
+        )
         with pytest.raises(AuthenticationException) as excinfo:
             test_api.authenticate()
         assert "Cannot authenticate" in str(excinfo.value)
-        assert FAKE_DATABASE in str(excinfo.value)
+        assert fake_credentials["database"] in str(excinfo.value)
 
 
 class TestServerCallApi:
     def test_get_version(self):
         version = api.server_call("GetVersion", server="my3.geotab.com")
         version_split = version.split(".")
-        assert len(version_split) == 4
+        assert len(version_split) == 3
 
     def test_invalid_server_call(self):
         with pytest.raises(Exception) as excinfo1:

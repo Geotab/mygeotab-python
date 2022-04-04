@@ -194,7 +194,7 @@ def remove(session, database):
 def console(session, database=None, user=None, password=None, server=None):
     """An interactive Python API console for MyGeotab
 
-    If either IPython or ptpython are installed, it will launch an interactive console using those libraries instead of 
+    If either IPython or ptpython are installed, it will launch an interactive console using those libraries instead of
     the built-in Python console. Using IPython or ptpython has numerous advantages over the stock Python console,
     including: colors, pretty printing, command auto-completion, and more.
 
@@ -217,8 +217,12 @@ def console(session, database=None, user=None, password=None, server=None):
         def configure(repl):
             repl.prompt_style = "ipython"
 
-        embed(globals=globals(), locals=local_vars, title="{0}. {1}".format(myg_console_version, auth_line),
-              configure=configure)
+        embed(
+            globals=globals(),
+            locals=local_vars,
+            title="{0}. {1}".format(myg_console_version, auth_line),
+            configure=configure,
+        )
     except ImportError:
         try:
             from IPython import embed

@@ -35,7 +35,7 @@ class API(api.API):
         server="my.geotab.com",
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
-        cert=None
+        cert=None,
     ):
         """
         Initialize the asynchronous MyGeotab API object with credentials.
@@ -75,7 +75,9 @@ class API(api.API):
                 self.__reauthorize_count = 0
             return result
         except MyGeotabException as exception:
-            if exception.name == "InvalidUserException":
+            if exception.name == "InvalidUserException" or (
+                exception.name == "DbUnavailableException" and "Initializing" in exception.message
+            ):
                 if self.__reauthorize_count == 0 and self.credentials.password:
                     self.__reauthorize_count += 1
                     self.authenticate()

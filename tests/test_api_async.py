@@ -7,10 +7,20 @@ import os
 import sys
 
 from mygeotab import API, server_call_async
-from mygeotab.exceptions import MyGeotabException, TimeoutException
-from tests.test_api_call import SERVER, USERNAME, PASSWORD, DATABASE, CER_FILE, KEY_FILE, PEM_FILE, TRAILER_NAME
+from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
+from tests.test_api_call import (
+    SERVER,
+    USERNAME,
+    PASSWORD,
+    DATABASE,
+    CER_FILE,
+    KEY_FILE,
+    PEM_FILE,
+    ZONETYPE_NAME,
+    generate_fake_credentials,
+)
 
-ASYNC_TRAILER_NAME = "async {name}".format(name=TRAILER_NAME)
+ASYNC_ZONETYPE_NAME = "async {name}".format(name=ZONETYPE_NAME)
 
 USERNAME = os.environ.get("MYGEOTAB_USERNAME_ASYNC", USERNAME)
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD_ASYNC", PASSWORD)
@@ -43,17 +53,14 @@ def async_populated_api():
 
 @pytest.fixture(scope="session")
 def async_populated_api_entity(async_populated_api):
-    def clean_trailers():
-        try:
-            trailers = async_populated_api.get("Trailer", name=ASYNC_TRAILER_NAME)
-            for trailer in trailers:
-                async_populated_api.remove("Trailer", trailer)
-        except Exception:
-            pass
+    def clean_zonetypes():
+        zonetypes = async_populated_api.get("ZoneType", name=ASYNC_ZONETYPE_NAME)
+        for zonetype in zonetypes:
+            async_populated_api.remove("ZoneType", zonetype)
 
-    clean_trailers()
+    clean_zonetypes()
     yield async_populated_api
-    clean_trailers()
+    clean_zonetypes()
 
 
 class TestAsyncCallApi:
@@ -135,25 +142,25 @@ class TestAsyncCallApi:
 
     @pytest.mark.asyncio
     async def test_add_edit_remove(self, async_populated_api_entity):
-        async def get_trailer():
-            trailers = await async_populated_api_entity.get_async("Trailer", name=ASYNC_TRAILER_NAME)
-            assert len(trailers) == 1
-            return trailers[0]
+        async def get_zonetypes():
+            zonetypes = await async_populated_api_entity.get_async("ZoneType", name=ASYNC_ZONETYPE_NAME)
+            assert len(zonetypes) == 1
+            return zonetypes[0]
 
         user = async_populated_api_entity.get("User", name=USERNAME)[0]
-        trailer = {"name": ASYNC_TRAILER_NAME, "groups": user["companyGroups"]}
-        trailer_id = await async_populated_api_entity.add_async("Trailer", trailer)
-        trailer["id"] = trailer_id
-        trailer = await get_trailer()
-        assert trailer["name"] == ASYNC_TRAILER_NAME
+        zonetype = {"name": ASYNC_ZONETYPE_NAME, "groups": user["companyGroups"]}
+        zonetype_id = await async_populated_api_entity.add_async("ZoneType", zonetype)
+        zonetype["id"] = zonetype_id
+        zonetype = await get_zonetypes()
+        assert zonetype["name"] == ASYNC_ZONETYPE_NAME
         comment = "some comment"
-        trailer["comment"] = comment
-        await async_populated_api_entity.set_async("Trailer", trailer)
-        trailer = await get_trailer()
-        assert trailer["comment"] == comment
-        await async_populated_api_entity.remove_async("Trailer", trailer)
-        trailers = await async_populated_api_entity.get_async("Trailer", name=ASYNC_TRAILER_NAME)
-        assert len(trailers) == 0
+        zonetype["comment"] = comment
+        await async_populated_api_entity.set_async("ZoneType", zonetype)
+        zonetype = await get_zonetypes()
+        assert zonetype["comment"] == comment
+        await async_populated_api_entity.remove_async("ZoneType", zonetype)
+        zonetypes = await async_populated_api_entity.get_async("ZoneType", name=ASYNC_ZONETYPE_NAME)
+        assert len(zonetypes) == 0
 
 
 class TestAsyncServerCallApi:
@@ -161,7 +168,7 @@ class TestAsyncServerCallApi:
     async def test_get_version(self):
         version = await server_call_async("GetVersion", server="my3.geotab.com")
         version_split = version.split(".")
-        assert len(version_split) == 4
+        assert len(version_split) == 3
 
     @pytest.mark.asyncio
     async def test_invalid_server_call(self):
@@ -177,3 +184,21 @@ class TestAsyncServerCallApi:
         with pytest.raises(TimeoutException) as excinfo:
             await server_call_async("GetVersion", server="my36.geotab.com", timeout=0.01)
         assert "Request timed out @ my36.geotab.com" in str(excinfo.value)
+
+
+class TestAsyncAuthentication:
+    @pytest.mark.asyncio
+    async def test_invalid_session(self):
+        fake_credentials = generate_fake_credentials()
+        test_api = API(
+            fake_credentials["username"],
+            session_id=fake_credentials["sessionid"],
+            database=fake_credentials["database"],
+        )
+        assert fake_credentials["username"] in str(test_api.credentials)
+        assert fake_credentials["database"] in str(test_api.credentials)
+        with pytest.raises(AuthenticationException) as excinfo:
+            await test_api.get_async("User")
+        assert "Cannot authenticate" in str(excinfo.value)
+        assert fake_credentials["database"] in str(excinfo.value)
+        assert fake_credentials["username"] in str(excinfo.value)
