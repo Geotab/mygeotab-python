@@ -48,7 +48,8 @@ def object_serializer(obj):
     if hasattr(obj, 'isoformat'):
         return dates.format_iso_datetime(obj)
     else:
-        raise TypeError("Unserializable object {} of type {}".format(obj, type(obj)))
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(obj)
 
 
 def object_deserializer(obj):
