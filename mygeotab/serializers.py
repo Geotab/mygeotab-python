@@ -45,7 +45,11 @@ def object_serializer(obj):
 
     :param obj: The object.
     """
-    return dates.format_iso_datetime(obj) if hasattr(obj, "isoformat") else obj
+    if hasattr(obj, 'isoformat'):
+        return dates.format_iso_datetime(obj)
+    else:
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(obj)
 
 
 def object_deserializer(obj):

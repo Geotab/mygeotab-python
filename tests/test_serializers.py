@@ -3,6 +3,7 @@
 import json
 from datetime import date, datetime
 
+import pytest
 import pytz
 
 from mygeotab import serializers, dates
@@ -41,6 +42,10 @@ class TestSerialization:
         expected_str = '{"date":"2016-02-22"}'
         data_str = json_serialize(data)
         assert data_str == expected_str
+
+    def test_unparsable_data_throws(self):
+        with pytest.raises(TypeError):
+            json_serialize({''})
 
 
 class TestDeserialization:
