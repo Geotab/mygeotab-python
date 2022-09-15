@@ -11,7 +11,7 @@ pytest-cov = "*"
 rope = "*"
 mygeotab = {editable = true,path = "."}
 mypy = {markers = "python_version >= '3.5'",version = "*"}
-pytest-asyncio = {markers = "python_version >= '3.5'",version = "*"}
+pytest-asyncio = {markers = "python_version >= '3.6'",version = "*"}
 sphinx = {markers = "python_version >= '3'",version = "*"}
 sphinx-rtd-theme = {markers = "python_version >= '3'",version = "*"}
 black = {markers = "python_version >= '3.6'",version = "*"}

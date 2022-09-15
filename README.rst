@@ -60,7 +60,7 @@ It's very easy to get started once you've registered a `MyGeotab <https://www.ge
     #   'idleMinutes': 3.0,
     #   ......
 
-If you're using Python 3.5 and higher, you can also make calls asynchronously via `asyncio <https://docs.python.org/3/library/asyncio.html>`__:
+If you're using Python 3.6 and higher, you can also make calls asynchronously via `asyncio <https://docs.python.org/3/library/asyncio.html>`__:
 
 .. code-block:: python
 

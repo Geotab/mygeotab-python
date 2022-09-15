@@ -25,7 +25,7 @@ ASYNC_ZONETYPE_NAME = "async {name}".format(name=ZONETYPE_NAME)
 USERNAME = os.environ.get("MYGEOTAB_USERNAME_ASYNC", USERNAME)
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD_ASYNC", PASSWORD)
 
-pytestmark = pytest.mark.skipif(sys.version_info < (3, 5), reason="Only testing API on Python 3.5")
+pytestmark = pytest.mark.skipif(sys.version_info < (3, 6), reason="Only testing API on Python 3.6")
 
 
 @pytest.fixture(scope="session")
