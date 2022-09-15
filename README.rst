@@ -26,22 +26,20 @@ MyGeotab
     :alt: License
 
 
-An Apache2 Licensed, unofficial Python client for the `MyGeotab SDK <https://geotab.github.io/sdk/>`_.
-
-Also bundled is the "myg" command line tool, which is a sandboxed console for quickly querying and operating on
-MyGeotab data.
+A Python client for the `MyGeotab SDK <https://geotab.github.io/sdk/>`_.
 
 Features
 --------
 
-- Automatic serializing and de-serializing of JSON results
+- Automatic serializing and deserializing of API call results
 - Clean, Pythonic API for querying data
 - Cross-platform and compatible with Python 2.7.9+ and 3.4+
+- A `myg` command-line tool for interactively working with data in a terminal
 
 Usage
 -----
 
-It's very easy to get started once you've registered with `MyGeotab <https://www.geotab.com/fleet-management-software/>`_:
+It's very easy to get started once you've registered a `MyGeotab <https://www.geotab.com/fleet-management-software/>`__ database:
 
 .. code-block:: python
 

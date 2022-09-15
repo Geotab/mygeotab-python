@@ -35,7 +35,7 @@ setup(
     author="Aaron Toth",
     version=version,
     url="https://github.com/geotab/mygeotab-python",
-    description="An unofficial Python client for the MyGeotab API",
+    description="A Python client for the MyGeotab SDK",
     long_description=readme + "\n\n" + changelog,
     extras_require={"notebook": ["pandas"], ":python_version>='3.6'": ["aiohttp>=3.8.1,<4", "python-rapidjson"]},
     test_suite="tests",
