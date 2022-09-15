@@ -3,6 +3,17 @@
 Changes
 -------
 
+0.8.8 (2022-09-14)
+++++++++++++++++++
+
+**Improvements**
+
+- Use the highest TLS version available (at least TLS 1.2) when making calls.
+
+**Bug Fixes**
+
+- Fix for recursive `hasattr` call when serializing objects `#7 <https://github.com/Geotab/mygeotab-python/pull/7>`__.
+
 0.8.7 (2021-11-11)
 ++++++++++++++++++
 

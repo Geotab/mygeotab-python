@@ -2,7 +2,7 @@
 
 __title__ = "mygeotab-python"
 __author__ = "Aaron Toth"
-__version__ = "0.8.7"
+__version__ = "0.8.8"
 
 import sys
 
@@ -17,5 +17,5 @@ except (SyntaxError, ImportError):
 __all__ = ["API", "Credentials", "MyGeotabException", "AuthenticationException", "TimeoutException", "server_call"]
 
 py_version = sys.version_info[:3]
-if py_version >= (3, 5, 0):
+if py_version >= (3, 6, 0):
     __all__.append("server_call_async")
