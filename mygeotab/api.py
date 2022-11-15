@@ -154,16 +154,32 @@ class API(object):
 
         :param type_name: The type of entity.
         :type type_name: str
-        :param parameters: Additional parameters to send.
+        :param parameters: Additional parameters to send. A parameter called `resultsLimit`
+                           or `results_limit` will limit the number of entries returned. A
+                           `search` parameter can further limit results, for example
+                           search=dict(id='b123'). If a parameter called `search` is
+                           omitted, any additional parameters are automatically added
+                           to a `search` dictionary. This simplifies basic usage.
+                           The following are equivalent calls:
+                           api.get("Device", search={"id":"b2"})
+                           api.get("Device", id="b2)
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         :return: The results from the server.
         :rtype: list
         """
         if parameters:
-            results_limit = parameters.get("resultsLimit", None)
+
+            # Detect resultsLimit if passed camelCase or python_case and
+            # remove from parameters (otherwise they will become part of search)
+            results_limit = parameters.get("resultsLimit")
             if results_limit is not None:
                 del parameters["resultsLimit"]
+            else:
+                results_limit = parameters.get("results_limit")
+                if results_limit is not None:
+                    del parameters["results_limit"]
+
             if "search" in parameters:
                 parameters.update(parameters["search"])
                 del parameters["search"]
