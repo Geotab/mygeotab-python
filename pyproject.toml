@@ -14,10 +14,10 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Software Development :: Libraries"
 ]
@@ -40,9 +40,9 @@ packages = [
 "Issue Tracker" = "https://github.com/geotab/mygeotab-python/issues"
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
-httpx = {version = "^1.0.0b0", extras = ["http2", "brotli"], allow-prereleases = true}
-click = "^7.1"
+python = "^3.7"
+httpx = {version = "^0.23", extras = ["http2", "brotli"]}
+click = "^8.0"
 pytz = ">=2018.9"
 arrow = "^1.0"
 python-rapidjson = "^1.0"
