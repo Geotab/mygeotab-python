@@ -44,7 +44,7 @@ def object_serializer(obj):
 
     :param obj: The object.
     """
-    if hasattr(obj, 'isoformat'):
+    if hasattr(obj, "isoformat"):
         return dates.format_iso_datetime(obj)
     else:
         # Let the base class default method raise the TypeError

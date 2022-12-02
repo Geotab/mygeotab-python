@@ -11,4 +11,12 @@ from .exceptions import MyGeotabException, AuthenticationException, TimeoutExcep
 
 from .api_async import API, server_call_async
 
-__all__ = ["API", "Credentials", "MyGeotabException", "AuthenticationException", "TimeoutException", "server_call", "server_call_async"]
+__all__ = [
+    "API",
+    "Credentials",
+    "MyGeotabException",
+    "AuthenticationException",
+    "TimeoutException",
+    "server_call",
+    "server_call_async",
+]

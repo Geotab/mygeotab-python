@@ -45,7 +45,7 @@ class TestSerialization:
 
     def test_unparsable_data_throws(self):
         with pytest.raises(TypeError):
-            json_serialize({''})
+            json_serialize({""})
 
 
 class TestDeserialization:
