@@ -33,7 +33,7 @@ Features
 
 - Automatic serializing and deserializing of API call results
 - Clean, Pythonic API for querying data
-- Cross-platform and compatible with Python 2.7.9+ and 3.4+
+- Cross-platform and compatible with Python 3.7+
 - A `myg` command-line tool for interactively working with data in a terminal
 
 Usage
@@ -60,7 +60,7 @@ It's very easy to get started once you've registered a `MyGeotab <https://www.ge
     #   'idleMinutes': 3.0,
     #   ......
 
-If you're using Python 3.6 and higher, you can also make calls asynchronously via `asyncio <https://docs.python.org/3/library/asyncio.html>`__:
+You can also make calls asynchronously via `asyncio <https://docs.python.org/3/library/asyncio.html>`__:
 
 .. code-block:: python
 

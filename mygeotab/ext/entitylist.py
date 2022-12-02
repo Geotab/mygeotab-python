@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import six
+from collections import UserList
 from mygeotab import api
-from six.moves import UserList
 
 
 class API(api.API):
@@ -100,7 +99,7 @@ class EntityList(UserList):
 
         def sort_by_key(entity):
             prop = entity[key]
-            if isinstance(prop, six.string_types):
+            if isinstance(prop, str):
                 return prop.lower()
             return prop
 

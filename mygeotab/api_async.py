@@ -4,14 +4,11 @@
 mygeotab.py3.api_async
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Async/Await-able (Python 3.6+) public objects and methods wrapping the MyGeotab API.
+Async/Await-able public objects and methods wrapping the MyGeotab API.
 """
 
 import asyncio
-import sys
 
-if sys.version_info < (3, 6):
-    raise Exception("Python 3.6+ is required to use the async API")
 import ssl
 from concurrent.futures import TimeoutError
 
