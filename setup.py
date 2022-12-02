@@ -27,7 +27,7 @@ py_version = sys.version_info[:3]
 if py_version < (3, 7, 0):
     raise RuntimeError("This package requres Python 3.7.0+")
 
-packages = ["mygeotab", "mygeotab.ext", "mygeotab.async", "mygeotab.py3"]
+packages = ["mygeotab", "mygeotab.ext"]
 
 setup(
     name="mygeotab",
@@ -42,7 +42,7 @@ setup(
     packages=packages,
     package_data={"": ["LICENSE"]},
     license="Apache 2.0",
-    install_requires=["requests", "click", "pytz", "arrow", "aiohttp>=3.8.1,<4", "python-rapidjson"],
+    install_requires=["requests", "urllib3", "click", "pytz", "arrow", "aiohttp>=3.8.1,<4", "python-rapidjson"],
     setup_requires=["wheel"],
     entry_points="""
         [console_scripts]

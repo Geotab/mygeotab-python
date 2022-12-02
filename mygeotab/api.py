@@ -16,10 +16,10 @@ import sys
 from urllib.parse import urlparse
 
 import requests
+import urllib3
 from requests.adapters import HTTPAdapter
 from requests.exceptions import Timeout
-from requests.packages import urllib3
-from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+from urllib3.util.ssl_ import create_urllib3_context
 
 from . import __title__, __version__
 from .exceptions import AuthenticationException, MyGeotabException, TimeoutException

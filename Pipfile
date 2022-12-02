@@ -21,9 +21,11 @@ pytest-benchmark = "*"
 pytest-monkeytype = "*"
 pandas = "*"
 types-requests = "*"
+types-pytz = "*"
+types-setuptools = "*"
 
 [packages]
-mygeotab = {editable = true,path = "."}
+mygeotab = {editable = true, path = "."}
 
 [pipenv]
 allow_prereleases = true
