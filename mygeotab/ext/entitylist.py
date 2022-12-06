@@ -140,8 +140,8 @@ class EntityList(UserList):
         """
         try:
             import pandas
-        except ImportError:
-            raise ImportError("The 'pandas' package could not be imported")
+        except ImportError as exc:
+            raise ImportError("The 'pandas' package could not be imported") from exc
         if normalize:
             try:
                 return pandas.json_normalize(self.data)

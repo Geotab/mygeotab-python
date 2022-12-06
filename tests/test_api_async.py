@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import pytest
-
-asyncio = pytest.importorskip("asyncio")
 import os
 import sys
+
+import pytest
 
 from mygeotab import API, server_call_async
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
 from tests.test_api_call import (
+    CER_FILE,
+    DATABASE,
+    KEY_FILE,
+    PASSWORD,
+    PEM_FILE,
     SERVER,
     USERNAME,
-    PASSWORD,
-    DATABASE,
-    CER_FILE,
-    KEY_FILE,
-    PEM_FILE,
     ZONETYPE_NAME,
     generate_fake_credentials,
 )

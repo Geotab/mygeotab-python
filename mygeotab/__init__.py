@@ -4,8 +4,6 @@ __title__ = "mygeotab-python"
 __author__ = "Aaron Toth"
 __version__ = "0.8.8"
 
-import sys
-
 from .api import Credentials, server_call
 from .exceptions import MyGeotabException, AuthenticationException, TimeoutException
 

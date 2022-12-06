@@ -1,5 +1,3 @@
-import sys
-
 import requests_mock
 import pytest
 

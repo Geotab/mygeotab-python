@@ -18,3 +18,7 @@ exclude = '''
                      # the root of the project
 )
 '''
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "B"]

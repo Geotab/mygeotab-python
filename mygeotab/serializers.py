@@ -7,9 +7,12 @@ mygeotab.serializers
 JSON serialization and deserialization helper objects for the MyGeotab API.
 """
 
+import json
 import re
 
 import arrow
+
+from mygeotab import dates
 
 use_rapidjson = False
 try:
@@ -20,9 +23,6 @@ try:
     use_rapidjson = True
 except ImportError:
     pass
-import json
-
-from mygeotab import dates
 
 DATETIME_REGEX = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
 

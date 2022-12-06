@@ -269,7 +269,7 @@ class API(object):
             ):
                 raise AuthenticationException(
                     self.credentials.username, self.credentials.database, self.credentials.server
-                )
+                ) from exception
             raise
 
     @staticmethod
@@ -383,8 +383,8 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
                 verify=verify_ssl,
                 proxies=proxies,
             )
-        except Timeout:
-            raise TimeoutException(server)
+        except Timeout as exc:
+            raise TimeoutException(server) from exc
     response.raise_for_status()
     content_type = response.headers.get("Content-Type")
     if content_type and "application/json" not in content_type.lower():
