@@ -3,6 +3,19 @@
 Changes
 -------
 
+1.0.0 (development)
++++++++++++++++++++
+
+**Improvements**
+
+- Removed all Python 2 handling code and packages (six).
+- Simplified code based on removing support for Python 2 and Python 3.6 and lower.
+
+**Housecleaning**
+
+- Changed linter to `ruff <https://github.com/charliermarsh/ruff>`__ and enabled additional linters.
+- Ensured proper mypy types installed for 3rd party packages.
+
 0.8.8 (2022-09-14)
 ++++++++++++++++++
 
