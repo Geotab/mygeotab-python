@@ -7,6 +7,7 @@ mygeotab.cli
 Console utilities for working with the MyGeotab API.
 """
 
+import configparser
 import os.path
 
 import sys
@@ -16,8 +17,6 @@ import click
 import mygeotab
 import mygeotab.api
 import mygeotab.dates
-
-from six.moves import configparser
 
 
 class Session(object):

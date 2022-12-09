@@ -5,24 +5,27 @@ verify_ssl = true
 
 [dev-packages]
 coverage = "*"
-flake8 = "*"
 pytest = "*"
 pytest-cov = "*"
 rope = "*"
 mygeotab = {editable = true,path = "."}
-mypy = {markers = "python_version >= '3.5'",version = "*"}
-pytest-asyncio = {markers = "python_version >= '3.6'",version = "*"}
-sphinx = {markers = "python_version >= '3'",version = "*"}
-sphinx-rtd-theme = {markers = "python_version >= '3'",version = "*"}
-black = {markers = "python_version >= '3.6'",version = "*"}
+mypy = "*"
+pytest-asyncio = "*"
+sphinx = "*"
+furo = "*"
+black = {extras = ["jupyter"], version = "*"}
 requests-mock = "*"
 pytest-datadir = "*"
 pytest-benchmark = "*"
-pytest-monkeytype = {markers = "python_version >= '3.6'",version = "*"}
+pytest-monkeytype = "*"
 pandas = "*"
+types-requests = "*"
+types-pytz = "*"
+types-setuptools = "*"
+ruff = "*"
 
 [packages]
-mygeotab = {editable = true,path = "."}
+mygeotab = {editable = true, path = "."}
 
 [pipenv]
 allow_prereleases = true

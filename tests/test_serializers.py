@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import json
 from datetime import date, datetime
 
 import pytest
 import pytz
 
-from mygeotab import serializers, dates
+from mygeotab import dates
 from mygeotab.serializers import json_serialize, json_deserialize
 
 
@@ -45,7 +44,7 @@ class TestSerialization:
 
     def test_unparsable_data_throws(self):
         with pytest.raises(TypeError):
-            json_serialize({''})
+            json_serialize({""})
 
 
 class TestDeserialization:

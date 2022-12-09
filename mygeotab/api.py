@@ -13,13 +13,13 @@ import copy
 import re
 import ssl
 import sys
+from urllib.parse import urlparse
 
 import requests
+import urllib3
 from requests.adapters import HTTPAdapter
 from requests.exceptions import Timeout
-from requests.packages import urllib3
-from requests.packages.urllib3.util.ssl_ import create_urllib3_context
-from six.moves.urllib.parse import urlparse
+from urllib3.util.ssl_ import create_urllib3_context
 
 from . import __title__, __version__
 from .exceptions import AuthenticationException, MyGeotabException, TimeoutException
@@ -269,7 +269,7 @@ class API(object):
             ):
                 raise AuthenticationException(
                     self.credentials.username, self.credentials.database, self.credentials.server
-                )
+                ) from exception
             raise
 
     @staticmethod
@@ -383,8 +383,8 @@ def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True,
                 verify=verify_ssl,
                 proxies=proxies,
             )
-        except Timeout:
-            raise TimeoutException(server)
+        except Timeout as exc:
+            raise TimeoutException(server) from exc
     response.raise_for_status()
     content_type = response.headers.get("Content-Type")
     if content_type and "application/json" not in content_type.lower():

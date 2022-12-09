@@ -1,5 +1,3 @@
-import sys
-
 import requests_mock
 import pytest
 
@@ -17,7 +15,6 @@ def mock_api():
 
 @pytest.mark.skip("Too slow to run automatically")
 class TestApiPerformance:
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="Requires Python 3.6 or higher")
     def test_timeout_large_json_rapidjson(self, mock_api, datadir, benchmark):
         server = "https://example.com/apiv1"
         json_response = (datadir / "big_nested_date_response.json").read_text()

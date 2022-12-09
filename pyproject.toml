@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 120
-target_version = ['py27']
+target_version = ['py37']
 include = '\.pyi?$'
 exclude = '''
 (
@@ -18,3 +18,7 @@ exclude = '''
                      # the root of the project
 )
 '''
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "B"]

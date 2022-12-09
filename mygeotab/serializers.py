@@ -7,10 +7,12 @@ mygeotab.serializers
 JSON serialization and deserialization helper objects for the MyGeotab API.
 """
 
+import json
 import re
 
 import arrow
-import six
+
+from mygeotab import dates
 
 use_rapidjson = False
 try:
@@ -21,9 +23,6 @@ try:
     use_rapidjson = True
 except ImportError:
     pass
-import json
-
-from mygeotab import dates
 
 DATETIME_REGEX = re.compile(r"^\d{4}\-\d{2}\-\d{2}")
 
@@ -45,7 +44,7 @@ def object_serializer(obj):
 
     :param obj: The object.
     """
-    if hasattr(obj, 'isoformat'):
+    if hasattr(obj, "isoformat"):
         return dates.format_iso_datetime(obj)
     else:
         # Let the base class default method raise the TypeError
@@ -58,7 +57,7 @@ def object_deserializer(obj):
     :param obj: The dict.
     """
     for key, val in obj.items():
-        if isinstance(val, six.string_types) and DATETIME_REGEX.search(val):
+        if isinstance(val, str) and DATETIME_REGEX.search(val):
             try:
                 obj[key] = dates.localize_datetime(arrow.get(val).datetime)
             except (ValueError, arrow.parser.ParserError):

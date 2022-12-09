@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import pytest
-
-asyncio = pytest.importorskip("asyncio")
 import os
 import sys
+
+import pytest
 
 from mygeotab import API, server_call_async
 from mygeotab.exceptions import AuthenticationException, MyGeotabException, TimeoutException
 from tests.test_api_call import (
+    CER_FILE,
+    DATABASE,
+    KEY_FILE,
+    PASSWORD,
+    PEM_FILE,
     SERVER,
     USERNAME,
-    PASSWORD,
-    DATABASE,
-    CER_FILE,
-    KEY_FILE,
-    PEM_FILE,
     ZONETYPE_NAME,
     generate_fake_credentials,
 )
@@ -25,7 +24,7 @@ ASYNC_ZONETYPE_NAME = "async {name}".format(name=ZONETYPE_NAME)
 USERNAME = os.environ.get("MYGEOTAB_USERNAME_ASYNC", USERNAME)
 PASSWORD = os.environ.get("MYGEOTAB_PASSWORD_ASYNC", PASSWORD)
 
-pytestmark = pytest.mark.skipif(sys.version_info < (3, 6), reason="Only testing API on Python 3.6")
+pytestmark = pytest.mark.skipif(sys.version_info < (3, 7), reason="Only testing API on Python 3.7")
 
 
 @pytest.fixture(scope="session")
