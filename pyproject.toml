@@ -20,5 +20,11 @@ exclude = '''
 '''
 
 [tool.ruff]
-line-length = 120
+line-length = 127
 select = ["E", "F", "B"]
+exclude = [
+    "docs"
+]
+
+[tool.ruff.mccabe]
+max-complexity = 10

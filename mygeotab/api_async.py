@@ -82,7 +82,7 @@ class API(api.API):
                 else:
                     raise AuthenticationException(
                         self.credentials.username, self.credentials.database, self.credentials.server
-                    )
+                    ) from exception
             raise
 
     async def multi_call_async(self, calls):

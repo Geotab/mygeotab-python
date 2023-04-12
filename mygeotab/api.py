@@ -132,7 +132,7 @@ class API(object):
                 else:
                     raise AuthenticationException(
                         self.credentials.username, self.credentials.database, self.credentials.server
-                    )
+                    ) from exception
             raise
 
     def multi_call(self, calls):
