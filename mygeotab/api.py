@@ -169,7 +169,6 @@ class API(object):
         :rtype: list
         """
         if parameters:
-
             # Detect resultsLimit if passed camelCase or python_case and
             # remove from parameters (otherwise they will become part of search)
             results_limit = parameters.get("resultsLimit")
@@ -278,7 +277,9 @@ class API(object):
                 return self.credentials
         except MyGeotabException as exception:
             if exception.name == "InvalidUserException" or (
-                exception.name == "DbUnavailableException" and "Initializing" in exception.message
+                exception.name == "DbUnavailableException" and (
+                    "Initializing" in exception.message or "UnknownDatabase" in exception.message
+                )
             ):
                 raise AuthenticationException(
                     self.credentials.username, self.credentials.database, self.credentials.server
