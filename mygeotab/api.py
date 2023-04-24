@@ -233,13 +233,26 @@ class API(object):
         :return: A Credentials object with a session ID created by the server.
         :rtype: Credentials
         """
+        if self.credentials.session_id and not self.credentials.password:
+            # Extend the session if only the session ID is present
+            extend_session_data = dict(
+                database=self.credentials.database,
+                userName=self.credentials.username,
+                sessionId=self.credentials.session_id,
+            )
+            _query(
+                self._server,
+                "ExtendSession",
+                extend_session_data,
+                self.timeout,
+                verify_ssl=self._is_verify_ssl,
+                proxies=self._proxies,
+                cert=self._cert,
+            )
+            return self.credentials
         auth_data = dict(
             database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
         )
-        if self.credentials.session_id and not self.credentials.password:
-            # Extend the session if only the session ID is present
-            auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
-
         try:
             result = _query(
                 self._server,
