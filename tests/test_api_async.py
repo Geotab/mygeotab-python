@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import asyncio
 import os
 import sys
 
@@ -28,14 +29,22 @@ pytestmark = pytest.mark.skipif(sys.version_info < (3, 7), reason="Only testing 
 
 
 @pytest.fixture(scope="session")
-def async_populated_api():
+def event_loop():
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="session")
+def async_populated_api(event_loop):
     cert = None
     if CER_FILE and KEY_FILE:
         cert = (CER_FILE, KEY_FILE)
     elif PEM_FILE:
         cert = PEM_FILE
     if USERNAME and PASSWORD:
-        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, cert=cert)
+        session = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, cert=cert, loop=event_loop)
         try:
             session.authenticate()
         except MyGeotabException as exception:

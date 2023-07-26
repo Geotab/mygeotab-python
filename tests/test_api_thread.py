@@ -2,14 +2,17 @@
 
 import threading
 
+import pytest
+
 
 class TestAsyncThreadImport:
-    def test_thread_import(self):
+    @pytest.mark.asyncio
+    async def test_thread_import(self, event_loop):
         def thread_func(results):
             try:
                 import mygeotab
 
-                mygeotab.API("testuser", session_id="abc123")
+                mygeotab.API("testuser", session_id="abc123", loop=event_loop)
                 results.append(None)
             except Exception as e:
                 results.append(e)

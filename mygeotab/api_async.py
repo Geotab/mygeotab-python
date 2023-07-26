@@ -11,6 +11,7 @@ import asyncio
 
 import ssl
 from concurrent.futures import TimeoutError
+from typing import Optional, Union
 
 import aiohttp
 
@@ -33,6 +34,7 @@ class API(api.API):
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
         cert=None,
+        loop=None,
     ):
         """
         Initialize the asynchronous MyGeotab API object with credentials.
@@ -44,10 +46,23 @@ class API(api.API):
         :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
         :param proxies: The proxies dictionary to apply to the request.
-        :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .pem file)
+        :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .pem file).
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         super().__init__(username, password, database, session_id, server, timeout, proxies=proxies, cert=cert)
+        self.session = _get_session(loop, cert)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.session.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.session.close()
 
     async def call_async(self, method, **parameters):
         """Makes an async call to the API.
@@ -67,7 +82,7 @@ class API(api.API):
             params["credentials"] = self.credentials.get_param()
 
         try:
-            result = await _query(self._server, method, params, verify_ssl=self._is_verify_ssl, cert=self._cert)
+            result = await _query(self.session, self._server, method, params)
             if result is not None:
                 self.__reauthorize_count = 0
             return result
@@ -162,13 +177,13 @@ class API(api.API):
         )
 
 
-async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters):
+async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, cert=None, **parameters):
     """Makes an asynchronous call to an un-authenticated method on a server.
 
     :param method: The method name.
     :param server: The MyGeotab server.
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-    :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
+    :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .pem file).
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
     :return: The JSON result (decoded into a dict) from the server.
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
@@ -179,18 +194,36 @@ async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = api.process_parameters(parameters)
-    return await _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl)
+    return await _query(_get_session(cert), server, method, parameters, timeout=timeout)
 
 
-async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, cert=None):
+def _get_session(
+    loop: Optional[Union[asyncio.AbstractEventLoop, None]] = None, cert: Optional[Union[str, tuple]] = None
+):
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context.options |= ssl.OP_NO_SSLv2
+    ssl_context.options |= ssl.OP_NO_SSLv3
+    ssl_context.options |= ssl.OP_NO_TLSv1
+    ssl_context.options |= ssl.OP_NO_TLSv1_1
+    if cert:
+        if isinstance(cert, str):
+            ssl_context.load_cert_chain(cert)
+        elif isinstance(cert, tuple):
+            cer, key = cert
+            ssl_context.load_cert_chain(cer, key)
+
+    conn = aiohttp.TCPConnector(ssl=ssl_context, loop=loop)
+    return aiohttp.ClientSession(loop=loop, connector=conn)
+
+
+async def _query(session: aiohttp.ClientSession, server: str, method: str, parameters: dict, timeout=DEFAULT_TIMEOUT):
     """Formats and performs the asynchronous query against the API
 
+    :param session: The aiohttp.ClientSession object.
     :param server: The server to query.
     :param method: The method name.
     :param parameters: A dict of parameters to send
     :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-    :param verify_ssl: Whether or not to verify SSL connections
-    :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .pem file)
     :return: The JSON-decoded result from the server
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server
     :raise TimeoutException: Raises when the request does not respond after some time.
@@ -200,26 +233,10 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     params = dict(id=-1, method=method, params=parameters)
     headers = get_headers()
 
-    ssl_context = False
-    if verify_ssl or cert:
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        ssl_context.options |= ssl.OP_NO_SSLv2
-        ssl_context.options |= ssl.OP_NO_SSLv3
-        ssl_context.options |= ssl.OP_NO_TLSv1
-        ssl_context.options |= ssl.OP_NO_TLSv1_1
-    if cert:
-        if isinstance(cert, str):
-            ssl_context.load_cert_chain(cert)
-        elif isinstance(cert, tuple):
-            cer, key = cert
-            ssl_context.load_cert_chain(cer, key)
-
-    conn = aiohttp.TCPConnector(ssl=ssl_context)
     try:
-        async with aiohttp.ClientSession(connector=conn) as session:
-            response = await session.post(
-                api_endpoint, data=json_serialize(params), headers=headers, timeout=timeout, allow_redirects=True
-            )
+        async with session.post(
+            api_endpoint, data=json_serialize(params), headers=headers, timeout=timeout, allow_redirects=True
+        ) as response:
             response.raise_for_status()
             content_type = response.headers.get("Content-Type")
             body = await response.text()
