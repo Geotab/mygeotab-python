@@ -169,7 +169,6 @@ class API(object):
         :rtype: list
         """
         if parameters:
-
             # Detect resultsLimit if passed camelCase or python_case and
             # remove from parameters (otherwise they will become part of search)
             results_limit = parameters.get("resultsLimit")
@@ -233,14 +232,30 @@ class API(object):
         :return: A Credentials object with a session ID created by the server.
         :rtype: Credentials
         """
-        auth_data = dict(
-            database=self.credentials.database, userName=self.credentials.username, password=self.credentials.password
-        )
-        if self.credentials.session_id and not self.credentials.password:
-            # Extend the session if only the session ID is present
-            auth_data = dict(credentials=dict(auth_data, **{"sessionId": self.credentials.session_id}))
-
         try:
+            if self.credentials.session_id and not self.credentials.password:
+                # Extend the session if only the session ID is present
+                extend_session_data = dict(
+                    database=self.credentials.database,
+                    userName=self.credentials.username,
+                    sessionId=self.credentials.session_id,
+                )
+                _query(
+                    self._server,
+                    "ExtendSession",
+                    extend_session_data,
+                    self.timeout,
+                    verify_ssl=self._is_verify_ssl,
+                    proxies=self._proxies,
+                    cert=self._cert,
+                )
+                return self.credentials
+
+            auth_data = dict(
+                database=self.credentials.database,
+                userName=self.credentials.username,
+                password=self.credentials.password,
+            )
             result = _query(
                 self._server,
                 "Authenticate",
@@ -265,7 +280,8 @@ class API(object):
                 return self.credentials
         except MyGeotabException as exception:
             if exception.name == "InvalidUserException" or (
-                exception.name == "DbUnavailableException" and "Initializing" in exception.message
+                exception.name == "DbUnavailableException"
+                and ("Initializing" in exception.message or "UnknownDatabase" in exception.message)
             ):
                 raise AuthenticationException(
                     self.credentials.username, self.credentials.database, self.credentials.server
