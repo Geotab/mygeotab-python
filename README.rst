@@ -9,7 +9,7 @@ MyGeotab
     :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://img.shields.io/codecov/c/github/Geotab/mygeotab-python/master.svg?style=flat
+.. image:: https://img.shields.io/codecov/c/github/Geotab/mygeotab-python/main.svg?style=flat
     :target: https://codecov.io/gh/Geotab/mygeotab-python
     :alt: Code Coverage
 
