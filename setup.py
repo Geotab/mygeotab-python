@@ -42,7 +42,15 @@ setup(
     packages=packages,
     package_data={"": ["LICENSE"]},
     license="Apache 2.0",
-    install_requires=["requests", "urllib3", "click", "pytz", "arrow", "aiohttp>=3.8.1,<4", "python-rapidjson"],
+    install_requires=[
+        "requests",
+        "urllib3",
+        "click",
+        "pytz",
+        "arrow",
+        "aiohttp[speedups]>=3.8.1,<4",
+        "python-rapidjson",
+    ],
     setup_requires=["wheel"],
     entry_points="""
         [console_scripts]

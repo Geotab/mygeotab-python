@@ -197,9 +197,7 @@ async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, cert=None, 
     return await _query(_get_session(cert), server, method, parameters, timeout=timeout)
 
 
-def _get_session(
-    loop: Optional[Union[asyncio.AbstractEventLoop, None]] = None, cert: Optional[Union[str, tuple]] = None
-):
+def _get_session(loop: Optional[Union[asyncio.AbstractEventLoop, None]] = None, cert: Optional[Union[str, tuple]] = None):
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     ssl_context.options |= ssl.OP_NO_SSLv2
     ssl_context.options |= ssl.OP_NO_SSLv3
