@@ -197,7 +197,7 @@ class AltitudeAPI(API):
     
     def do(self, params: dict) -> list:
         """
-        given the parameters, will call the request, wait on it to finish and returned the combined data.
+        given the parameters, will call the request, wait on it to finish and return the combined data.
         """
         logging.info(f"creating job")
         job = self.create_job(params)
