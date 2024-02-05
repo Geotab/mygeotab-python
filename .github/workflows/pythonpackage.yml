@@ -44,7 +44,7 @@ jobs:
       run: |
         pipenv run py.test --cov-config .coveragerc --cov-report xml:output/coverage.xml --cov mygeotab --junitxml output/python${{ matrix.python-version }}-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://output/ --benchmark-autosave tests/
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: ./output/coverage.xml
