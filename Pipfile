@@ -11,8 +11,6 @@ rope = "*"
 mygeotab = {editable = true,path = "."}
 mypy = "*"
 pytest-asyncio = "*"
-sphinx = "*"
-furo = "*"
 black = {extras = ["jupyter"], version = "*"}
 requests-mock = "*"
 pytest-datadir = "*"
@@ -23,7 +21,6 @@ types-requests = "*"
 types-pytz = "*"
 types-setuptools = "*"
 ruff = "*"
-sphinx-copybutton = "*"
 
 [packages]
 mygeotab = {editable = true, path = "."}
