@@ -28,3 +28,4 @@ The full API reference for all public classes and functions.
    :maxdepth: 2
 
    api
+   altitude

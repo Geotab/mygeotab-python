@@ -60,7 +60,7 @@ From this, store the `server`, `database`, `username`, and `session_id` properti
     However, constantly running sessions may not need to store the credentials in the file system as they can retain the :class:`API <mygeotab.API>`
     instance in memory.
 
-Subsequent calls to the :func:`authenticate() <mygeotab.API.authenticate>` method with an already authenticted :class:`API <mygeotab.API>` object can extend the lifetime of the session. However, this still counts towards the count of authentication attempts and calling this may still result in `OverLimitException`s and may reject requests for a short time afterward to prevent API abuse.
+Subsequent calls to the :func:`authenticate() <mygeotab.API.authenticate>` method with an already authenticted :class:`API <mygeotab.API>` object can extend the lifetime of the session. However, this still counts towards the count of authentication attempts and calling this may still result in `OverLimitException`\s and may reject requests for a short time afterward to prevent API abuse.
 
 Making Calls
 ------------

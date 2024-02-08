@@ -31,7 +31,7 @@ packages = ["mygeotab", "mygeotab.ext"]
 
 setup(
     name="mygeotab",
-    author="Aaron Toth",
+    author="Geotab Inc.",
     version=version,
     url="https://github.com/geotab/mygeotab-python",
     description="A Python client for the MyGeotab SDK",

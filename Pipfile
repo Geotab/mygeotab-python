@@ -23,6 +23,7 @@ types-requests = "*"
 types-pytz = "*"
 types-setuptools = "*"
 ruff = "*"
+sphinx-copybutton = "*"
 
 [packages]
 mygeotab = {editable = true, path = "."}

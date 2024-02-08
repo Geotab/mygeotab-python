@@ -3,13 +3,18 @@
 Changes
 -------
 
-1.0.0 (development)
-+++++++++++++++++++
+0.9.0 (2024-02-08)
+++++++++++++++++++
 
 **Improvements**
 
 - Removed all Python 2 handling code and packages (six).
 - Simplified code based on removing support for Python 2 and Python 3.6 and lower.
+
+**Bug Fixes**
+
+- Support results limit in get requests `#11 <https://github.com/Geotab/mygeotab-python/pull/11>`__. 
+- Handles ArgumentException when extending the session `#19 <https://github.com/Geotab/mygeotab-python/issues/19>`__.
 
 **Housecleaning**
 

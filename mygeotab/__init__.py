@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 __title__ = "mygeotab-python"
-__author__ = "Aaron Toth"
-__version__ = "0.8.8"
+__author__ = "Geotab Inc."
+__version__ = "0.9.0"
 
 from .api import Credentials, server_call
 from .exceptions import MyGeotabException, AuthenticationException, TimeoutException

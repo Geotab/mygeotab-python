@@ -1,8 +1,6 @@
 Command Line Tools
 ==================
 
-.. module:: mygeotab
-
 The `myg` command line script is installed alongside this package, which currently makes some administration
 and querying simple, as it handles the credential storage and token expiry automatically.
 
