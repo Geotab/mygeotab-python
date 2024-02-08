@@ -6,8 +6,8 @@ MyGeotab
     :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/mygeotab-python/badge/?version=latest
-    :target: https://readthedocs.org/projects/mygeotab-python/?badge=latest
-    :alt: Documentation Status
+    :target: https://mygeotab-python.readthedocs.io/en/latest/
+    :alt: Documentation
 
 .. image:: https://img.shields.io/codecov/c/github/Geotab/mygeotab-python/main.svg?style=flat
     :target: https://codecov.io/gh/Geotab/mygeotab-python
