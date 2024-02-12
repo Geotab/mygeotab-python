@@ -1466,15 +1466,17 @@
                 "sha256:50fb9cbe836c3f20f0dfa99c565201fb75dc54c8d76373cd1bde06b06657bdb6"
             ],
             "index": "pypi",
+            "markers": "python_version >= '3.8'",
             "version": "==8.0.0"
         },
         "pytest-asyncio": {
             "hashes": [
-                "sha256:987c3eb0a847268a884a0d26ad0e57e885647e647792f2accc80e01842ed1b68",
-                "sha256:ea37983dbf4391f569183e97fb1c4c2899a3349818f1b338ca91aaa149983cc7"
+                "sha256:3a048872a9c4ba14c3e90cc1aa20cbc2def7d01c7c8db3777ec281ba9c057675",
+                "sha256:4e7093259ba018d58ede7d5315131d21923a60f8a6e9ee266ce1589685c89eac"
             ],
             "index": "pypi",
-            "version": "==0.23.5a0"
+            "markers": "python_version >= '3.8'",
+            "version": "==0.23.5"
         },
         "pytest-benchmark": {
             "hashes": [
