@@ -203,10 +203,12 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     ssl_context = False
     if verify_ssl or cert:
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        ssl_context.load_default_certs()
         ssl_context.options |= ssl.OP_NO_SSLv2
         ssl_context.options |= ssl.OP_NO_SSLv3
         ssl_context.options |= ssl.OP_NO_TLSv1
         ssl_context.options |= ssl.OP_NO_TLSv1_1
+        ssl_context.options |= ssl.OP_ENABLE_MIDDLEBOX_COMPAT
     if cert:
         if isinstance(cert, str):
             ssl_context.load_cert_chain(cert)

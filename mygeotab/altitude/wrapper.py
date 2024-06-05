@@ -49,13 +49,14 @@ class AltitudeAPI(API):
             proxies=proxies,
             cert=cert,
         )
-        _ = logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        
+        _ = logging.basicConfig(
+            stream=sys.stdout,
+            level=logging.INFO,
+            format="%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
 
-
-    def _call_api(
-        self, service_name: str, function_name: str, function_parameters: dict
-    ) -> dict:
+    def _call_api(self, service_name: str, function_name: str, function_parameters: dict) -> dict:
         results = self.call(
             method="GetBigDataResults",
             serviceName=service_name,
@@ -64,12 +65,10 @@ class AltitudeAPI(API):
         )
         return results
 
-
-
-    def call_api(self, function_name: str, params: dict) -> dict :
-        '''
+    def call_api(self, function_name: str, params: dict) -> dict:
+        """
         Supports getJobStatus calls, and getQueryResults calls. Retries in case of errors like connection rest.
-        '''
+        """
         assert function_name in ["getJobStatus", "getQueryResults", "createQueryJob"]
         max_tries = 5
         for try_index in range(max_tries):
@@ -87,7 +86,7 @@ class AltitudeAPI(API):
                         raise e
                     else:
                         print(f"encountered error trying to parse to api response {str(call_result)}, retrying....")
-                        time.sleep((try_index + 1)*10)
+                        time.sleep((try_index + 1) * 10)
                 else:
                     raise e
 
@@ -138,8 +137,6 @@ class AltitudeAPI(API):
                 logging.error(f"error: error while waiting for job to complete, result: {daas_status.job}")
                 raise e
         return daas_status.job
-
-
 
     def fetch_data(self, params: dict) -> dict:
         """
@@ -194,7 +191,7 @@ class AltitudeAPI(API):
                 logging.error(f"error: error while combining data:: {e}")
                 raise e
         return data
-    
+
     def do(self, params: dict) -> list:
         """
         given the parameters, will call the request, wait on it to finish and return the combined data.
@@ -210,13 +207,3 @@ class AltitudeAPI(API):
         data = self.get_data(params)
         logging.info(f"data gathered")
         return data
-
-
-
-
-
-
-
-
-
-    
