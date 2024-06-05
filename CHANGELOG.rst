@@ -3,6 +3,13 @@
 Changes
 -------
 
+0.9.1 (2024-04-05)
+++++++++++++++++++
+
+**Bug Fixes**
+
+- Loads system CA certificates when creating an SSL context `#123 <https://github.com/Geotab/mygeotab-python/pull/123>`__.
+
 0.9.0 (2024-02-23)
 ++++++++++++++++++
 
