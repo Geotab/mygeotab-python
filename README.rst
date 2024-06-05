@@ -1,7 +1,7 @@
 MyGeotab
 ========
 
-.. image:: https://github.com/Geotab/mygeotab-python/workflows/Python%20package/badge.svg
+.. image:: https://github.com/Geotab/mygeotab-python/actions/workflows/pythonpackage.yml/badge.svg
     :target: https://github.com/Geotab/mygeotab-python
     :alt: Build Status
 
