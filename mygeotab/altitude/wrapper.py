@@ -58,7 +58,7 @@ class AltitudeAPI(API):
 
     def _call_api(self, service_name: str, function_name: str, function_parameters: dict) -> dict:
         results = self.call(
-            method="GetBigDataResults",
+            method="GetAltitudeData",
             serviceName=service_name,
             functionName=function_name,
             functionParameters=function_parameters,
