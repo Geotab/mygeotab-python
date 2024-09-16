@@ -11,7 +11,7 @@ rope = "*"
 mygeotab = {editable = true,path = "."}
 mypy = "*"
 pytest-asyncio = "*"
-black = {extras = ["jupyter"], version = "*"}
+black = "*"
 requests-mock = "*"
 pytest-datadir = "*"
 pytest-benchmark = "*"
