@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.9.2 (2024-10-08)
+++++++++++++++++++
+
+**Improvements**
+
+- Updates Altitude API call method `#124 <https://github.com/Geotab/mygeotab-python/pull/124>`__.
+
+
 0.9.1 (2024-04-05)
 ++++++++++++++++++
 
