@@ -21,10 +21,10 @@ exclude = '''
 
 [tool.ruff]
 line-length = 127
+
+[tool.ruff.lint]
 select = ["E", "F", "B"]
 exclude = [
     "docs"
 ]
-
-[tool.ruff.mccabe]
-max-complexity = 10
+mccabe.max-complexity = 10
