@@ -48,8 +48,8 @@ def populated_api():
         session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, cert=cert)
         try:
             session.authenticate()
-        except api.MyGeotabException as exception:
-            pytest.fail(exception)
+        except (api.MyGeotabException, api.AuthenticationException) as exception:
+            pytest.fail(str(exception))
             return
         yield session
     else:

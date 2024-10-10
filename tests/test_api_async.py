@@ -38,8 +38,8 @@ def async_populated_api():
         session = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, cert=cert)
         try:
             session.authenticate()
-        except MyGeotabException as exception:
-            pytest.fail(exception)
+        except (MyGeotabException, AuthenticationException) as exception:
+            pytest.fail(str(exception))
             return
         yield session
     else:
