@@ -350,13 +350,10 @@ class GeotabHTTPAdapter(HTTPAdapter):
     """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        ssl_context = create_urllib3_context(ssl_version=ssl.PROTOCOL_TLS)
+        ssl_context = create_urllib3_context(ssl_version=ssl.PROTOCOL_TLS_CLIENT)
         ssl_context.load_default_certs()
-        ssl_context.options |= ssl.OP_NO_SSLv2
-        ssl_context.options |= ssl.OP_NO_SSLv3
-        ssl_context.options |= ssl.OP_NO_TLSv1
-        ssl_context.options |= ssl.OP_NO_TLSv1_1
-        ssl_context.options |= ssl.OP_ENABLE_MIDDLEBOX_COMPAT
+        if hasattr(ssl, "OP_ENABLE_MIDDLEBOX_COMPAT"):
+            ssl_context.options |= ssl.OP_ENABLE_MIDDLEBOX_COMPAT
         self.poolmanager = urllib3.poolmanager.PoolManager(
             num_pools=connections, maxsize=maxsize, block=block, ssl_context=ssl_context, **pool_kwargs
         )
