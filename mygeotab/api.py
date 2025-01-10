@@ -347,7 +347,7 @@ class Credentials(object):
 
 
 class GeotabHTTPAdapter(HTTPAdapter):
-    """HTTP adapter to force use of TLS 1.2 for HTTPS connections."""
+    """HTTP adapter to enforce use of TLS for HTTPS."""
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         ssl_context = create_urllib3_context(ssl_version=ssl.PROTOCOL_TLS_CLIENT)
