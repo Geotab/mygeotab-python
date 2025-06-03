@@ -179,10 +179,14 @@ class API(object):
                 if results_limit is not None:
                     del parameters["results_limit"]
 
+            sort = parameters.get("sort")
+            if sort is not None:
+                del parameters["sort"]
+
             if "search" in parameters:
                 parameters.update(parameters["search"])
                 del parameters["search"]
-            parameters = dict(search=parameters, resultsLimit=results_limit)
+            parameters = dict(search=parameters, resultsLimit=results_limit, sort=sort)
         return self.call("Get", type_name=type_name, **parameters)
 
     def add(self, type_name, entity):
