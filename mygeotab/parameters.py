@@ -59,7 +59,7 @@ def convert_get_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
     if "search" in parameters:
         parameters.update(parameters["search"])
         del parameters["search"]
-    result = {'search': parameters}
+    result = {"search": parameters}
     if results_limit is not None:
-        result['resultsLimit'] = results_limit
+        result["resultsLimit"] = results_limit
     return result
