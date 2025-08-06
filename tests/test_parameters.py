@@ -78,3 +78,52 @@ def test_convert_get_parameters_removes_results_limit_from_search():
     assert "resultsLimit" in result
     assert result["resultsLimit"] == 7
     assert "results_limit" not in result["search"]
+
+
+def test_convert_get_parameters_with_sort():
+    params = {
+        "search": {"foo": "bar"},
+        "sort": {"sortBy": "name", "sortDirection": "asc", "offset": "Delivery Truck 12", "lastId": "b1234"},
+    }
+    result = convert_get_parameters(params)
+    assert "sort" in result
+    assert isinstance(result["sort"], dict)
+    assert result["sort"]["sortBy"] == "name"
+    assert result["sort"]["sortDirection"] == "asc"
+    assert result["sort"]["offset"] == "Delivery Truck 12"
+    assert result["sort"]["lastId"] == "b1234"
+
+
+def test_convert_get_parameters_with_property_selector():
+    params = {"search": {"foo": "bar"}, "propertySelector": {"fields": ["id", "name"], "isIncluded": True}}
+    result = convert_get_parameters(params)
+    assert "propertySelector" in result
+    assert isinstance(result["propertySelector"], dict)
+    assert "fields" in result["propertySelector"]
+    assert "isIncluded" in result["propertySelector"]
+
+
+def test_convert_get_parameters_with_property_selector_snake_case():
+    params = {"search": {"foo": "bar"}, "property_selector": {"fields": ["id", "name"], "isIncluded": True}}
+    result = convert_get_parameters(params)
+    assert "propertySelector" in result
+    assert isinstance(result["propertySelector"], dict)
+    assert "fields" in result["propertySelector"]
+    assert "isIncluded" in result["propertySelector"]
+
+
+def test_convert_get_parameters_with_sort_and_property_selector():
+    params = {
+        "search": {"foo": "bar"},
+        "sort": {"sortBy": "name", "sortDirection": "asc", "offset": "Delivery Truck 12", "lastId": "b1234"},
+        "property_selector": {"fields": ["id", "status"], "isIncluded": True},
+    }
+    result = convert_get_parameters(params)
+    assert "sort" in result
+    assert result["sort"]["sortBy"] == "name"
+    assert result["sort"]["sortDirection"] == "asc"
+    assert result["sort"]["offset"] == "Delivery Truck 12"
+    assert result["sort"]["lastId"] == "b1234"
+    assert "propertySelector" in result
+    assert "fields" in result["propertySelector"]
+    assert "isIncluded" in result["propertySelector"]

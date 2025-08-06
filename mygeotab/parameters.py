@@ -9,7 +9,7 @@ This module contains parameter utilities used in the MyGeotab API.
 
 import re
 from copy import copy
-from typing import Any
+from typing import Any, Optional
 
 
 def camelcaseify_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
@@ -37,8 +37,8 @@ def camelcaseify_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
 def convert_get_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
     """Converts parameters passed into a get() call to a format suitable for the MyGeotab API.
     It detects if a 'search' dictionary is passed and flattens it into the top-level parameters.
-    It also detects 'resultsLimit' or 'results_limit' and removes it from the parameters
-    so it doesn't become part of the search.
+    It also detects 'resultsLimit'/'results_limit' or 'sort' parameters and removes them from the parameters
+    so they doesn't become part of the search.
 
     :param parameters: The parameters object.
     :type parameters: dict
@@ -48,18 +48,33 @@ def convert_get_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
     if not parameters:
         return dict()
 
-    results_limit = parameters.get("resultsLimit")
-    if results_limit is not None:
-        del parameters["resultsLimit"]
-    else:
-        results_limit = parameters.get("results_limit")
-        if results_limit is not None:
-            del parameters["results_limit"]
+    parameters = copy(parameters)
+
+    results_limit_param = _try_extract_get_parameter(parameters, "resultsLimit", "results_limit")
+    property_selector_param = _try_extract_get_parameter(parameters, "propertySelector", "property_selector")
+    sort_param = _try_extract_get_parameter(parameters, "sort")
 
     if "search" in parameters:
         parameters.update(parameters["search"])
         del parameters["search"]
+
     result = {"search": parameters}
-    if results_limit is not None:
-        result["resultsLimit"] = results_limit
+    if results_limit_param is not None:
+        result["resultsLimit"] = results_limit_param
+    if property_selector_param is not None:
+        result["propertySelector"] = property_selector_param
+    if sort_param is not None:
+        result["sort"] = sort_param
     return result
+
+
+def _try_extract_get_parameter(parameters: dict[str, Any], name: str, pythonic_name: Optional[str] = None) -> Any | None:
+    """Helper to get a parameter from a dictionary, returning None if it doesn't exist."""
+    parameter = parameters.get(name)
+    if parameter is not None:
+        del parameters[name]
+    elif pythonic_name is not None:
+        parameter = parameters.get(pythonic_name)
+        if parameter is not None:
+            del parameters[pythonic_name]
+    return parameter
