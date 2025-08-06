@@ -9,10 +9,10 @@ This module contains parameter utilities used in the MyGeotab API.
 
 import re
 from copy import copy
-from typing import Any, Optional
+from typing import Any, Optional, Dict, Union
 
 
-def camelcaseify_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
+def camelcaseify_parameters(parameters: Dict[str, Any]) -> Dict[str, Any]:
     """Allows the use of Pythonic-style parameters with underscores instead of camel-case.
 
     :param parameters: The parameters object.
@@ -34,7 +34,7 @@ def camelcaseify_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
     return params
 
 
-def convert_get_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
+def convert_get_parameters(parameters: Dict[str, Any]) -> Dict[str, Any]:
     """Converts parameters passed into a get() call to a format suitable for the MyGeotab API.
     It detects if a 'search' dictionary is passed and flattens it into the top-level parameters.
     It also detects 'resultsLimit'/'results_limit' or 'sort' parameters and removes them from the parameters
@@ -68,7 +68,7 @@ def convert_get_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def _try_extract_get_parameter(parameters: dict[str, Any], name: str, pythonic_name: Optional[str] = None) -> Any | None:
+def _try_extract_get_parameter(parameters: Dict[str, Any], name: str, pythonic_name: Optional[str] = None) -> Union[Any, None]:
     """Helper to get a parameter from a dictionary, returning None if it doesn't exist."""
     parameter = parameters.get(name)
     if parameter is not None:
