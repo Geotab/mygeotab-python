@@ -4,7 +4,7 @@
 mygeotab.parameters
 ~~~~~~~~~~~~~~~~~~~
 
-This module contains parameter utilites used in the MyGeotab API.
+This module contains parameter utilities used in the MyGeotab API.
 """
 
 import re
@@ -59,4 +59,7 @@ def convert_get_parameters(parameters: dict[str, Any]) -> dict[str, Any]:
     if "search" in parameters:
         parameters.update(parameters["search"])
         del parameters["search"]
-    return dict(search=parameters, resultsLimit=results_limit)
+    result = {'search': parameters}
+    if results_limit is not None:
+        result['resultsLimit'] = results_limit
+    return result
