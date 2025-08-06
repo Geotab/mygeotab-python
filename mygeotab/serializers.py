@@ -12,7 +12,7 @@ import re
 
 import arrow
 
-from mygeotab import dates
+from . import dates
 
 use_rapidjson = False
 try:
