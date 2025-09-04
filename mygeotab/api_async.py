@@ -8,19 +8,18 @@ Async/Await-able public objects and methods wrapping the MyGeotab API.
 """
 
 import asyncio
-
 import ssl
 from concurrent.futures import TimeoutError
 
 import aiohttp
 
-from mygeotab import api
-from mygeotab.api import DEFAULT_TIMEOUT, get_headers
-from mygeotab.exceptions import MyGeotabException, TimeoutException, AuthenticationException
-from mygeotab.serializers import json_serialize, json_deserialize
+from .api import API as SyncAPI, DEFAULT_TIMEOUT, _process, get_api_url, get_headers
+from .exceptions import AuthenticationException, MyGeotabException, TimeoutException
+from .parameters import camelcaseify_parameters, convert_get_parameters
+from .serializers import json_deserialize, json_serialize
 
 
-class API(api.API):
+class API(SyncAPI):
     """A simple, asynchronous, and Pythonic wrapper for the MyGeotab API."""
 
     def __init__(
@@ -60,7 +59,7 @@ class API(api.API):
         """
         if method is None:
             raise Exception("A method name must be specified")
-        params = api.process_parameters(parameters)
+        params = camelcaseify_parameters(parameters)
         if self.credentials and not self.credentials.session_id:
             self.authenticate()
         if "credentials" not in params and self.credentials.session_id:
@@ -105,15 +104,7 @@ class API(api.API):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        if parameters:
-            results_limit = parameters.get("resultsLimit", None)
-            if results_limit is not None:
-                del parameters["resultsLimit"]
-            if "search" in parameters:
-                parameters.update(parameters["search"])
-                del parameters["search"]
-            parameters = dict(search=parameters, resultsLimit=results_limit)
-        return await self.call_async("Get", type_name=type_name, **parameters)
+        return await self.call_async("Get", type_name=type_name, **convert_get_parameters(parameters))
 
     async def add_async(self, type_name, entity):
         """
@@ -178,7 +169,7 @@ async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=
         raise Exception("A method name must be specified")
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
-    parameters = api.process_parameters(parameters)
+    parameters = camelcaseify_parameters(parameters)
     return await _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl)
 
 
@@ -196,7 +187,7 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
     :raise TimeoutException: Raises when the request does not respond after some time.
     :raise aiohttp.ClientResponseError: Raises when there is an HTTP status code that indicates failure.
     """
-    api_endpoint = api.get_api_url(server)
+    api_endpoint = get_api_url(server)
     params = dict(id=-1, method=method, params=parameters)
     headers = get_headers()
 
@@ -226,4 +217,4 @@ async def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl
         raise TimeoutException(server) from exc
     if content_type and "application/json" not in content_type.lower():
         return body
-    return api._process(json_deserialize(body))
+    return _process(json_deserialize(body))

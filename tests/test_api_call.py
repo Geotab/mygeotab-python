@@ -54,9 +54,7 @@ def populated_api():
         yield session
     else:
         pytest.skip(
-            "Can't make calls to the API without the "
-            "MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD "
-            "environment variables being set"
+            "Can't make calls to the API without the MYGEOTAB_USERNAME and MYGEOTAB_PASSWORD environment variables being set"
         )
 
 

@@ -9,14 +9,15 @@ Console utilities for working with the MyGeotab API.
 
 import configparser
 import os.path
-
 import sys
 
 import click
 
 import mygeotab
-import mygeotab.api
-import mygeotab.dates
+
+from . import API, __title__, __version__, dates
+from .api import Credentials
+from .exceptions import AuthenticationException
 
 
 class Session(object):
@@ -28,7 +29,7 @@ class Session(object):
 
     @staticmethod
     def _get_config_file():
-        config_path = click.get_app_dir(mygeotab.__title__)
+        config_path = click.get_app_dir(__title__)
         if not os.path.exists(config_path):
             os.makedirs(config_path)
         return os.path.join(config_path, "config.ini")
@@ -82,7 +83,7 @@ class Session(object):
             session_id = config.get(section_name, "session_id")
             database = config.get(section_name, "database")
             server = config.get(section_name, "server")
-            self.credentials = mygeotab.Credentials(username, session_id, database, server)
+            self.credentials = Credentials(username, session_id, database, server)
         except configparser.NoSectionError:
             self.credentials = None
         except configparser.NoOptionError:
@@ -95,14 +96,14 @@ class Session(object):
 
     def get_api(self):
         if self.credentials:
-            return mygeotab.API.from_credentials(self.credentials)
+            return API.from_credentials(self.credentials)
         return None
 
     def login(self, username, password=None, database=None, server=None):
         if server:
-            api = mygeotab.API(username=username, password=password, database=database, server=server)
+            api = API(username=username, password=password, database=database, server=server)
         else:
-            api = mygeotab.API(username=username, password=password, database=database)
+            api = API(username=username, password=password, database=database)
         self.credentials = api.authenticate()
         self.save()
 
@@ -139,7 +140,7 @@ def login(session, user, password, database=None, server=None):
             click.echo("Logged in as: %s" % session.credentials)
             session.load(database)
         return session.get_api()
-    except mygeotab.AuthenticationException:
+    except AuthenticationException:
         click.echo("Incorrect credentials. Please try again.")
         sys.exit(0)
 
@@ -206,7 +207,7 @@ def console(session, database=None, user=None, password=None, server=None):
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
     local_vars = _populate_locals(database, password, server, session, user)
-    myg_console_version = "MyGeotab Console {0}".format(mygeotab.__version__)
+    myg_console_version = "MyGeotab Console {0}".format(__version__)
     version = "{0} [Python {1}]".format(myg_console_version, sys.version.replace("\n", ""))
     auth_line = ("Logged in as: %s" % session.credentials) if session.credentials else "Not logged in"
     banner = "\n".join([version, auth_line])
@@ -258,11 +259,11 @@ def _populate_locals(database, password, server, session, user):
         api = login(session, user, password, database, server)
     try:
         api.get("User", name=session.credentials.username)
-    except mygeotab.AuthenticationException:
+    except AuthenticationException:
         # Credentials expired, try logging in again
         click.echo("Your session has expired. Please login again.")
         api = login(session, user, password, database, server)
-    return dict(myg=api, mygeotab=mygeotab, dates=mygeotab.dates)
+    return dict(myg=api, mygeotab=mygeotab, dates=dates)
 
 
 main.add_command(console)

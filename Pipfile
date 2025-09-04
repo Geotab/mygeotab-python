@@ -7,11 +7,9 @@ verify_ssl = true
 coverage = "*"
 pytest = "*"
 pytest-cov = "*"
-rope = "*"
 mygeotab = {editable = true,path = "."}
 mypy = "*"
 pytest-asyncio = "*"
-black = "*"
 requests-mock = "*"
 pytest-datadir = "*"
 pytest-benchmark = "*"

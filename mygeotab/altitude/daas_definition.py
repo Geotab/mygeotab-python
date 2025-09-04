@@ -25,7 +25,6 @@ class DaasResult:
     """
 
     def __init__(self, call_result: dict):
-
         if not call_result:
             self.errors = [Exception("result is empty"), NOT_FULL_API_CALL_EXCEPTION]
             raise NOT_FULL_API_CALL_EXCEPTION

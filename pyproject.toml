@@ -1,26 +1,6 @@
-[tool.black]
-line-length = 120
-target_version = ['py37']
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.mypy_cache
-    | \.venv
-    | _build
-    | build
-    | dist
-    | docs
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-'''
-
 [tool.ruff]
 line-length = 127
+target-version = "py37"
 
 [tool.ruff.lint]
 select = ["E", "F", "B"]
@@ -28,3 +8,11 @@ exclude = [
     "docs"
 ]
 mccabe.max-complexity = 10
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"

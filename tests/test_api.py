@@ -15,19 +15,6 @@ class TestAttributes:
         assert my_api._is_verify_ssl is False
 
 
-class TestProcessParameters:
-    def test_camel_case_transformer(self):
-        params = dict(search=dict(device_search=dict(id=123), include_overlapped_trips=True))
-        fixed_params = api.process_parameters(params)
-        assert fixed_params is not None
-        assert "search" in fixed_params
-        assert "deviceSearch" in fixed_params["search"]
-        assert "id" in fixed_params["search"]["deviceSearch"]
-        assert fixed_params["search"]["deviceSearch"]["id"] == 123
-        assert "includeOverlappedTrips" in fixed_params["search"]
-        assert fixed_params["search"]["includeOverlappedTrips"]
-
-
 class TestProcessResults:
     def test_handle_server_exception(self):
         exception_response = dict(

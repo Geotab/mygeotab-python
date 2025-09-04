@@ -3,6 +3,14 @@
 Changes
 -------
 
+TBD
++++
+
+**Improvements**
+
+- Centralized and better handling of new parameters in API calls (like `resultsLimit`, `search`, and `propertySelector`) `#127 <https://github.com/Geotab/mygeotab-python/pull/127>__`.
+
+
 0.9.2 (2024-10-08)
 ++++++++++++++++++
 
