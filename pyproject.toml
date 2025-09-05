@@ -1,6 +1,79 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mygeotab"
+dynamic = ["version"]
+description = "A Python client for the MyGeotab SDK"
+authors = [
+    { name = "Geotab Inc." }
+]
+license = { text = "Apache 2.0" }
+readme = "README.rst"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "requests",
+    "aiohttp>=3.8.1,<4",
+    "click",
+    "pytz",
+    "arrow",
+    "python-rapidjson",
+]
+
+[project.optional-dependencies]
+notebook = ["pandas"]
+dev = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "pytest-asyncio",
+    "aioresponses",
+    "pytest-datadir",
+    "pytest-benchmark",
+    "pytest-monkeytype",
+    "pandas",
+    "types-pytz",
+    "types-setuptools",
+    "ruff",
+]
+
+[project.urls]
+Homepage = "https://github.com/geotab/mygeotab-python"
+Repository = "https://github.com/geotab/mygeotab-python"
+
+[project.scripts]
+myg = "mygeotab.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "mygeotab.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["mygeotab*"]
+
+[tool.setuptools.package-data]
+"*" = ["LICENSE"]
+
 [tool.ruff]
 line-length = 127
-target-version = "py39"
+target-version = "py37"
 
 [tool.ruff.lint]
 select = ["E", "F", "B"]
@@ -16,3 +89,21 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 docstring-code-format = false
 docstring-code-line-length = "dynamic"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["mygeotab"]
+omit = ["tests/*", "setup.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]

@@ -8,7 +8,8 @@ Future
 
 **Improvements**
 
-- Drop support for Python 3.8 and older.
+- Drops support for Python 3.8 and older.
+- Changes project structure to `uv` to manage dependencies and virtual environments.
 
 0.9.3 (2025-09-05)
 ++++++++++++++++++
