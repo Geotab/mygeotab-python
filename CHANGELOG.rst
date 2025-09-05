@@ -3,13 +3,13 @@
 Changes
 -------
 
-TBD
-+++
+0.9.3 (2025-09-05)
+++++++++++++++++++
 
 **Improvements**
 
-- Centralized and better handling of new parameters in API calls (like `resultsLimit`, `search`, and `propertySelector`) `#127 <https://github.com/Geotab/mygeotab-python/pull/127>__`.
-
+- Centralized and better handling of new parameters in API calls (like `resultsLimit`, `search`, and `propertySelector`) `#127 <https://github.com/Geotab/mygeotab-python/pull/127>`__.
+- Removes deprecated SSL parameters for SSL context creation `#125 <https://github.com/Geotab/mygeotab-python/pull/125>`__.
 
 0.9.2 (2024-10-08)
 ++++++++++++++++++
