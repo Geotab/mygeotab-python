@@ -3,6 +3,13 @@
 Changes
 -------
 
+Future
+++++++
+
+**Improvements**
+
+- Drop support for Python 3.8 and older.
+
 0.9.3 (2025-09-05)
 ++++++++++++++++++
 

@@ -24,8 +24,8 @@ except IOError:
 
 py_version = sys.version_info[:3]
 
-if py_version < (3, 7, 0):
-    raise RuntimeError("This package requres Python 3.7.0+")
+if py_version < (3, 9, 0):
+    raise RuntimeError("This package requres Python 3.9.0+")
 
 packages = ["mygeotab", "mygeotab.ext"]
 
@@ -48,7 +48,7 @@ setup(
         "click",
         "pytz",
         "arrow",
-        "aiohttp>=3.8.1,<4",
+        "aiohttp[speedups]>=3.8.1,<4",
         "python-rapidjson",
     ],
     setup_requires=["wheel"],
@@ -62,12 +62,11 @@ setup(
         "Natural Language :: English",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Libraries",
     ],

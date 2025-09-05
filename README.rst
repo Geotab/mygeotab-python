@@ -33,7 +33,7 @@ Features
 
 - Automatic serializing and deserializing of API call results
 - Clean, Pythonic API for querying data
-- Cross-platform and compatible with Python 3.7+
+- Cross-platform and compatible with Python 3.9+
 - A `myg` command-line tool for interactively working with data in a terminal
 
 Usage
