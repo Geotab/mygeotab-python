@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.7]
+        python-version: [3.9]
     env:
       MYGEOTAB_DATABASE: ${{ secrets.MYGEOTAB_DATABASE }}
       MYGEOTAB_USERNAME: ${{ secrets.MYGEOTAB_USERNAME }}
