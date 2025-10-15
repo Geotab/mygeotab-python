@@ -64,6 +64,11 @@ class AltitudeAPI(API):
             functionParameters=function_parameters,
         )
         return results
+    
+    def _extract_errors(self, resp: dict) -> list:
+        """Extracts errors from myG and daas wrappers."""
+        return resp.get("errors", []) or resp.get("apiResult", {}).get("errors", [])
+
 
     def call_api(self, function_name: str, params: dict) -> dict:
         """
@@ -99,13 +104,14 @@ class AltitudeAPI(API):
                 function_name="createQueryJob",
                 params=params,
             )
-            errors = results.get("errors", [])
-            if errors and len(errors) > 0:
-                raise errors[0]
+            
+            errors = self._extract_errors(resp=results)
+            if errors:
+                raise Exception(errors[0].get("message", "Failed to create the job"))            
+            
             return results["apiResult"]["results"][0]
         except Exception as e:
             logging.error(f"Exception: {e}")
-            logging.error(f"error: error while creating job, results: {results}")
             raise e
 
     def check_job_status(self, params: dict) -> DaasGetJobStatusResult:
