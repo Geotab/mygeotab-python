@@ -76,18 +76,19 @@ class TestEntityList:
         mock_dataframe.__len__ = MagicMock(return_value=3)
         mock_dataframe.__getitem__ = MagicMock(return_value=MagicMock(__getitem__=lambda self, key: 123))
         
-        with patch('pandas.DataFrame') as mock_df_class, \
-             patch('pandas.json_normalize') as mock_json_normalize:
-            mock_df_class.from_dict.return_value = mock_dataframe
-            mock_json_normalize.return_value = mock_dataframe
-            
+        # Create mock pandas module
+        mock_pandas = MagicMock()
+        mock_pandas.DataFrame.from_dict.return_value = mock_dataframe
+        mock_pandas.json_normalize.return_value = mock_dataframe
+        
+        with patch.dict('sys.modules', {'pandas': mock_pandas}):
             dataframe = entitylist.to_dataframe()
             assert len(dataframe) == 3
-            mock_df_class.from_dict.assert_called_once()
+            mock_pandas.DataFrame.from_dict.assert_called_once()
             
             dataframe = entitylist.to_dataframe(True)
             assert len(dataframe) == 3
-            mock_json_normalize.assert_called_once()
+            mock_pandas.json_normalize.assert_called_once()
             assert int(dataframe["location.x"][-1:]) == 123
 
 
