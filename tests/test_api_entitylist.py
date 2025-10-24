@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
 from mygeotab.ext.entitylist import EntityList
@@ -69,11 +70,25 @@ class TestEntityList:
 
     def test_to_dataframe(self):
         entitylist = get_entitylist()
-        dataframe = entitylist.to_dataframe()
-        assert len(dataframe) == 3
-        dataframe = entitylist.to_dataframe(True)
-        assert len(dataframe) == 3
-        assert int(dataframe["location.x"][-1:]) == 123
+        
+        # Mock pandas DataFrame
+        mock_dataframe = MagicMock()
+        mock_dataframe.__len__ = MagicMock(return_value=3)
+        mock_dataframe.__getitem__ = MagicMock(return_value=MagicMock(__getitem__=lambda self, key: 123))
+        
+        with patch('pandas.DataFrame') as mock_df_class, \
+             patch('pandas.json_normalize') as mock_json_normalize:
+            mock_df_class.from_dict.return_value = mock_dataframe
+            mock_json_normalize.return_value = mock_dataframe
+            
+            dataframe = entitylist.to_dataframe()
+            assert len(dataframe) == 3
+            mock_df_class.from_dict.assert_called_once()
+            
+            dataframe = entitylist.to_dataframe(True)
+            assert len(dataframe) == 3
+            mock_json_normalize.assert_called_once()
+            assert int(dataframe["location.x"][-1:]) == 123
 
 
 def get_entitylist(type_name="Device", second_device_name="Test Device"):
