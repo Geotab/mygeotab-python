@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.9.4 (2025-10-24)
+++++++++++++++++++
+
+**Improvements**
+
+- Altitude: Improved error handling for access check failures `#133 <https://github.com/Geotab/mygeotab-python/pull/133>`__.
+- Removes un-needed pandas and pytest-monkeytype from dev-packages.
+
 0.9.3 (2025-09-08)
 ++++++++++++++++++
 
