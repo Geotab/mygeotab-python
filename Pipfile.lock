@@ -2209,6 +2209,14 @@
             "markers": "python_version >= '3.7'",
             "version": "==1.3.0"
         },
+        "exceptiongroup": {
+            "hashes": [
+                "sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10",
+                "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==1.3.0"
+        },
         "frozenlist": {
             "hashes": [
                 "sha256:0325024fe97f94c41c08872db482cf8ac4800d80e79222c6b0b7b162d5b13686",
@@ -2863,12 +2871,12 @@
         },
         "pytest-benchmark": {
             "hashes": [
-                "sha256:922de2dfa3033c227c96da942d1878191afa135a29485fb942e85dff1c592c89",
-                "sha256:9ea661cdc292e8231f7cd4c10b0319e56a2118e2c09d9f50e1b3d150d2aca105"
+                "sha256:bc839726ad20e99aaa0d11a127445457b4219bdb9e80a1afc4b51da7f96b0803",
+                "sha256:deb7317998a23c650fd4ff76e1230066a76cb45dcece0aca5607143c619e7779"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9'",
-            "version": "==5.1.0"
+            "version": "==5.2.3"
         },
         "pytest-cov": {
             "hashes": [
