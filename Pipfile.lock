@@ -3179,12 +3179,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:2c2eb64499b41b672c387f6f45678a28d20a143a81b45a5c77acbfd4da0df3e1",
-                "sha256:4facf71e3f953f8f5ac0020cd6c1b5e493aaff0183e85830bc34870b6abf8475"
+                "sha256:5124a7daf67f195c6054e0f00f1d97c69caad12fdcf9113eba33eff0bce8cd2b",
+                "sha256:d9719fbbeb185254480ade1f25327c4654f8c00efda3fec36823379cebcdee58"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.9'",
-            "version": "==81.0.0.20260209"
+            "markers": "python_version >= '3.10'",
+            "version": "==82.0.0.20260210"
         },
         "typing-extensions": {
             "hashes": [
