@@ -43,8 +43,6 @@ setup(
     package_data={"": ["LICENSE"]},
     license="Apache 2.0",
     install_requires=[
-        "requests",
-        "urllib3",
         "click",
         "pytz",
         "arrow",

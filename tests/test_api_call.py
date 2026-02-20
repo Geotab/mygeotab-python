@@ -2,7 +2,7 @@
 
 import random
 import string
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -67,8 +67,8 @@ def mock_zonetype_response(name, zonetype_id="zt123", comment=None):
 
 @pytest.fixture
 def mock_query():
-    """Fixture to mock the _query function."""
-    with patch("mygeotab.api._query") as mock:
+    """Fixture to mock the _query_async function where it's used in api.py."""
+    with patch("mygeotab.api._query_async", new_callable=AsyncMock) as mock:
         yield mock
 
 
@@ -278,3 +278,84 @@ class TestServerCallApi:
         with pytest.raises(TimeoutException) as excinfo:
             api.server_call("GetVersion", server="my36.geotab.com", timeout=0.01)
         assert "Request timed out @ my36.geotab.com" in str(excinfo.value)
+
+
+class TestSessionManagement:
+    """Tests for session lifecycle management."""
+
+    def test_context_manager_creates_session(self, mock_query):
+        """Test that sync context manager creates and manages a session."""
+        mock_query.side_effect = [
+            mock_authenticate_response(),
+            mock_user_response(),
+        ]
+        with api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER) as session:
+            assert session._http_session is not None
+            assert session._owns_session is True
+            session.authenticate()
+            users = session.get("User")
+            assert len(users) == 1
+        # After exiting context, session should be closed
+        assert session._http_session is None
+        assert session._owns_session is False
+
+    def test_context_manager_multiple_calls_reuse_session(self, mock_query):
+        """Test that multiple calls within context manager reuse the same session."""
+        mock_query.side_effect = [
+            mock_authenticate_response(),
+            mock_user_response(),
+            mock_version_response(),
+        ]
+        with api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER) as session:
+            session.authenticate()
+            original_session = session._http_session
+            session.get("User")
+            session.call("GetVersion")
+            # Session should be the same object
+            assert session._http_session is original_session
+
+    def test_close_method(self, mock_query):
+        """Test that close() properly cleans up the session."""
+        mock_query.return_value = mock_authenticate_response()
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        # Manually enter context to create session
+        session.__enter__()
+        assert session._http_session is not None
+        assert session._owns_session is True
+
+        # Close should clean up
+        session.close()
+        assert session._http_session is None
+        assert session._owns_session is False
+
+    def test_user_provided_session_not_closed(self, mock_query):
+        """Test that user-provided sessions are not closed by the API."""
+        import aiohttp
+
+        mock_query.return_value = mock_authenticate_response()
+
+        # Create a mock session
+        mock_session = AsyncMock(spec=aiohttp.ClientSession)
+
+        session = api.API(
+            USERNAME,
+            password=PASSWORD,
+            database=DATABASE,
+            server=SERVER,
+            http_session=mock_session,
+        )
+
+        # User-provided session should be used but not owned
+        assert session._http_session is mock_session
+        assert session._owns_session is False
+
+        # close() should not close user-provided session
+        session.close()
+        assert session._http_session is mock_session  # Still there
+        mock_session.close.assert_not_called()
+
+    def test_no_session_by_default(self):
+        """Test that no session is created by default (per-request mode)."""
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        assert session._http_session is None
+        assert session._owns_session is False
