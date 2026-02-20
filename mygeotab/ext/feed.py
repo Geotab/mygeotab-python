@@ -11,8 +11,9 @@ import abc
 from threading import Thread
 from time import sleep
 
+import aiohttp
+
 from mygeotab import api
-from requests.exceptions import ConnectionError
 
 
 class DataFeedListener(object):
@@ -77,7 +78,7 @@ class DataFeed(object):
                 )
                 self._version = result["toVersion"]
                 self.listener.on_data(result["data"])
-            except (api.MyGeotabException, ConnectionError) as exception:
+            except (api.MyGeotabException, aiohttp.ClientError) as exception:
                 if self.listener.on_error(exception) is False:
                     break
             if not self.running:

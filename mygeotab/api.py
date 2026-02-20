@@ -9,22 +9,17 @@ Public objects and methods wrapping the MyGeotab API.
 
 from __future__ import unicode_literals
 
-import ssl
-import sys
-from urllib.parse import urlparse
+import aiohttp
 
-import requests
-import urllib3
-from requests.adapters import HTTPAdapter
-from requests.exceptions import Timeout
-from urllib3.util.ssl_ import create_urllib3_context
-
-from . import __title__, __version__
-from .exceptions import AuthenticationException, MyGeotabException, TimeoutException
+from .exceptions import AuthenticationException, MyGeotabException
+from .http import (
+    DEFAULT_TIMEOUT,
+    _process,
+    _query_async,
+    _run_sync,
+    get_api_url,
+)
 from .parameters import camelcaseify_parameters, convert_get_parameters
-from .serializers import json_deserialize, json_serialize
-
-DEFAULT_TIMEOUT = 300
 
 
 class API(object):
@@ -40,6 +35,7 @@ class API(object):
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
         cert=None,
+        http_session=None,
     ):
         """Initialize the MyGeotab API object with credentials.
 
@@ -56,9 +52,12 @@ class API(object):
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
         :type timeout: float or None
         :param proxies: The proxies dictionary to apply to the request.
+                        (Not supported with aiohttp, kept for API compatibility)
         :type proxies: dict or None
         :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .key file).
         :type cert: str or Tuple or None
+        :param http_session: An optional aiohttp.ClientSession to reuse for connection pooling.
+        :type http_session: aiohttp.ClientSession or None
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
         if username is None:
@@ -70,8 +69,10 @@ class API(object):
         )
         self.timeout = timeout
         self._proxies = proxies
-        self.__reauthorize_count = 0
+        self._reauthorize_count = 0
         self._cert = cert
+        self._http_session = http_session
+        self._owns_session = False
 
     @property
     def _server(self):
@@ -88,8 +89,54 @@ class API(object):
         """
         return not any(s in get_api_url(self._server) for s in ["127.0.0.1", "localhost"])
 
-    def call(self, method, **parameters):
-        """Makes a call to the API.
+    def __enter__(self):
+        """Sync context manager entry - creates a managed session."""
+        self._http_session = _run_sync(self._create_session())
+        self._owns_session = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Sync context manager exit - closes the managed session."""
+        if self._owns_session and self._http_session is not None:
+            _run_sync(self._http_session.close())
+            self._http_session = None
+            self._owns_session = False
+        return False
+
+    async def __aenter__(self):
+        """Async context manager entry - creates a managed session."""
+        self._http_session = await self._create_session()
+        self._owns_session = True
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit - closes the managed session."""
+        if self._owns_session and self._http_session is not None:
+            await self._http_session.close()
+            self._http_session = None
+            self._owns_session = False
+        return False
+
+    async def _create_session(self):
+        """Creates a new aiohttp ClientSession."""
+        return aiohttp.ClientSession()
+
+    def close(self):
+        """Closes the HTTP session if one is managed by this API instance."""
+        if self._owns_session and self._http_session is not None:
+            _run_sync(self._http_session.close())
+            self._http_session = None
+            self._owns_session = False
+
+    async def close_async(self):
+        """Asynchronously closes the HTTP session if one is managed by this API instance."""
+        if self._owns_session and self._http_session is not None:
+            await self._http_session.close()
+            self._http_session = None
+            self._owns_session = False
+
+    async def call_async(self, method, **parameters):
+        """Makes an async call to the API.
 
         :param method: The method name.
         :type method: str
@@ -103,36 +150,63 @@ class API(object):
             raise Exception("A method name must be specified")
         params = camelcaseify_parameters(parameters)
         if self.credentials and not self.credentials.session_id:
-            self.authenticate()
+            await self.authenticate_async()
         if "credentials" not in params and self.credentials.session_id:
             params["credentials"] = self.credentials.get_param()
 
         try:
-            result = _query(
+            result = await _query_async(
                 self._server,
                 method,
                 params,
                 self.timeout,
                 verify_ssl=self._is_verify_ssl,
-                proxies=self._proxies,
                 cert=self._cert,
+                session=self._http_session,
             )
             if result is not None:
-                self.__reauthorize_count = 0
+                self._reauthorize_count = 0
             return result
         except MyGeotabException as exception:
             if exception.name == "InvalidUserException" or (
                 exception.name == "DbUnavailableException" and "Initializing" in exception.message
             ):
-                if self.__reauthorize_count == 0 and self.credentials.password:
-                    self.__reauthorize_count += 1
-                    self.authenticate()
-                    return self.call(method, **parameters)
+                if self._reauthorize_count == 0 and self.credentials.password:
+                    self._reauthorize_count += 1
+                    await self.authenticate_async()
+                    return await self.call_async(method, **parameters)
                 else:
                     raise AuthenticationException(
                         self.credentials.username, self.credentials.database, self.credentials.server
                     ) from exception
             raise
+
+    def call(self, method, **parameters):
+        """Makes a call to the API.
+
+        :param method: The method name.
+        :type method: str
+        :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: dict or list
+        """
+        return _run_sync(self.call_async(method, **parameters))
+
+    async def multi_call_async(self, calls):
+        """Performs an async multi-call to the API.
+
+        :param calls: A list of call 2-tuples with method name and params
+                      (for example, ('Get', dict(typeName='Trip')) ).
+        :type calls: list((str, dict))
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: list
+        """
+        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
+        return await self.call_async("ExecuteMultiCall", calls=formatted_calls)
 
     def multi_call(self, calls):
         """Performs a multi-call to the API.
@@ -145,8 +219,20 @@ class API(object):
         :return: The results from the server.
         :rtype: list
         """
-        formatted_calls = [dict(method=call[0], params=call[1] if len(call) > 1 else {}) for call in calls]
-        return self.call("ExecuteMultiCall", calls=formatted_calls)
+        return _run_sync(self.multi_call_async(calls))
+
+    async def get_async(self, type_name, **parameters):
+        """Gets entities asynchronously using the API. Shortcut for using call_async() with the 'Get' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param parameters: Additional parameters to send.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The results from the server.
+        :rtype: list
+        """
+        return await self.call_async("Get", type_name=type_name, **convert_get_parameters(parameters))
 
     def get(self, type_name, **parameters):
         """Gets entities using the API. Shortcut for using call() with the 'Get' method.
@@ -167,7 +253,21 @@ class API(object):
         :return: The results from the server.
         :rtype: list
         """
-        return self.call("Get", type_name=type_name, **convert_get_parameters(parameters))
+        return _run_sync(self.get_async(type_name, **parameters))
+
+    async def add_async(self, type_name, entity):
+        """Adds an entity asynchronously using the API. Shortcut for using call_async() with the 'Add' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param entity: The entity to add.
+        :type entity: dict
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: The id of the object added.
+        :rtype: str
+        """
+        return await self.call_async("Add", type_name=type_name, entity=entity)
 
     def add(self, type_name, entity):
         """Adds an entity using the API. Shortcut for using call() with the 'Add' method.
@@ -181,7 +281,19 @@ class API(object):
         :return: The id of the object added.
         :rtype: str
         """
-        return self.call("Add", type_name=type_name, entity=entity)
+        return _run_sync(self.add_async(type_name, entity))
+
+    async def set_async(self, type_name, entity):
+        """Sets an entity asynchronously using the API. Shortcut for using call_async() with the 'Set' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param entity: The entity to set.
+        :type entity: dict
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        return await self.call_async("Set", type_name=type_name, entity=entity)
 
     def set(self, type_name, entity):
         """Sets an entity using the API. Shortcut for using call() with the 'Set' method.
@@ -193,7 +305,19 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        return self.call("Set", type_name=type_name, entity=entity)
+        return _run_sync(self.set_async(type_name, entity))
+
+    async def remove_async(self, type_name, entity):
+        """Removes an entity asynchronously using the API. Shortcut for using call_async() with the 'Remove' method.
+
+        :param type_name: The type of entity.
+        :type type_name: str
+        :param entity: The entity to remove.
+        :type entity: dict
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        """
+        return await self.call_async("Remove", type_name=type_name, entity=entity)
 
     def remove(self, type_name, entity):
         """Removes an entity using the API. Shortcut for using call() with the 'Remove' method.
@@ -205,10 +329,10 @@ class API(object):
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """
-        return self.call("Remove", type_name=type_name, entity=entity)
+        return _run_sync(self.remove_async(type_name, entity))
 
-    def authenticate(self):
-        """Authenticates against the API server.
+    async def authenticate_async(self):
+        """Authenticates asynchronously against the API server.
 
         :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
@@ -224,14 +348,14 @@ class API(object):
                     userName=self.credentials.username,
                     sessionId=self.credentials.session_id,
                 )
-                _query(
+                await _query_async(
                     self._server,
                     "ExtendSession",
                     extend_session_data,
                     self.timeout,
                     verify_ssl=self._is_verify_ssl,
-                    proxies=self._proxies,
                     cert=self._cert,
+                    session=self._http_session,
                 )
                 return self.credentials
 
@@ -240,14 +364,14 @@ class API(object):
                 userName=self.credentials.username,
                 password=self.credentials.password,
             )
-            result = _query(
+            result = await _query_async(
                 self._server,
                 "Authenticate",
                 auth_data,
                 self.timeout,
                 verify_ssl=self._is_verify_ssl,
-                proxies=self._proxies,
                 cert=self._cert,
+                session=self._http_session,
             )
             if result:
                 if "path" not in result and self.credentials.session_id:
@@ -271,6 +395,17 @@ class API(object):
                     self.credentials.username, self.credentials.database, self.credentials.server
                 ) from exception
             raise
+
+    def authenticate(self):
+        """Authenticates against the API server.
+
+        :raise AuthenticationException: Raises if there was an issue with authenticating or logging in.
+        :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+        :raise TimeoutException: Raises when the request does not respond after some time.
+        :return: A Credentials object with a session ID created by the server.
+        :rtype: Credentials
+        """
+        return _run_sync(self.authenticate_async())
 
     @staticmethod
     def from_credentials(credentials):
@@ -328,82 +463,6 @@ class Credentials(object):
         return dict(userName=self.username, sessionId=self.session_id, database=self.database)
 
 
-class GeotabHTTPAdapter(HTTPAdapter):
-    """HTTP adapter to enforce use of TLS for HTTPS."""
-
-    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        ssl_context = create_urllib3_context(ssl_version=ssl.PROTOCOL_TLS_CLIENT)
-        ssl_context.load_default_certs()
-        if hasattr(ssl, "OP_ENABLE_MIDDLEBOX_COMPAT"):
-            ssl_context.options |= ssl.OP_ENABLE_MIDDLEBOX_COMPAT
-        self.poolmanager = urllib3.poolmanager.PoolManager(
-            num_pools=connections, maxsize=maxsize, block=block, ssl_context=ssl_context, **pool_kwargs
-        )
-
-
-def _query(server, method, parameters, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None, cert=None):
-    """Formats and performs the query against the API.
-
-    :param server: The MyGeotab server.
-    :type server: str
-    :param method: The method name.
-    :type method: str
-    :param parameters: The parameters to send with the query.
-    :type parameters: dict
-    :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
-    :type timeout: float
-    :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
-    :type verify_ssl: bool
-    :param proxies: The proxies dictionary to apply to the request.
-    :type proxies: dict or None
-    :param cert: The path to client certificate. A single path to .pem file or a Tuple (.cer file, .pem file)
-    :type cert: str or Tuple or None
-    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
-    :raise TimeoutException: Raises when the request does not respond after some time.
-    :raise urllib2.HTTPError: Raises when there is an HTTP status code that indicates failure.
-    :return: The JSON-decoded result from the server.
-    """
-    api_endpoint = get_api_url(server)
-    params = dict(id=-1, method=method, params=parameters or {})
-    headers = get_headers()
-    with requests.Session() as session:
-        session.mount("https://", GeotabHTTPAdapter())
-        if cert:
-            session.cert = cert
-        try:
-            response = session.post(
-                api_endpoint,
-                data=json_serialize(params),
-                headers=headers,
-                allow_redirects=True,
-                timeout=timeout,
-                verify=verify_ssl,
-                proxies=proxies,
-            )
-        except Timeout as exc:
-            raise TimeoutException(server) from exc
-    response.raise_for_status()
-    content_type = response.headers.get("Content-Type")
-    if content_type and "application/json" not in content_type.lower():
-        return response.text
-    return _process(json_deserialize(response.text))
-
-
-def _process(data):
-    """Processes the returned JSON from the server.
-
-    :param data: The JSON data in dict form.
-    :raise MyGeotabException: Raises when a server exception was encountered.
-    :return: The result data.
-    """
-    if data:
-        if "error" in data:
-            raise MyGeotabException(data["error"])
-        if "result" in data:
-            return data["result"]
-    return data
-
-
 def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxies=None, **parameters):
     """Makes a call to an un-authenticated method on a server
 
@@ -415,8 +474,27 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxie
     :type timeout: float
     :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
     :type verify_ssl: bool
-    :param proxies: The proxies dictionary to apply to the request.
+    :param proxies: The proxies dictionary to apply to the request. (Not supported with aiohttp, kept for API compatibility)
     :type proxies: dict or None
+    :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
+    :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
+    :raise TimeoutException: Raises when the request does not respond after some time.
+    :return: The result from the server.
+    """
+    return _run_sync(server_call_async(method, server, timeout=timeout, verify_ssl=verify_ssl, **parameters))
+
+
+async def server_call_async(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, **parameters):
+    """Makes an asynchronous call to an un-authenticated method on a server.
+
+    :param method: The method name.
+    :type method: str
+    :param server: The MyGeotab server.
+    :type server: str
+    :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
+    :type timeout: float
+    :param verify_ssl: If True, verify the SSL certificate. It's recommended not to modify this.
+    :type verify_ssl: bool
     :param parameters: Additional parameters to send (for example, search=dict(id='b123') ).
     :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
     :raise TimeoutException: Raises when the request does not respond after some time.
@@ -427,33 +505,15 @@ def server_call(method, server, timeout=DEFAULT_TIMEOUT, verify_ssl=True, proxie
     if server is None:
         raise Exception("A server (eg. my3.geotab.com) must be specified")
     parameters = camelcaseify_parameters(parameters)
-    return _query(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl, proxies=proxies)
+    return await _query_async(server, method, parameters, timeout=timeout, verify_ssl=verify_ssl)
 
 
-def get_api_url(server):
-    """Formats the server URL properly in order to query the API.
-
-    :return: A valid MyGeotab API request URL.
-    :rtype: str
-    """
-    parsed = urlparse(server)
-    base_url = parsed.netloc if parsed.netloc else parsed.path
-    base_url.replace("/", "")
-    return "https://" + base_url + "/apiv1"
-
-
-def get_headers():
-    """Gets the request headers.
-
-    :return: The user agent
-    :rtype: dict
-    """
-    return {
-        "Content-type": "application/json; charset=UTF-8",
-        "User-Agent": "Python/{py_version[0]}.{py_version[1]} {title}/{version}".format(
-            py_version=sys.version_info, title=__title__, version=__version__
-        ),
-    }
-
-
-__all__ = ["API", "Credentials", "MyGeotabException", "AuthenticationException"]
+__all__ = [
+    "API",
+    "Credentials",
+    "MyGeotabException",
+    "AuthenticationException",
+    "server_call",
+    "server_call_async",
+    "_process",
+]

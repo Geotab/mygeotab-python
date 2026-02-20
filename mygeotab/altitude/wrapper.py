@@ -202,14 +202,14 @@ class AltitudeAPI(API):
         """
         given the parameters, will call the request, wait on it to finish and return the combined data.
         """
-        logging.info(f"creating job")
+        logging.info("creating job")
         job = self.create_job(params)
         logging.info(f"job created: {job}")
         params["functionParameters"]["jobId"] = job["id"]
-        logging.info(f"checking the job status")
+        logging.info("checking the job status")
         results = self.wait_for_job_to_complete(params)
         logging.info(f"job finished: {results}")
-        logging.info(f"gathering result")
+        logging.info("gathering result")
         data = self.get_data(params)
-        logging.info(f"data gathered")
+        logging.info("data gathered")
         return data
