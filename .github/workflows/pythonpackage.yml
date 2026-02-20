@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.9]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     env:
       MYGEOTAB_DATABASE: ${{ secrets.MYGEOTAB_DATABASE }}
       MYGEOTAB_USERNAME: ${{ secrets.MYGEOTAB_USERNAME }}
@@ -26,23 +26,23 @@ jobs:
       MYGEOTAB_PASSWORD_ASYNC: ${{ secrets.MYGEOTAB_PASSWORD_ASYNC }}
     steps:
     - uses: actions/checkout@v6
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
       with:
-        python-version: ${{ matrix.python-version }}
+        version: "latest"
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade setuptools pip pipenv
-        pipenv install --skip-lock --dev -e .
+      run: uv sync
     - name: Lint with ruff
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        pipenv run ruff check . --select=E9,F63,F7,F82 --output-format=full
+        uv run ruff check . --select=E9,F63,F7,F82 --output-format=full
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        pipenv run ruff check . --exit-zero
+        uv run ruff check . --exit-zero
     - name: Test with pytest
       run: |
-        pipenv run py.test --cov-config .coveragerc --cov-report xml:output/coverage.xml --cov mygeotab --junitxml output/python${{ matrix.python-version }}-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://output/ --benchmark-autosave tests/
+        uv run pytest --cov-config .coveragerc --cov-report xml:output/coverage.xml --cov mygeotab --junitxml output/python${{ matrix.python-version }}-test-results.xml --benchmark-min-rounds=3 --benchmark-storage=file://output/ --benchmark-autosave tests/
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
@@ -51,5 +51,5 @@ jobs:
     - name: Archive code coverage results
       uses: actions/upload-artifact@v6
       with:
-        name: output
+        name: output-${{ matrix.python-version }}
         path: output
