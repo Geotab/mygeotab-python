@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
+from unittest.mock import patch
 
 import pytz
 
@@ -120,3 +119,29 @@ class TestFormatIsoDate:
         check_fmt = "9999-12-31T23:59:59.999Z"
         fmt_date = dates.format_iso_datetime(date)
         assert fmt_date == check_fmt
+
+    def test_format_clamps_below_min_date(self):
+        """When localize_datetime returns a date below MIN_DATE, clamp to MIN_DATE."""
+        # Create a mock object that always compares as less than MIN_DATE
+        fake_below = type("FakeDatetime", (), {
+            "__lt__": lambda self, other: True,
+            "__gt__": lambda self, other: False,
+            "__le__": lambda self, other: True,
+            "__ge__": lambda self, other: False,
+        })()
+        with patch.object(dates, "localize_datetime", return_value=fake_below):
+            result = dates.format_iso_datetime(datetime(2000, 1, 1))
+            assert result == "0001-01-01T00:00:00.000Z"
+
+    def test_format_clamps_above_max_date(self):
+        """When localize_datetime returns a date above MAX_DATE, clamp to MAX_DATE."""
+        # Create a mock object that always compares as greater than MAX_DATE
+        fake_above = type("FakeDatetime", (), {
+            "__lt__": lambda self, other: False,
+            "__gt__": lambda self, other: True,
+            "__le__": lambda self, other: False,
+            "__ge__": lambda self, other: True,
+        })()
+        with patch.object(dates, "localize_datetime", return_value=fake_above):
+            result = dates.format_iso_datetime(datetime(2000, 1, 1))
+            assert result == "9999-12-31T23:59:59.999Z"

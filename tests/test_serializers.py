@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
 from datetime import date, datetime
+from unittest.mock import patch
 
 import pytest
 import pytz
 
 from mygeotab import dates
-from mygeotab.serializers import json_serialize, json_deserialize
+from mygeotab.serializers import json_serialize, json_deserialize, object_deserializer, object_serializer
 
 
 class TestSerialization:
@@ -95,3 +94,56 @@ class TestDeserialization:
         assert utc_date.year == check_date.year
         assert utc_date.month == check_date.month
         assert utc_date.day == check_date.day
+
+
+class TestObjectSerializer:
+    def test_isoformat_object(self):
+        dt = pytz.utc.localize(datetime(2024, 1, 15, 10, 30, 0))
+        result = object_serializer(dt)
+        assert result == "2024-01-15T10:30:00.000Z"
+
+
+class TestObjectDeserializer:
+    def test_converts_valid_datetime_string(self):
+        obj = {"dateTime": "2024-01-15T10:30:00Z", "name": "test"}
+        result = object_deserializer(obj)
+        assert isinstance(result["dateTime"], datetime)
+        assert result["name"] == "test"
+
+    def test_keeps_invalid_datetime_string(self):
+        obj = {"dateTime": "2024-13-45T99:99:99Z"}
+        result = object_deserializer(obj)
+        assert result["dateTime"] == "2024-13-45T99:99:99Z"
+
+    def test_ignores_non_datetime_strings(self):
+        obj = {"name": "hello", "count": 42}
+        result = object_deserializer(obj)
+        assert result["name"] == "hello"
+        assert result["count"] == 42
+
+
+class TestRapidjsonPaths:
+    def test_serialize_with_rapidjson(self):
+        data = {"key": "value", "num": 42}
+        result = json_serialize(data)
+        assert "key" in result
+        assert "value" in result
+
+    def test_deserialize_with_rapidjson(self):
+        json_str = '{"dateTime": "2024-01-15T10:30:00Z", "name": "test"}'
+        result = json_deserialize(json_str)
+        assert result["name"] == "test"
+
+    def test_serialize_without_rapidjson(self):
+        with patch("mygeotab.serializers.use_rapidjson", False):
+            data = {"key": "value", "num": 42}
+            result = json_serialize(data)
+            assert '"key"' in result
+            assert '"value"' in result
+
+    def test_deserialize_without_rapidjson(self):
+        with patch("mygeotab.serializers.use_rapidjson", False):
+            json_str = '{"dateTime": "2024-01-15T10:30:00Z", "name": "test"}'
+            result = json_deserialize(json_str)
+            assert result["name"] == "test"
+            assert isinstance(result["dateTime"], datetime)

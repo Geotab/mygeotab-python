@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-
+from collections import UserList
+from copy import copy
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
@@ -90,6 +90,84 @@ class TestEntityList:
             assert len(dataframe) == 3
             mock_pandas.json_normalize.assert_called_once()
             assert int(dataframe["location.x"][-1:]) == 123
+
+
+    def test_radd_with_userlist(self):
+        el = get_entitylist()
+        ul = UserList([{"id": "u1"}])
+        combined = ul + el
+        assert len(combined) == len(el) + 1
+        assert isinstance(combined, EntityList)
+
+    def test_radd_with_plain_list(self):
+        el = get_entitylist()
+        combined = [{"id": "x1"}] + el
+        assert len(combined) == len(el) + 1
+        assert isinstance(combined, EntityList)
+
+    def test_add_with_plain_list(self):
+        el = get_entitylist()
+        combined = el + [{"id": "x1"}]
+        assert len(combined) == len(el) + 1
+        assert isinstance(combined, EntityList)
+
+    def test_add_with_tuple(self):
+        el = get_entitylist()
+        combined = el + ({"id": "t1"},)
+        assert len(combined) == len(el) + 1
+        assert isinstance(combined, EntityList)
+
+    def test_radd_with_tuple(self):
+        el = get_entitylist()
+        combined = ({"id": "t1"},) + el
+        assert len(combined) == len(el) + 1
+        assert isinstance(combined, EntityList)
+
+    def test_mul(self):
+        el = get_entitylist()
+        result = el * 3
+        assert len(result) == len(el) * 3
+        assert result.type_name == "Device"
+
+    def test_rmul(self):
+        el = get_entitylist()
+        result = 3 * el
+        assert len(result) == len(el) * 3
+        assert result.type_name == "Device"
+
+    def test_copy(self):
+        el = get_entitylist()
+        el_copy = copy(el)
+        assert len(el_copy) == len(el)
+        assert el_copy.type_name == "Device"
+        el_copy.data.append({"id": "new"})
+        assert len(el_copy) == len(el) + 1
+
+    def test_first_and_last_empty(self):
+        el = EntityList([], "Device")
+        assert el.first is None
+        assert el.last is None
+
+    def test_repr_pretty_cycle(self):
+        el = get_entitylist()
+        p = MagicMock()
+        el._repr_pretty_(p, cycle=True)
+        p.text.assert_called_once_with("Device(...)")
+
+    def test_repr_pretty_no_cycle(self):
+        el = get_entitylist()
+        p = MagicMock()
+        ctx = MagicMock()
+        p.group.return_value.__enter__ = MagicMock(return_value=ctx)
+        p.group.return_value.__exit__ = MagicMock(return_value=False)
+        el._repr_pretty_(p, cycle=False)
+        p.group.assert_called_once()
+
+    def test_to_dataframe_no_pandas(self):
+        el = get_entitylist()
+        with patch.dict("sys.modules", {"pandas": None}):
+            with pytest.raises(ImportError, match="pandas"):
+                el.to_dataframe()
 
 
 def get_entitylist(type_name="Device", second_device_name="Test Device"):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import random
 import string
 from unittest.mock import AsyncMock, patch
@@ -359,3 +357,34 @@ class TestSessionManagement:
         session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
         assert session._http_session is None
         assert session._owns_session is False
+
+    def test_sync_exit_without_owning_session(self):
+        """__exit__ when API doesn't own the session should be a no-op."""
+        my_api = api.API(USERNAME, session_id=SESSION_ID, database=DATABASE, server=SERVER)
+        my_api._http_session = "fake_session"
+        my_api._owns_session = False
+        my_api.__exit__(None, None, None)
+        assert my_api._http_session == "fake_session"
+
+
+class TestServerDefault:
+    def test_server_defaults_to_mygeotab(self):
+        """When server is None/empty, _server property defaults to my.geotab.com."""
+        my_api = api.API(USERNAME, session_id=SESSION_ID, server="")
+        my_api.credentials.server = None
+        assert my_api._server == "my.geotab.com"
+
+
+class TestCredentials:
+    def test_str(self):
+        creds = api.Credentials(USERNAME, SESSION_ID, DATABASE, SERVER)
+        assert str(creds) == f"{USERNAME} @ {SERVER}/{DATABASE}"
+
+    def test_repr(self):
+        creds = api.Credentials(USERNAME, SESSION_ID, DATABASE, SERVER)
+        assert repr(creds) == f"Credentials(username={USERNAME}, database={DATABASE})"
+
+    def test_get_param(self):
+        creds = api.Credentials(USERNAME, SESSION_ID, DATABASE, SERVER)
+        param = creds.get_param()
+        assert param == {"userName": USERNAME, "sessionId": SESSION_ID, "database": DATABASE}

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -10,6 +8,7 @@ from tests.test_api_call import (
     DATABASE,
     PASSWORD,
     SERVER,
+    SESSION_ID,
     USERNAME,
     ZONETYPE_NAME,
     generate_fake_credentials,
@@ -324,3 +323,153 @@ class TestAsyncSessionManagement:
             for call in mock_query.call_args_list:
                 # session is passed as a keyword argument
                 assert "session" in call.kwargs or len(call.args) > 6
+
+
+class TestAsyncAuthenticateEdgeCases:
+    @pytest.mark.asyncio
+    async def test_extend_session_without_password(self, mock_query):
+        """When session_id is set but password is not, authenticate calls ExtendSession."""
+        mock_query.return_value = None
+        my_api = API(USERNAME, session_id=SESSION_ID, database=DATABASE, server=SERVER)
+        result = await my_api.authenticate_async()
+        assert result is my_api.credentials
+        mock_query.assert_called_once()
+        assert mock_query.call_args[0][1] == "ExtendSession"
+
+    @pytest.mark.asyncio
+    async def test_this_server_keeps_original(self, mock_query):
+        """When auth returns 'ThisServer', keep the original server."""
+        mock_query.return_value = {
+            "path": "ThisServer",
+            "credentials": {
+                "userName": USERNAME,
+                "sessionId": SESSION_ID,
+                "database": DATABASE,
+            },
+        }
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        creds = await my_api.authenticate_async()
+        assert creds.server == SERVER
+
+    @pytest.mark.asyncio
+    async def test_session_extended_no_path(self, mock_query):
+        """When auth result has no 'path' key and session_id exists, session was extended."""
+        mock_query.return_value = {
+            "credentials": {
+                "userName": USERNAME,
+                "sessionId": "new_session",
+                "database": DATABASE,
+            },
+        }
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, session_id=SESSION_ID)
+        result = await my_api.authenticate_async()
+        assert result is my_api.credentials
+
+    @pytest.mark.asyncio
+    async def test_authenticate_returns_none_on_falsy_result(self, mock_query):
+        """When authenticate gets a falsy result from the server, returns None."""
+        mock_query.return_value = None
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        result = await my_api.authenticate_async()
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_db_unavailable_initializing_raises_auth_exception(self, mock_query):
+        """DbUnavailableException with 'Initializing' raises AuthenticationException."""
+        mock_query.side_effect = MyGeotabException(
+            {"errors": [{"name": "DbUnavailableException", "message": "Initializing database"}]}
+        )
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, session_id=SESSION_ID)
+        with pytest.raises(AuthenticationException):
+            await my_api.authenticate_async()
+
+    @pytest.mark.asyncio
+    async def test_db_unavailable_unknown_database_raises_auth_exception(self, mock_query):
+        """DbUnavailableException with 'UnknownDatabase' raises AuthenticationException."""
+        mock_query.side_effect = MyGeotabException(
+            {"errors": [{"name": "DbUnavailableException", "message": "UnknownDatabase foo"}]}
+        )
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER, session_id=SESSION_ID)
+        with pytest.raises(AuthenticationException):
+            await my_api.authenticate_async()
+
+    @pytest.mark.asyncio
+    async def test_other_exception_during_auth_re_raises(self, mock_query):
+        """Non-auth exceptions during authenticate should re-raise as-is."""
+        mock_query.side_effect = MyGeotabException(
+            {"errors": [{"name": "SomeOtherException", "message": "Something else went wrong"}]}
+        )
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        with pytest.raises(MyGeotabException) as excinfo:
+            await my_api.authenticate_async()
+        assert excinfo.value.name == "SomeOtherException"
+
+    @pytest.mark.asyncio
+    async def test_async_exit_without_owning_session(self):
+        """__aexit__ when API doesn't own the session should be a no-op."""
+        my_api = API(USERNAME, session_id=SESSION_ID, database=DATABASE, server=SERVER)
+        my_api._http_session = "fake_session"
+        my_api._owns_session = False
+        await my_api.__aexit__(None, None, None)
+        assert my_api._http_session == "fake_session"
+
+
+class TestAsyncCallReauthentication:
+    @pytest.mark.asyncio
+    async def test_reauthenticate_on_invalid_user(self, mock_query):
+        """On InvalidUserException during call, re-authenticate and retry once."""
+        mock_query.return_value = mock_authenticate_response()
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        await my_api.authenticate_async()
+        my_api.credentials.password = PASSWORD
+
+        mock_query.side_effect = [
+            MyGeotabException({"errors": [{"name": "InvalidUserException", "message": "Invalid user"}]}),
+            mock_authenticate_response(),
+            [{"id": "b1"}],
+        ]
+        result = await my_api.call_async("Get", type_name="User")
+        assert result == [{"id": "b1"}]
+        assert my_api._reauthorize_count == 0
+
+    @pytest.mark.asyncio
+    async def test_reauthenticate_on_db_unavailable_initializing(self, mock_query):
+        """On DbUnavailableException with Initializing, re-authenticate and retry."""
+        mock_query.return_value = mock_authenticate_response()
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        await my_api.authenticate_async()
+        my_api.credentials.password = PASSWORD
+
+        mock_query.side_effect = [
+            MyGeotabException(
+                {"errors": [{"name": "DbUnavailableException", "message": "Initializing database"}]}
+            ),
+            mock_authenticate_response(),
+            [{"id": "b2"}],
+        ]
+        result = await my_api.call_async("Get", type_name="User")
+        assert result == [{"id": "b2"}]
+
+    @pytest.mark.asyncio
+    async def test_no_reauthenticate_without_password(self, mock_query):
+        """Without password, InvalidUserException should raise AuthenticationException."""
+        my_api = API(USERNAME, session_id=SESSION_ID, database=DATABASE, server=SERVER)
+        mock_query.side_effect = MyGeotabException(
+            {"errors": [{"name": "InvalidUserException", "message": "Invalid user"}]}
+        )
+        with pytest.raises(AuthenticationException):
+            await my_api.call_async("Get", type_name="User")
+
+    @pytest.mark.asyncio
+    async def test_non_auth_exception_re_raises(self, mock_query):
+        """Non-auth MyGeotabExceptions during call should re-raise directly."""
+        mock_query.return_value = mock_authenticate_response()
+        my_api = API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        await my_api.authenticate_async()
+
+        mock_query.side_effect = MyGeotabException(
+            {"errors": [{"name": "SomeOtherException", "message": "Something went wrong"}]}
+        )
+        with pytest.raises(MyGeotabException) as excinfo:
+            await my_api.call_async("Get", type_name="User")
+        assert excinfo.value.name == "SomeOtherException"
