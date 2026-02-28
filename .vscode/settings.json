@@ -1,10 +1,7 @@
-// Place your settings in this file to overwrite default and user settings.
 {
-    "python.linting.mypyEnabled": true,
-    "python.linting.pylintEnabled": false,
     "python.testing.pytestEnabled": true,
     "files.exclude": {
-        "**/*.pyc": { "when": "$(basename).py"},
+        "**/*.pyc": { "when": "$(basename).py" },
         "**/*.egg-info": true,
         "**/__pycache__": true,
         "**/build": true,
@@ -15,12 +12,14 @@
     },
     "python.testing.promptToConfigure": false,
     "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true,
-    "python.formatting.provider": "black",
-    "python.jediEnabled": false,
     "restructuredtext.confPath": "${workspaceFolder}/docs",
-    "python.pythonPath": "/home/aarontoth/.local/share/virtualenvs/mygeotab-python-0imvwKXF/bin/python",
     "python.languageServer": "Pylance",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    }
 }

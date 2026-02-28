@@ -56,7 +56,7 @@ dev = [
     "pytest-benchmark>=5.2.0",
     "pytest-cov>=7.0.0",
     "pytest-datadir>=1.8.0",
-    "requests-mock>=1.12.0",
+    "aioresponses>=0.7.0",
     "ruff>=0.15.0",
     "types-pytz>=2025.2.0",
     "types-setuptools>=82.0.0",
@@ -82,6 +82,7 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 mygeotab.ext.feed
 ~~~~~~~~~~~~~~~~~
@@ -16,10 +14,8 @@ import aiohttp
 from mygeotab import api
 
 
-class DataFeedListener(object):
+class DataFeedListener(abc.ABC):
     """The abstract DataFeedListener to override"""
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def on_data(self, data):
@@ -40,7 +36,7 @@ class DataFeedListener(object):
         return False
 
 
-class DataFeed(object):
+class DataFeed:
     """A simple wrapper for the MyGeotab Data Feed. Create a listener that inherits
     from DataFeedListener to pass in.
     """

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """
 mygeotab.http
 ~~~~~~~~~~~~~
 
 Shared HTTP layer using aiohttp for all API communication.
 """
-
-from __future__ import unicode_literals
 
 import asyncio
 import ssl
@@ -34,7 +30,7 @@ def get_api_url(server):
     """
     parsed = urlparse(server)
     base_url = parsed.netloc if parsed.netloc else parsed.path
-    base_url.replace("/", "")
+    base_url = base_url.replace("/", "")
     return "https://" + base_url + "/apiv1"
 
 
@@ -46,9 +42,7 @@ def get_headers():
     """
     return {
         "Content-type": "application/json; charset=UTF-8",
-        "User-Agent": "Python/{py_version[0]}.{py_version[1]} {title}/{version}".format(
-            py_version=sys.version_info, title=__title__, version=__version__
-        ),
+        "User-Agent": f"Python/{sys.version_info[0]}.{sys.version_info[1]} {__title__}/{__version__}",
     }
 
 

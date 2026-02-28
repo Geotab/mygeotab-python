@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from collections import UserList
 from mygeotab import api
 
@@ -35,15 +33,15 @@ class EntityList(UserList):
         :param type_name: The type of entity.
         :type type_name: str
         """
-        super(EntityList, self).__init__(data)
+        super().__init__(data)
         self.type_name = type_name
 
     def _repr_pretty_(self, p, cycle):
         """The pretty printer for IPython"""
         if cycle:
-            p.text("{}(...)".format(self.type_name))
+            p.text(f"{self.type_name}(...)")
         else:
-            with p.group(8, "{}([".format(self.type_name), "])"):
+            with p.group(8, f"{self.type_name}([", "])"):
                 for idx, item in enumerate(self.data):
                     if idx:
                         p.text(",")
@@ -55,11 +53,6 @@ class EntityList(UserList):
             return self.__class__(self.data[i], self.type_name)
         else:
             return self.data[i]
-
-    def __getslice__(self, i, j):
-        i = max(i, 0)
-        j = max(j, 0)
-        return self.__class__(self.data[i:j], self.type_name)
 
     def __add__(self, other):
         if isinstance(other, UserList):
@@ -128,7 +121,7 @@ class EntityList(UserList):
         :rtype: dict
         """
         data_length = len(self.data)
-        assert data_length == 1, "Expecting one entity, but {} entities were returned".format(data_length)
+        assert data_length == 1, f"Expecting one entity, but {data_length} entities were returned"
         return self.first
 
     def to_dataframe(self, normalize=False):
@@ -143,11 +136,6 @@ class EntityList(UserList):
         except ImportError as exc:
             raise ImportError("The 'pandas' package could not be imported") from exc
         if normalize:
-            try:
-                return pandas.json_normalize(self.data)
-            except AttributeError:
-                from pandas.io.json import json_normalize
-
-                return json_normalize(self.data)
+            return pandas.json_normalize(self.data)
 
         return pandas.DataFrame.from_dict(self.data)

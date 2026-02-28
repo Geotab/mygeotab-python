@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """
 mygeotab.api
 ~~~~~~~~~~~~
 
 Public objects and methods wrapping the MyGeotab API.
 """
-
-from __future__ import unicode_literals
 
 import aiohttp
 
@@ -22,7 +18,7 @@ from .http import (
 from .parameters import camelcaseify_parameters, convert_get_parameters
 
 
-class API(object):
+class API:
     """A simple and Pythonic wrapper for the MyGeotab API."""
 
     def __init__(
@@ -425,7 +421,7 @@ class API(object):
         )
 
 
-class Credentials(object):
+class Credentials:
     """The MyGeotab Credentials object."""
 
     def __init__(self, username, session_id, database, server, password=None):
@@ -449,10 +445,10 @@ class Credentials(object):
         self.password = password
 
     def __str__(self):
-        return "{0} @ {1}/{2}".format(self.username, self.server, self.database)
+        return f"{self.username} @ {self.server}/{self.database}"
 
     def __repr__(self):
-        return "Credentials(username={username}, database={database})".format(username=self.username, database=self.database)
+        return f"Credentials(username={self.username}, database={self.database})"
 
     def get_param(self):
         """A simple representation of the credentials object for passing into the API.authenticate() server call.
