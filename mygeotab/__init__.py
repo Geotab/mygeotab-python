@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __title__ = "mygeotab-python"
 __author__ = "Geotab Inc."
 __version__ = "0.9.4"

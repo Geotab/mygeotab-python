@@ -1,5 +1,5 @@
-import requests_mock
 import pytest
+from aioresponses import aioresponses
 
 from mygeotab import api, serializers
 
@@ -21,8 +21,8 @@ class TestApiPerformance:
 
         mock_api.timeout = 0.0001
 
-        with requests_mock.mock() as m:
-            m.post(server, text=json_response)
+        with aioresponses() as m:
+            m.post(server, body=json_response, content_type="application/json")
 
             benchmark(mock_api.get, "Data")
 
@@ -32,8 +32,8 @@ class TestApiPerformance:
 
         mock_api.timeout = 0.0001
 
-        with requests_mock.mock() as m:
-            m.post(server, text=json_response)
+        with aioresponses() as m:
+            m.post(server, body=json_response, content_type="application/json")
 
             monkeypatch.setattr(serializers, "use_rapidjson", False)
 

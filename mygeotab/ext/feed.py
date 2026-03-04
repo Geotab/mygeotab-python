@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 mygeotab.ext.feed
 ~~~~~~~~~~~~~~~~~
@@ -11,14 +9,13 @@ import abc
 from threading import Thread
 from time import sleep
 
+import aiohttp
+
 from mygeotab import api
-from requests.exceptions import ConnectionError
 
 
-class DataFeedListener(object):
+class DataFeedListener(abc.ABC):
     """The abstract DataFeedListener to override"""
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def on_data(self, data):
@@ -39,7 +36,7 @@ class DataFeedListener(object):
         return False
 
 
-class DataFeed(object):
+class DataFeed:
     """A simple wrapper for the MyGeotab Data Feed. Create a listener that inherits
     from DataFeedListener to pass in.
     """
@@ -77,7 +74,7 @@ class DataFeed(object):
                 )
                 self._version = result["toVersion"]
                 self.listener.on_data(result["data"])
-            except (api.MyGeotabException, ConnectionError) as exception:
+            except (api.MyGeotabException, aiohttp.ClientError) as exception:
                 if self.listener.on_error(exception) is False:
                     break
             if not self.running:

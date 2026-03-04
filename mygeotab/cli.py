@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 mygeotab.cli
 ~~~~~~~~~~~~
@@ -20,7 +18,7 @@ from .api import Credentials
 from .exceptions import AuthenticationException
 
 
-class Session(object):
+class Session:
     """The console session object."""
 
     def __init__(self):
@@ -36,7 +34,7 @@ class Session(object):
 
     @staticmethod
     def _section_name(database):
-        return "session:{0}".format(database)
+        return f"session:{database}"
 
     @staticmethod
     def session_names(config):
@@ -207,8 +205,8 @@ def console(session, database=None, user=None, password=None, server=None):
     :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
     """
     local_vars = _populate_locals(database, password, server, session, user)
-    myg_console_version = "MyGeotab Console {0}".format(__version__)
-    version = "{0} [Python {1}]".format(myg_console_version, sys.version.replace("\n", ""))
+    myg_console_version = f"MyGeotab Console {__version__}"
+    version = f"{myg_console_version} [Python {sys.version.replace(chr(10), '')}]"
     auth_line = ("Logged in as: %s" % session.credentials) if session.credentials else "Not logged in"
     banner = "\n".join([version, auth_line])
     try:
@@ -220,7 +218,7 @@ def console(session, database=None, user=None, password=None, server=None):
         embed(
             globals=globals(),
             locals=local_vars,
-            title="{0}. {1}".format(myg_console_version, auth_line),
+            title=f"{myg_console_version}. {auth_line}",
             configure=configure,
         )
     except ImportError:

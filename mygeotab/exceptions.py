@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 mygeotab.exceptions
 ~~~~~~~~~~~~~~~~~~~
@@ -22,12 +20,12 @@ class MyGeotabException(IOError):
         self.message = main_error["message"]
         self.data = main_error.get("data")
         self.stack_trace = main_error.get("stackTrace")
-        super(MyGeotabException, self).__init__(self.message, *args, **kwargs)
+        super().__init__(self.message, *args, **kwargs)
 
     def __str__(self):
-        error_str = "{0}\n{1}".format(self.name, self.message)
+        error_str = f"{self.name}\n{self.message}"
         if self.stack_trace:
-            error_str += "\n\nStacktrace:\n{0}".format(self.stack_trace)
+            error_str += f"\n\nStacktrace:\n{self.stack_trace}"
         return error_str
 
 
@@ -44,7 +42,7 @@ class AuthenticationException(IOError):
         self.username = username
         self.database = database
         self.server = server
-        super(AuthenticationException, self).__init__(self.message, *args, **kwargs)
+        super().__init__(self.message, *args, **kwargs)
 
     def __str__(self):
         return self.message
@@ -52,7 +50,7 @@ class AuthenticationException(IOError):
     @property
     def message(self):
         """The exception message."""
-        return "Cannot authenticate '{0} @ {1}/{2}'".format(self.username, self.server, self.database)
+        return f"Cannot authenticate '{self.username} @ {self.server}/{self.database}'"
 
 
 class TimeoutException(IOError):
@@ -64,7 +62,7 @@ class TimeoutException(IOError):
         :param server: The server ie. my23.geotab.com.
         """
         self.server = server
-        super(TimeoutException, self).__init__(self.message, *args, **kwargs)
+        super().__init__(self.message, *args, **kwargs)
 
     def __str__(self):
         return self.message
@@ -72,4 +70,4 @@ class TimeoutException(IOError):
     @property
     def message(self):
         """The excepton message."""
-        return "Request timed out @ {0}".format(self.server)
+        return f"Request timed out @ {self.server}"
