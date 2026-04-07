@@ -1,7 +1,7 @@
 import sys
 import time
 import logging
-from .daas_definition import DaasGetQueryResult, DaasGetJobStatusResult, DaasResult, NOT_FULL_API_CALL_EXCEPTION
+from .daas_definition import DaasGetQueryResult, DaasGetJobStatusResult, NOT_FULL_API_CALL_EXCEPTION
 from ..api import API, DEFAULT_TIMEOUT
 
 
@@ -83,7 +83,6 @@ class AltitudeAPI(API):
                     function_name=function_name,
                     function_parameters=params["functionParameters"],
                 )
-                DaasResult(call_result)
                 return call_result
             except Exception as e:
                 if e == NOT_FULL_API_CALL_EXCEPTION:
