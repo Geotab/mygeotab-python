@@ -3219,12 +3219,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:4b9a9f6c3c4c65107a3956ad6a6acbccec38e398ff6d5f78d5df7f103dadb8d6",
-                "sha256:63d2b10ba7958396ad79bbc24d2f6311484e452daad4637ffd40407983a27069"
+                "sha256:036c68caf7e672a699f5ebbf914708d40644c14e05298bc49f7272be91cf43d3",
+                "sha256:ece0a215cdfa6463a65fd6f68bd940f39e455729300ddfe61cab1147ed1d2462"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==82.0.0.20260402"
+            "version": "==82.0.0.20260408"
         },
         "typing-extensions": {
             "hashes": [
