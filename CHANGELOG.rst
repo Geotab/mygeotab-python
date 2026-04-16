@@ -3,6 +3,13 @@
 Changes
 -------
 
+0.9.5 (2026-04-16)
+++++++++++++++++++
+
+**Improvements**
+
+- Altitude: Removed ``DaasResult`` wrapper to resurface access check errors directly to the user `#192 <https://github.com/Geotab/mygeotab-python/pull/192>`__.
+
 0.9.4 (2025-10-24)
 ++++++++++++++++++
 
