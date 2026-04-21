@@ -48,7 +48,7 @@ setup(
         "click",
         "pytz",
         "arrow",
-        "aiohttp[speedups]>=3.12.2,<4",
+        "aiohttp[speedups]>=3.13.5,<4",
         "python-rapidjson",
     ],
     setup_requires=["wheel"],
