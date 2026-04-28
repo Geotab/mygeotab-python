@@ -20,6 +20,7 @@ ruff = "*"
 
 [packages]
 mygeotab = {editable = true, path = "."}
+aiohttp = "*"
 
 [pipenv]
 allow_prereleases = true
