@@ -77,6 +77,17 @@ class DaasGetJobStatusResult(DaasResult):
         self.status = self.job.get("status", {"state": "FAILED"})
         self.state = self.status.get("state", "FAILED")
 
+        error_result = self.status.get("errorResult")
+        if error_result:
+            self.api_result_error = DaasError({
+                "code": error_result.get("code", 500),
+                "domain": error_result.get("location", ""),
+                "message": error_result.get("message", "Job completed with error"),
+            })
+            self.errors.append(Exception(self.api_result_error.message))
+            self.state = "FAILED"
+
+
     def has_finished(self):
         if self.state == "DONE":
             return True
