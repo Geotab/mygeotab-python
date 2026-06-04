@@ -3002,12 +3002,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:ba1d863bbd11526d7232bca8d5a4aebe1d38fa1677a550f47a2692b7d5776900",
-                "sha256:e76ade6f42ba9b4211636b84b65a8e55948a67ffe81f9a44e66b8af93d57e77e"
+                "sha256:31c04a62b57a653a5021caf191be0f10f70df890f813b51f02bab3969d300f20",
+                "sha256:3b743cfe63d0981ea4c15b90710fc1ed41e3464a537d51e705be514e891c1d07"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==82.0.0.20260508"
+            "version": "==82.0.0.20260518"
         },
         "typing-extensions": {
             "hashes": [
