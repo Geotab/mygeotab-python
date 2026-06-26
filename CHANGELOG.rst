@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.9.6 (2026-06-26)
+++++++++++++++++++
+
+**Improvements**
+
+- Altitude: Updated default server to ``altitudeserver.geotab.com`` `#230 <https://github.com/Geotab/mygeotab-python/pull/230>`__.
+
+
 0.9.5 (2026-04-16)
 ++++++++++++++++++
 
