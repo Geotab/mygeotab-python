@@ -12,7 +12,7 @@ class AltitudeAPI(API):
         password=None,
         database=None,
         session_id=None,
-        server="my.geotab.com",
+        server="altitudeserver.geotab.com",
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
         cert=None,
