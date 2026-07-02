@@ -4,6 +4,8 @@ import logging
 from .daas_definition import DaasGetQueryResult, DaasGetJobStatusResult, NOT_FULL_API_CALL_EXCEPTION
 from ..api import API, DEFAULT_TIMEOUT
 
+ALTITUDE_PROXY_SERVER = "https://altitudeapis.geotab.com/api/v1"
+
 
 class AltitudeAPI(API):
     def __init__(
@@ -12,7 +14,7 @@ class AltitudeAPI(API):
         password=None,
         database=None,
         session_id=None,
-        server="altitudeserver.geotab.com",
+        server=ALTITUDE_PROXY_SERVER,
         timeout=DEFAULT_TIMEOUT,
         proxies=None,
         cert=None,
@@ -28,7 +30,8 @@ class AltitudeAPI(API):
         :type database: str
         :param session_id: A session ID, assigned by the server.
         :type session_id: str
-        :param server: The server ie. my23.geotab.com. Optional as this usually gets resolved upon authentication.
+        :param server: Ignored for routing. All Altitude traffic is hardcoded to the proxy
+                       at ``https://altitudeapis.geotab.com/api/v1``, which forwards requests to MyGeotab.
         :type server: str or None
         :param timeout: The timeout to make the call, in seconds. By default, this is 300 seconds (or 5 minutes).
         :type timeout: float or None
@@ -38,7 +41,8 @@ class AltitudeAPI(API):
         :type cert: str or Tuple or None
         :raise Exception: Raises an Exception if a username, or one of the session_id or password is not provided.
         """
-
+        # Overwriting to our new proxy server - backwards compatible for our customers
+        server = ALTITUDE_PROXY_SERVER
         super().__init__(
             username=username,
             password=password,
