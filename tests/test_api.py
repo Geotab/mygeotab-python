@@ -15,6 +15,22 @@ class TestAttributes:
         assert my_api._is_verify_ssl is False
 
 
+class TestGetApiUrl:
+    def test_bare_host(self):
+        assert api.get_api_url("my3.geotab.com") == "https://my3.geotab.com/apiv1"
+
+    def test_scheme_empty_path(self):
+        assert api.get_api_url("https://example.com") == "https://example.com/apiv1"
+
+    def test_scheme_root_path(self):
+        assert api.get_api_url("https://example.com/") == "https://example.com/apiv1"
+
+    def test_full_url_with_path_returned_verbatim(self):
+        server = "https://altitudeapis.geotab.com/api/v1"
+        assert api.get_api_url(server) == server
+
+
+
 class TestProcessResults:
     def test_handle_server_exception(self):
         exception_response = dict(

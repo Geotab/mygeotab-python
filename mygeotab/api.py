@@ -437,6 +437,8 @@ def get_api_url(server):
     :rtype: str
     """
     parsed = urlparse(server)
+    if parsed.scheme in ("http", "https") and parsed.path not in ("", "/"):
+        return server
     base_url = parsed.netloc if parsed.netloc else parsed.path
     base_url.replace("/", "")
     return "https://" + base_url + "/apiv1"
