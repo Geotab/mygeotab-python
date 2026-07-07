@@ -3,6 +3,14 @@
 Changes
 -------
 
+0.9.7 (2026-07-07)
+++++++++++++++++++
+
+**Improvements**
+
+- Altitude: Re-pointed Altitude to new reverse proxy server `#233 <https://github.com/Geotab/mygeotab-python/pull/233>`__.
+
+
 0.9.6 (2026-06-26)
 ++++++++++++++++++
 
