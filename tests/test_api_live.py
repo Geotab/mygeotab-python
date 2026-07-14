@@ -4,11 +4,14 @@
 Live API tests - only unauthenticated GetVersion calls.
 
 These tests actually hit the MyGeotab API servers and require network access.
+Run them explicitly with: pytest -m live
 """
 
 import pytest
 
 from mygeotab import api, server_call_async
+
+pytestmark = pytest.mark.live
 
 
 class TestLiveServerCall:

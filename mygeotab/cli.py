@@ -8,7 +8,9 @@ Console utilities for working with the MyGeotab API.
 """
 
 import configparser
+import os
 import os.path
+import stat
 import sys
 
 import click
@@ -32,6 +34,9 @@ class Session(object):
         config_path = click.get_app_dir(__title__)
         if not os.path.exists(config_path):
             os.makedirs(config_path)
+        # Restrict the directory so only the owner can read/write/traverse it.
+        # This prevents other local users from enumerating or accessing session files.
+        os.chmod(config_path, stat.S_IRWXU)  # 0700
         return os.path.join(config_path, "config.ini")
 
     @staticmethod
@@ -64,8 +69,11 @@ class Session(object):
         config.set(section_name, "database", self.credentials.database)
         config.set(section_name, "server", self.credentials.server)
 
-        with open(self._get_config_file(), "w") as configfile:
+        config_file = self._get_config_file()
+        with open(config_file, "w") as configfile:
             config.write(configfile)
+        # Restrict the session file so only the owner can read/write it.
+        os.chmod(config_file, stat.S_IRUSR | stat.S_IWUSR)  # 0600
 
     def load(self, name=None):
         config = configparser.ConfigParser()
@@ -114,8 +122,10 @@ class Session(object):
             config = configparser.ConfigParser()
             config.read(self._get_config_file())
             config.remove_section(section_name)
-            with open(self._get_config_file(), "w") as configfile:
+            config_file = self._get_config_file()
+            with open(config_file, "w") as configfile:
                 config.write(configfile)
+            os.chmod(config_file, stat.S_IRUSR | stat.S_IWUSR)  # 0600
         self.credentials = None
 
 
@@ -241,6 +251,11 @@ def main(ctx):
     """MyGeotab Python SDK command line tools.
 
     You probably want to use the `console` command.
+
+    Session tokens are stored in an owner-only config file
+    (~/.config/mygeotab-python/config.ini on Linux,
+    ~/Library/Application Support/mygeotab-python/config.ini on macOS).
+    To remove a saved session run: myg sessions remove <database>
     """
     ctx.obj = Session()
     try:

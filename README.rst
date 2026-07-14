@@ -26,7 +26,7 @@ MyGeotab
     :alt: License
 
 
-A Python client for the `MyGeotab SDK <https://geotab.github.io/sdk/>`_.
+A Python client for the `MyGeotab SDK <https://developers.geotab.com/>`_.
 
 Features
 --------
@@ -102,4 +102,4 @@ or for the bleeding-edge version:
 Documentation
 -------------
 
-Read the docs at `<http://mygeotab-python.readthedocs.org>`_
+Read the docs at `<https://mygeotab-python.readthedocs.io/en/latest/>`_
