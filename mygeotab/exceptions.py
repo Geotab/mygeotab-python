@@ -71,5 +71,5 @@ class TimeoutException(IOError):
 
     @property
     def message(self):
-        """The excepton message."""
+        """The exception message."""
         return "Request timed out @ {0}".format(self.server)

@@ -53,7 +53,7 @@ class API(SyncAPI):
 
         :param method: The method name.
         :param params: Additional parameters to send (for example, search=dict(id='b123') )
-        :return: The JSON result (decoded into a dict) from the server.abs
+        :return: The JSON result (decoded into a dict) from the server.
         :raise MyGeotabException: Raises when an exception occurs on the MyGeotab server.
         :raise TimeoutException: Raises when the request does not respond after some time.
         """

@@ -11,6 +11,11 @@ querying data rather than managing authentication boilerplate.
     are created with owner-only permissions (``0700``/``0600``) so other local
     users cannot read your session tokens.
 
+    Config file locations:
+
+    - **Linux:** ``~/.config/mygeotab-python/config.ini``
+    - **macOS:** ``~/Library/Application Support/mygeotab-python/config.ini``
+
     To clear a saved session at any time, run ``myg sessions remove <database>``.
 
 Usage
@@ -20,7 +25,7 @@ Launching a console
 ~~~~~~~~~~~~~~~~~~~
 
 The most common use of ``myg`` is to open an interactive Python console
-pre-loaded with an authenticated API object (``myg``):
+pre-loaded with an authenticated API object:
 
 .. code-block:: bash
 
@@ -29,7 +34,27 @@ pre-loaded with an authenticated API object (``myg``):
     Password: ******
     Logged in as: my_user@example.com @ my1.geotab.com/my_database
 
-Inside the console, use ``myg`` to make API calls:
+Credentials can also be passed inline to skip the prompts:
+
+.. code-block:: bash
+
+    $ myg console my_database --user my_user@example.com --password mypass
+    $ myg console my_database -u my_user@example.com -p mypass --server my3.geotab.com
+
+Inside the console the following locals are available:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 85
+
+   * - Name
+     - Description
+   * - ``myg``
+     - The authenticated :class:`API <mygeotab.API>` object for the selected database.
+   * - ``mygeotab``
+     - The ``mygeotab`` module (for accessing exceptions, helpers, etc.).
+   * - ``dates``
+     - The :mod:`mygeotab.dates` module (date/timezone helpers).
 
 .. code-block:: python
 
@@ -37,17 +62,21 @@ Inside the console, use ``myg`` to make API calls:
     >>> myg.call('GetVersion')
 
 .. note::
+    If ``ptpython`` or ``IPython`` is installed, the console launches with that
+    instead of the standard Python REPL, providing syntax highlighting, tab
+    completion, and pretty-printed output. Install either with ``pip install ptpython``
+    or ``pip install ipython``.
+
     Once a database has been authenticated, ``myg`` remembers the session and
     won't prompt for credentials again until the session expires:
 
     .. code-block:: bash
 
         $ myg console my_database
-        MyGeotab Console 0.9.7 [Python 3.12.0]
+        MyGeotab Console [Python 3.12.0]
         Logged in as: my_user@example.com @ my1.geotab.com/my_database
 
-    If ``my_database`` was the last logged-in database, the database argument
-    can be omitted:
+    If ``my_database`` was the last logged-in database, the argument can be omitted:
 
     .. code-block:: bash
 
