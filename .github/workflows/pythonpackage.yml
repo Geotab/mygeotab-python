@@ -103,7 +103,9 @@ jobs:
           python -m pip install --upgrade setuptools pip pipenv
           pipenv install --skip-lock --dev -e .
       - name: Run credentialed integration tests
-        # Skip if secrets are not available (e.g. PRs from forks)
+        # Skip if secrets are not available (e.g. PRs from forks).
+        # Exit code 5 means pytest collected 0 tests (no integration tests
+        # marked yet); treat that as success so the job doesn't block the PR.
         run: |
           if [ -z "$MYGEOTAB_DATABASE" ]; then
             echo "No credentials available – skipping integration tests."
@@ -115,7 +117,7 @@ jobs:
             --benchmark-storage=file://output/ \
             --benchmark-autosave \
             --junitxml output/integration-test-results.xml \
-            tests/
+            tests/ || { code=$?; [ $code -eq 5 ] && echo "No integration tests collected – OK." || exit $code; }
       - name: Archive integration results
         uses: actions/upload-artifact@v7
         with:
