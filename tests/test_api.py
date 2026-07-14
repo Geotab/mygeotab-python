@@ -91,3 +91,25 @@ class TestProcessResults:
     def test_handle_none(self):
         result = api._process(None)
         assert result is None
+
+    def test_unknown_structure_returned_as_is(self):
+        """A dict with neither 'error' nor 'result' must be returned unchanged."""
+        data = {"someUnexpectedKey": 42}
+        assert api._process(data) == data
+
+
+class TestMiscApi:
+    def test_server_defaults_when_credentials_server_is_none(self):
+        """_server: when credentials.server is falsy it must fall back to
+        'my.geotab.com' and mutate credentials.server in-place."""
+        a = api.API("user@test.com", session_id="s123", database="db", server="my3.geotab.com")
+        a.credentials.server = None
+        assert a._server == "my.geotab.com"
+        assert a.credentials.server == "my.geotab.com"
+
+    def test_mygeotab_exception_data_field(self):
+        """MyGeotabException must expose the 'data' attribute when provided."""
+        exc = api.MyGeotabException(
+            {"errors": [{"name": "SomeError", "message": "msg", "data": {"key": "value"}}]}
+        )
+        assert exc.data == {"key": "value"}

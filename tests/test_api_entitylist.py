@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import copy
+import sys
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+from mygeotab.ext.entitylist import API as EntityListAPI
 from mygeotab.ext.entitylist import EntityList
 
 
@@ -90,6 +93,106 @@ class TestEntityList:
             assert len(dataframe) == 3
             mock_pandas.json_normalize.assert_called_once()
             assert int(dataframe["location.x"][-1:]) == 123
+
+
+class TestEntityListEdgeCases:
+    """Cover branches missed by the original test suite."""
+
+    # ── first / last on empty list ───────────────────────────────────────────
+
+    def test_first_empty_returns_none(self):
+        assert EntityList([], "Device").first is None
+
+    def test_last_empty_returns_none(self):
+        assert EntityList([], "Device").last is None
+
+    # ── entity with zero items ───────────────────────────────────────────────
+
+    def test_entity_zero_items_raises(self):
+        with pytest.raises(AssertionError, match="0 entities"):
+            EntityList([], "Device").entity
+
+    # ── __add__ with plain list ──────────────────────────────────────────────
+
+    def test_add_plain_list(self):
+        el = EntityList([{"id": "a"}], "Device")
+        result = el + [{"id": "b"}]
+        assert len(result) == 2
+        assert isinstance(result, EntityList)
+        assert result.type_name == "Device"
+
+    # ── __radd__ with plain list ─────────────────────────────────────────────
+
+    def test_radd_plain_list(self):
+        el = EntityList([{"id": "a"}], "Device")
+        result = [{"id": "b"}] + el
+        assert len(result) == 2
+        assert isinstance(result, EntityList)
+        assert result.type_name == "Device"
+
+    # ── __mul__ / __rmul__ ───────────────────────────────────────────────────
+
+    def test_mul(self):
+        el = EntityList([{"id": "a"}], "Device")
+        result = el * 3
+        assert len(result) == 3
+        assert isinstance(result, EntityList)
+        assert result.type_name == "Device"
+
+    def test_rmul(self):
+        el = EntityList([{"id": "a"}], "Device")
+        result = 3 * el
+        assert len(result) == 3
+        assert isinstance(result, EntityList)
+        assert result.type_name == "Device"
+
+    # ── __copy__ ─────────────────────────────────────────────────────────────
+
+    def test_copy(self):
+        el = EntityList([{"id": "a"}], "Device")
+        el2 = copy.copy(el)
+        assert el2.type_name == el.type_name
+        assert el2.data == el.data
+        assert el2.data is not el.data  # independent copy
+
+    # ── to_dataframe — ImportError when pandas not installed ────────────────
+
+    def test_to_dataframe_raises_import_error_when_no_pandas(self):
+        el = EntityList([{"id": "b1"}], "Device")
+        # Simulate pandas being absent
+        with patch.dict(sys.modules, {"pandas": None}):
+            with pytest.raises(ImportError, match="pandas"):
+                el.to_dataframe()
+
+    # ── EntityList.API.get returns EntityList ────────────────────────────────
+
+    def test_entitylist_api_get_returns_entity_list(self):
+        """ext.entitylist.API.get() must wrap the raw result in an EntityList."""
+        with patch("mygeotab.api._query") as mock_query:
+            # First call: authenticate
+            mock_query.return_value = {
+                "path": "my3.geotab.com",
+                "credentials": {
+                    "userName": "test@example.com",
+                    "sessionId": "sid123",
+                    "database": "db",
+                },
+            }
+            el_api = EntityListAPI(
+                "test@example.com",
+                password="pw",
+                database="db",
+                server="my3.geotab.com",
+            )
+            el_api.authenticate()
+
+            # Second call: get
+            mock_query.return_value = [{"id": "b1", "name": "Device A"}]
+            result = el_api.get("Device")
+
+        assert isinstance(result, EntityList)
+        assert result.type_name == "Device"
+        assert result[0]["id"] == "b1"
 
 
 def get_entitylist(type_name="Device", second_device_name="Test Device"):

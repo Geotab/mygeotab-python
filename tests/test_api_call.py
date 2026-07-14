@@ -264,6 +264,145 @@ class TestAuthentication:
         assert fake_credentials["database"] in str(excinfo.value)
 
 
+class TestAuthenticateEdgeCases:
+    """Cover authenticate() paths missed by the existing suite."""
+
+    def test_extend_session_when_session_id_no_password(self, mock_query):
+        """authenticate() with session_id and no password must call ExtendSession
+        and return the *same* Credentials object unchanged."""
+        mock_query.return_value = None  # ExtendSession returns None
+        session = api.API(
+            USERNAME,
+            session_id=SESSION_ID,
+            database=DATABASE,
+            server=SERVER,
+        )
+        original_credentials = session.credentials
+        result = session.authenticate()
+
+        assert result is original_credentials
+        assert result.session_id == SESSION_ID
+        # Verify the method name passed to _query was ExtendSession
+        called_method = mock_query.call_args[0][1]
+        assert called_method == "ExtendSession"
+        called_data = mock_query.call_args[0][2]
+        assert called_data["sessionId"] == SESSION_ID
+        assert called_data["userName"] == USERNAME
+
+    def test_authenticate_this_server_keeps_current_server(self, mock_query):
+        """When the server responds with path='ThisServer', the client's server
+        must not change."""
+        mock_query.return_value = {
+            "path": "ThisServer",
+            "credentials": {
+                "userName": USERNAME,
+                "sessionId": "new-session-id",
+                "database": DATABASE,
+            },
+        }
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        creds = session.authenticate()
+
+        assert creds.server == SERVER  # unchanged
+        assert creds.session_id == "new-session-id"
+
+    def test_authenticate_no_path_in_result_returns_existing_credentials(self, mock_query):
+        """When the server returns a result with no 'path' key but a session_id
+        is already present, the existing Credentials object is returned as-is."""
+        # Seed a valid session_id so the code reaches the 'path' check
+        session = api.API(
+            USERNAME,
+            password=PASSWORD,
+            session_id=SESSION_ID,
+            database=DATABASE,
+            server=SERVER,
+        )
+        original = session.credentials
+        mock_query.return_value = {
+            # No 'path' key
+            "credentials": {"userName": USERNAME, "sessionId": SESSION_ID, "database": DATABASE}
+        }
+        result = session.authenticate()
+        assert result is original
+
+    @pytest.mark.parametrize("message", ["Initializing", "UnknownDatabase"])
+    def test_authenticate_db_unavailable_raises_auth_exception(self, mock_query, message):
+        """DbUnavailableException with 'Initializing' or 'UnknownDatabase' in
+        the message must be converted to AuthenticationException."""
+        mock_query.side_effect = api.MyGeotabException(
+            {"errors": [{"name": "DbUnavailableException", "message": message}]}
+        )
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        with pytest.raises(AuthenticationException):
+            session.authenticate()
+
+    def test_authenticate_other_mygeotab_exception_re_raised(self, mock_query):
+        """A MyGeotabException that is not InvalidUser/DbUnavailable must
+        propagate without conversion."""
+        mock_query.side_effect = api.MyGeotabException(
+            {"errors": [{"name": "SomeOtherException", "message": "unexpected"}]}
+        )
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        with pytest.raises(api.MyGeotabException):
+            session.authenticate()
+
+
+class TestCallReauth:
+    """Cover call() re-authentication paths."""
+
+    def test_reauth_on_invalid_user_when_password_present(self, mock_query):
+        """When InvalidUserException is raised and the API object has a password,
+        it must re-authenticate and retry the original call transparently."""
+        # Sequence:
+        #   1. Initial call → InvalidUserException (session expired)
+        #   2. Re-authenticate → returns new credentials
+        #   3. Retry call → success
+        mock_query.side_effect = [
+            api.MyGeotabException(
+                {"errors": [{"name": "InvalidUserException", "message": "Session expired"}]}
+            ),
+            mock_authenticate_response(),  # authenticate() response
+            mock_user_response(),           # retried get()
+        ]
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        # Give the session a pre-existing session_id so it skips initial auth
+        session.credentials.session_id = SESSION_ID
+
+        result = session.get("User", name=USERNAME)
+        assert len(result) == 1
+        # Three _query calls: original + auth + retry
+        assert mock_query.call_count == 3
+
+    def test_no_infinite_reauth_loop(self, mock_query):
+        """If InvalidUserException recurs after a re-auth attempt, the client
+        must raise AuthenticationException instead of looping again."""
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        session.credentials.session_id = SESSION_ID
+        # Artificially set the guard counter to 1, simulating a re-auth already done.
+        session._API__reauthorize_count = 1
+
+        mock_query.side_effect = api.MyGeotabException(
+            {"errors": [{"name": "InvalidUserException", "message": "Invalid user"}]}
+        )
+        with pytest.raises(AuthenticationException):
+            session.call("GetVersion")
+
+
+class TestMiscAttributes:
+    """Cover miscellaneous API utility paths requiring mock_query."""
+
+    def test_multi_call_single_element_no_params(self, mock_query):
+        """multi_call with a single-method entry (no params dict) must use an
+        empty params dict rather than crash."""
+        mock_query.return_value = mock_authenticate_response()
+        session = api.API(USERNAME, password=PASSWORD, database=DATABASE, server=SERVER)
+        session.authenticate()
+
+        mock_query.return_value = ["8.0.1234"]
+        results = session.multi_call([["GetVersion"]])  # no params element
+        assert results is not None
+
+
 class TestServerCallApi:
     def test_invalid_server_call(self):
         with pytest.raises(Exception) as excinfo1:
