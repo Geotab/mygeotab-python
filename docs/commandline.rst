@@ -7,9 +7,10 @@ querying data rather than managing authentication boilerplate.
 
 .. note::
     ``myg`` never stores passwords. Only the username, database name, server,
-    and session token are persisted. The config file and its parent directory
-    are created with owner-only permissions (``0700``/``0600``) so other local
-    users cannot read your session tokens.
+    and session token are persisted to a local config file:
+
+    - **Linux:** ``~/.config/mygeotab-python/config.ini``
+    - **macOS:** ``~/Library/Application Support/mygeotab-python/config.ini``
 
     To clear a saved session at any time, run ``myg sessions remove <database>``.
 
