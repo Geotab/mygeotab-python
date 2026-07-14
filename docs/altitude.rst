@@ -4,7 +4,7 @@ Altitude
 `Altitude <https://altitude.geotab.com/platform-overview/>`__ is Geotab's DaaS
 (Data as a Service) platform. :class:`AltitudeAPI <mygeotab.altitude.wrapper.AltitudeAPI>`
 is a subclass of :class:`API <mygeotab.API>` that routes all traffic through the
-Altitude proxy endpoint, regardless of which server is passed at construction.
+Altitude proxy endpoint.
 
 Authentication works the same way as the core API — provide credentials and call
 ``authenticate()`` before making any data calls.

@@ -11,11 +11,6 @@ querying data rather than managing authentication boilerplate.
     are created with owner-only permissions (``0700``/``0600``) so other local
     users cannot read your session tokens.
 
-    Config file locations:
-
-    - **Linux:** ``~/.config/mygeotab-python/config.ini``
-    - **macOS:** ``~/Library/Application Support/mygeotab-python/config.ini``
-
     To clear a saved session at any time, run ``myg sessions remove <database>``.
 
 Usage
