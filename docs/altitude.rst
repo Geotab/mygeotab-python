@@ -1,7 +1,7 @@
 Altitude
 ========
 
-Reference for the `Altitude <https://altitude.geotab.com/altitude/>`__ DaaS (Data as a Service) API wrapper.
+Reference for the `Altitude <https://altitude.geotab.com/platform-overview/>`__ DaaS (Data as a Service) API wrapper.
 
 AltitudeAPI
 -----------
