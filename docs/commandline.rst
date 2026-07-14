@@ -1,57 +1,70 @@
 Command Line Tools
 ==================
 
-The `myg` command line script is installed alongside this package, which currently makes some administration
-and querying simple, as it handles the credential storage and token expiry automatically.
+The ``myg`` command-line tool is installed alongside this package. It handles
+credential storage and session token expiry automatically, so you can focus on
+querying data rather than managing authentication boilerplate.
 
-Currently, the script launches an interactive console to quickly query data from a database. More functionality
-will be added in the future.
+.. note::
+    ``myg`` never stores passwords. Only the username, database name, server,
+    and session token are persisted. The config file and its parent directory
+    are created with owner-only permissions (``0700``/``0600``) so other local
+    users cannot read your session tokens.
 
-The tools never store passwords. The username, session token, and database are persisted and managed in
-the local user's data directory.
+    To clear a saved session at any time, run ``myg sessions remove <database>``.
 
 Usage
 -----
 
-The most common usage of the `myg` script is to launch an interactive console.
+Launching a console
+~~~~~~~~~~~~~~~~~~~
 
-For example, to launch a console for a database called `my_database`:
+The most common use of ``myg`` is to open an interactive Python console
+pre-loaded with an authenticated API object (``myg``):
 
 .. code-block:: bash
 
     $ myg console my_database
-    Username: my_user
+    Username: my_user@example.com
     Password: ******
+    Logged in as: my_user@example.com @ my1.geotab.com/my_database
+
+Inside the console, use ``myg`` to make API calls:
+
+.. code-block:: python
+
+    >>> myg.get('Device', name='%Test%')
+    >>> myg.call('GetVersion')
 
 .. note::
-    The `myg` script automatically handles storing credentials for various databases and remembers the last logged in
-    database. It also handles session expiry: it will prompt for a new password if the session has expired.
-
-    For example, once the database has been authenticated against, the script won't prompt for passwords until the
-    sesison expires:
+    Once a database has been authenticated, ``myg`` remembers the session and
+    won't prompt for credentials again until the session expires:
 
     .. code-block:: bash
 
         $ myg console my_database
-        MyGeotab Console 0.5.1 [Python 3.5.2 \|Anaconda custom (x86_64)\| (default, Jul  2 2016, 17:52:12) [GCC 4.2.1 Compatible Apple LLVM 4.2 (clang-425.0.28)]]
-        Logged in as:  my_user @ my1.geotab.com/my_database
-        In [1]:
+        MyGeotab Console 0.9.7 [Python 3.12.0]
+        Logged in as: my_user@example.com @ my1.geotab.com/my_database
 
-    If `my_database` was the last logged in database, the following also works:
+    If ``my_database`` was the last logged-in database, the database argument
+    can be omitted:
 
     .. code-block:: bash
 
         $ myg console
 
-To view current sessions:
+Managing sessions
+~~~~~~~~~~~~~~~~~
+
+List all saved sessions:
 
 .. code-block:: bash
 
-    $ myg sessions
+    $ myg sessions --list
     my_database
     my_other_database
 
-And to remove a session:
+Remove a session (logs out and deletes the stored token):
 
 .. code-block:: bash
 
@@ -61,9 +74,10 @@ And to remove a session:
 Additional Help
 ---------------
 
-Run `--help` after any command to get available options and descriptions.
+Run ``--help`` after any command to see all available options:
 
 .. code-block:: bash
 
     $ myg --help
     $ myg console --help
+    $ myg sessions --help

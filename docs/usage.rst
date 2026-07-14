@@ -7,9 +7,9 @@ Getting Started
 ---------------
 
 For a quick introduction to the MyGeotab SDK and initial setup of a database,
-please refer to the `Getting Started guide <https://my.geotab.com/sdk/#/gettingStarted>`_.
+please refer to the `Getting Started guide <https://developers.geotab.com/>`_.
 
-For an overview of some basic concepts, the `Concepts guide <https://my.geotab.com/sdk/#/concepts>`_
+For an overview of some basic concepts, the `Concepts guide <https://developers.geotab.com/>`_
 is a good resource to find out how things work under the hood.
 
 Authentication
@@ -48,12 +48,12 @@ From this, store the `server`, `database`, `username`, and `session_id` properti
 
     # Continue with api object until your app finishes
 
-    local_credentials = my_read_credentials() # Next load of the app
-    new_api = mygeotab.api(username=local_credentials.user, database=local_credentials.database, server=local_credentials.server, session_id=saved_session_id)
+    local_credentials = my_read_credentials()  # Next load of the app
+    new_api = mygeotab.API(username=local_credentials.username, database=local_credentials.database, server=local_credentials.server, session_id=local_credentials.session_id)
 
 .. note::
     The best practices of saving credentials only applies to some service-based SDK apps. The recommendation is that if the app runs on
-    a schedule (for example, a operating system-scheduled task running every minute), store the credentials locally.
+    a schedule (for example, an operating system-scheduled task running every minute), store the credentials locally.
 
     Too many authentication attempts within a period of time will cause the server to reject any further requests for a short time.
 
@@ -106,17 +106,17 @@ To filter this down to a specific vehicle, a 'search' parameter is added on the 
     In this Python library, a lot of effort was made to make this a much easier experience. Please read the below section
     to see how the above call was made to be more Pythonic and easier to use.
 
-For more information on calls available, visit the "Methods" section of the `MyGeotab API Reference <https://my.geotab.com/sdk/#/api>`_.
+For more information on calls available, visit the `MyGeotab API Reference <https://developers.geotab.com/>`_.
 
 Entities
 --------
 
-From the `MyGeotab API Concepts documentation <https://my.geotab.com/sdk/#/concepts>`_:
+From the `MyGeotab API Concepts documentation <https://developers.geotab.com/>`_:
 
 .. pull-quote::
     All objects in the MyGeotab system are called entities. Entities have an ID property that is used to uniquely identify that object in the database.
 
-To see all available entities, refer to the `API _MyGeotab API Reference <https://my.geotab.com/sdk/#/api>`_.
+To see all available entities, refer to the `MyGeotab API Reference <https://developers.geotab.com/>`_.
 
 .. note::
     To see which objects are entities in the SDK, type in "search" into the search box of the API reference page.

@@ -1,7 +1,26 @@
 Altitude
 ========
 
-The full reference for `Altitude <https://its.geotab.com/altitude/>`__ APIs.
+Reference for the `Altitude <https://developers.geotab.com/>`__ DaaS (Data as a Service) API wrapper.
 
-.. automodule:: mygeotab.altitude
-    :members:
+AltitudeAPI
+-----------
+
+.. autoclass:: mygeotab.altitude.wrapper.AltitudeAPI
+   :members:
+   :inherited-members:
+
+Result Types
+------------
+
+.. autoclass:: mygeotab.altitude.daas_definition.DaasResult
+   :members:
+
+.. autoclass:: mygeotab.altitude.daas_definition.DaasGetJobStatusResult
+   :members:
+
+.. autoclass:: mygeotab.altitude.daas_definition.DaasGetQueryResult
+   :members:
+
+.. autoclass:: mygeotab.altitude.daas_definition.DaasError
+   :members:
