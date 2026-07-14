@@ -7,9 +7,9 @@ Getting Started
 ---------------
 
 For a quick introduction to the MyGeotab SDK and initial setup of a database,
-please refer to the `Getting Started guide <https://developers.geotab.com/>`_.
+please refer to the `Getting Started guide <https://developers.geotab.com/myGeotab/guides/gettingStarted/>`_.
 
-For an overview of some basic concepts, the `Concepts guide <https://developers.geotab.com/>`_
+For an overview of some basic concepts, the `Concepts guide <https://developers.geotab.com/myGeotab/guides/concepts/>`_
 is a good resource to find out how things work under the hood.
 
 Authentication
@@ -106,17 +106,17 @@ To filter this down to a specific vehicle, a 'search' parameter is added on the 
     In this Python library, a lot of effort was made to make this a much easier experience. Please read the below section
     to see how the above call was made to be more Pythonic and easier to use.
 
-For more information on calls available, visit the `MyGeotab API Reference <https://developers.geotab.com/>`_.
+For more information on calls available, visit the `MyGeotab API Reference <https://developers.geotab.com/myGeotab/apiReference/methods/>`_.
 
 Entities
 --------
 
-From the `MyGeotab API Concepts documentation <https://developers.geotab.com/>`_:
+From the `MyGeotab API Concepts documentation <https://developers.geotab.com/myGeotab/guides/concepts/>`_:
 
 .. pull-quote::
     All objects in the MyGeotab system are called entities. Entities have an ID property that is used to uniquely identify that object in the database.
 
-To see all available entities, refer to the `MyGeotab API Reference <https://developers.geotab.com/>`_.
+To see all available entities, refer to the `MyGeotab API Reference <https://developers.geotab.com/myGeotab/apiReference/objects/>`_.
 
 .. note::
     To see which objects are entities in the SDK, type in "search" into the search box of the API reference page.
