@@ -26,80 +26,102 @@ MyGeotab
     :alt: License
 
 
-A Python client for the `MyGeotab SDK <https://geotab.github.io/sdk/>`_.
+A Python client for the `MyGeotab SDK <https://developers.geotab.com/>`_.
 
 Features
 --------
 
-- Automatic serializing and deserializing of API call results
-- Clean, Pythonic API for querying data
-- Cross-platform and compatible with Python 3.9+
-- A `myg` command-line tool for interactively working with data in a terminal
+- Automatic serialization and deserialization of API call results
+- Clean, Pythonic API for querying, adding, updating, and removing entities
+- Both synchronous and ``async``/``await`` interfaces
+- Cross-platform and compatible with Python 3.10+
+- ``myg`` command-line tool for interactively exploring data in a terminal
+
+Installation
+------------
+
+.. code-block:: bash
+
+    $ pip install mygeotab
+
+For the latest development version:
+
+.. code-block:: bash
+
+    $ pip install git+https://github.com/geotab/mygeotab-python
 
 Usage
 -----
 
-It's very easy to get started once you've registered a `MyGeotab <https://www.geotab.com/fleet-management-software/>`__ database:
+Synchronous
+~~~~~~~~~~~
 
 .. code-block:: python
 
     import mygeotab
 
-    client = mygeotab.API(username='hello@example.com', password='mypass', database='MyDatabase')
+    client = mygeotab.API(
+        username='hello@example.com',
+        password='mypass',
+        database='MyDatabase',
+    )
     client.authenticate()
 
     devices = client.get('Device', name='%Test Dev%')
-
     print(devices)
 
-    # [{'maxSecondsBetweenLogs': 200.0,
+    # [{'name': 'Test Device',
+    #   'maxSecondsBetweenLogs': 200.0,
     #   'activeTo': '2050-01-01',
-    #   'minAccidentSpeed': 3.0,
-    #   'ignoreDownloadsUntil': '1986-01-01',
-    #   'name': 'Test Device',
-    #   'idleMinutes': 3.0,
-    #   ......
+    #   ...}]
 
-You can also make calls asynchronously via `asyncio <https://docs.python.org/3/library/asyncio.html>`__:
+Asynchronous
+~~~~~~~~~~~~
 
 .. code-block:: python
 
     import asyncio
     import mygeotab
 
-    client = mygeotab.API(username='hello@example.com', password='mypass', database='MyDatabase')
-    client.authenticate()
+    async def main():
+        client = mygeotab.API(
+            username='hello@example.com',
+            password='mypass',
+            database='MyDatabase',
+        )
+        client.authenticate()
 
-    async def get_device():
-      return await client.get_async('Device', name='%Test Dev%')
-    
-    devices = loop.run_until_complete(get_device())
-    print(devices)
+        devices = await client.get_async('Device', name='%Test Dev%')
+        print(devices)
 
-    # [{'maxSecondsBetweenLogs': 200.0,
-    #   'activeTo': '2050-01-01',
-    #   'minAccidentSpeed': 3.0,
-    #   'ignoreDownloadsUntil': '1986-01-01',
-    #   'name': 'Test Device',
-    #   'idleMinutes': 3.0,
-    #   ......
+    asyncio.run(main())
 
-Installation
-------------
+Command-line tool
+~~~~~~~~~~~~~~~~~
 
-To install the MyGeotab library and command line tool:
+The ``myg`` tool opens an interactive Python console pre-loaded with an
+authenticated API object:
 
 .. code-block:: bash
 
-    $ pip install mygeotab
+    $ myg console MyDatabase
 
-or for the bleeding-edge version:
+    # Inside the console, `myg` is the active API object:
+    >>> myg.get('Device', name='%Test%')
+
+Manage saved sessions:
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/geotab/mygeotab-python
+    $ myg sessions --list
+    $ myg sessions remove MyDatabase
 
 Documentation
 -------------
 
-Read the docs at `<http://mygeotab-python.readthedocs.org>`_
+Full API reference and guides are at `<https://mygeotab-python.readthedocs.io/en/latest/>`_.
+
+License
+-------
+
+Apache 2.0. See `LICENSE <LICENSE>`_ for details.

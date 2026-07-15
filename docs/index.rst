@@ -1,8 +1,3 @@
-.. MyGeotab Python SDK documentation master file, created by
-   sphinx-quickstart on Wed Oct  1 20:55:06 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 .. include:: ../README.rst
 
 .. include:: ../CHANGELOG.rst

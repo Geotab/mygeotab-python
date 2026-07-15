@@ -7,7 +7,6 @@ verify_ssl = true
 coverage = "*"
 pytest = "*"
 pytest-cov = "*"
-mygeotab = {editable = true,path = "."}
 mypy = "*"
 pytest-asyncio = "*"
 requests-mock = "*"
@@ -17,6 +16,7 @@ types-requests = "*"
 types-pytz = "*"
 types-setuptools = "*"
 ruff = "*"
+mygeotab = {path = ".", editable = true}
 
 [packages]
 mygeotab = {editable = true, path = "."}

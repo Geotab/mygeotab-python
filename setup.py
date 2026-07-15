@@ -24,15 +24,16 @@ except IOError:
 
 py_version = sys.version_info[:3]
 
-if py_version < (3, 7, 0):
-    raise RuntimeError("This package requres Python 3.9.0+")
+if py_version < (3, 10, 0):
+    raise RuntimeError("This package requires Python 3.10.0+")
 
-packages = ["mygeotab", "mygeotab.ext"]
+packages = ["mygeotab", "mygeotab.ext", "mygeotab.altitude"]
 
 setup(
     name="mygeotab",
     author="Geotab Inc.",
     version=version,
+    python_requires=">=3.10",
     url="https://github.com/geotab/mygeotab-python",
     description="A Python client for the MyGeotab SDK",
     long_description=f"{readme} \n\n {changelog}",
@@ -62,11 +63,11 @@ setup(
         "Natural Language :: English",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Libraries",
     ],

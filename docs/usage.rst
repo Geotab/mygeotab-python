@@ -7,9 +7,9 @@ Getting Started
 ---------------
 
 For a quick introduction to the MyGeotab SDK and initial setup of a database,
-please refer to the `Getting Started guide <https://my.geotab.com/sdk/#/gettingStarted>`_.
+please refer to the `Getting Started guide <https://developers.geotab.com/myGeotab/guides/gettingStarted/>`_.
 
-For an overview of some basic concepts, the `Concepts guide <https://my.geotab.com/sdk/#/concepts>`_
+For an overview of some basic concepts, the `Concepts guide <https://developers.geotab.com/myGeotab/guides/concepts/>`_
 is a good resource to find out how things work under the hood.
 
 Authentication
@@ -48,19 +48,19 @@ From this, store the `server`, `database`, `username`, and `session_id` properti
 
     # Continue with api object until your app finishes
 
-    local_credentials = my_read_credentials() # Next load of the app
-    new_api = mygeotab.api(username=local_credentials.user, database=local_credentials.database, server=local_credentials.server, session_id=saved_session_id)
+    local_credentials = my_read_credentials()  # Next load of the app
+    new_api = mygeotab.API(username=local_credentials.username, database=local_credentials.database, server=local_credentials.server, session_id=local_credentials.session_id)
 
 .. note::
     The best practices of saving credentials only applies to some service-based SDK apps. The recommendation is that if the app runs on
-    a schedule (for example, a operating system-scheduled task running every minute), store the credentials locally.
+    a schedule (for example, an operating system-scheduled task running every minute), store the credentials locally.
 
     Too many authentication attempts within a period of time will cause the server to reject any further requests for a short time.
 
     However, constantly running sessions may not need to store the credentials in the file system as they can retain the :class:`API <mygeotab.API>`
     instance in memory.
 
-Subsequent calls to the :func:`authenticate() <mygeotab.API.authenticate>` method with an already authenticted :class:`API <mygeotab.API>` object can extend the lifetime of the session. However, this still counts towards the count of authentication attempts and calling this may still result in `OverLimitException`\s and may reject requests for a short time afterward to prevent API abuse.
+Subsequent calls to the :func:`authenticate() <mygeotab.API.authenticate>` method with an already authenticated :class:`API <mygeotab.API>` object can extend the lifetime of the session. However, this still counts towards the count of authentication attempts and calling this may still result in an over-limit server error (raised as a :class:`MyGeotabException <mygeotab.MyGeotabException>`) and may reject requests for a short time afterward to prevent API abuse.
 
 Making Calls
 ------------
@@ -79,7 +79,7 @@ To demonstrate a (slightly) more complex call with 1 parameter, the following is
 
 Assume for this example there is one vehicle in the system, with a partial JSON representation:
 
-.. code-block:: javascript
+.. code-block:: json
 
     {
         "id": "b0a46",
@@ -106,17 +106,17 @@ To filter this down to a specific vehicle, a 'search' parameter is added on the 
     In this Python library, a lot of effort was made to make this a much easier experience. Please read the below section
     to see how the above call was made to be more Pythonic and easier to use.
 
-For more information on calls available, visit the "Methods" section of the `MyGeotab API Reference <https://my.geotab.com/sdk/#/api>`_.
+For more information on calls available, visit the `MyGeotab API Reference <https://developers.geotab.com/myGeotab/apiReference/methods/>`_.
 
 Entities
 --------
 
-From the `MyGeotab API Concepts documentation <https://my.geotab.com/sdk/#/concepts>`_:
+From the `MyGeotab API Concepts documentation <https://developers.geotab.com/myGeotab/guides/concepts/>`_:
 
 .. pull-quote::
     All objects in the MyGeotab system are called entities. Entities have an ID property that is used to uniquely identify that object in the database.
 
-To see all available entities, refer to the `API _MyGeotab API Reference <https://my.geotab.com/sdk/#/api>`_.
+To see all available entities, refer to the `MyGeotab API Reference <https://developers.geotab.com/myGeotab/apiReference/objects/>`_.
 
 .. note::
     To see which objects are entities in the SDK, type in "search" into the search box of the API reference page.
@@ -170,7 +170,7 @@ To modify an entity, first get the full entity:
     device = devices[0]
 
 .. note::
-    The the :func:`get() <mygeotab.API.get>` method always returns a list of entities, even when querying on a specific
+    The :func:`get() <mygeotab.API.get>` method always returns a list of entities, even when querying on a specific
     serial number or VIN, etc.
 
 Then modify a property:
@@ -194,3 +194,60 @@ To remove the entity, once again get the full entity, as above in Setting_, and 
 .. code-block:: python
 
     api.remove('Device', device)
+
+Batching Calls
+--------------
+
+Multiple API calls can be combined into a single HTTP request using
+:func:`multi_call() <mygeotab.API.multi_call>`. This reduces network overhead significantly
+when making several small requests together:
+
+.. code-block:: python
+
+    results = api.multi_call([
+        ['GetVersion'],
+        ['Get', {'typeName': 'Device', 'search': {'name': '%Test%'}}],
+    ])
+    version = results[0]
+    devices = results[1]
+
+If one call in a multi-call fails, an exception is raised immediately and subsequent
+calls in the batch are not executed.
+
+Async Usage
+-----------
+
+All methods have an ``async`` equivalent. The public :class:`API <mygeotab.API>` class
+exported from the top-level package supports both sync and async calls from the same
+object:
+
+.. code-block:: python
+
+    import asyncio
+    import mygeotab
+
+    async def main():
+        api = mygeotab.API(
+            username='hello@example.com',
+            password='mypass',
+            database='MyDatabase',
+        )
+        api.authenticate()  # authentication is always synchronous
+
+        version = await api.call_async('GetVersion')
+        devices = await api.get_async('Device', name='%Test%')
+
+        results = await api.multi_call_async([
+            ['GetVersion'],
+            ['Get', {'typeName': 'User'}],
+        ])
+
+    asyncio.run(main())
+
+The async variants — :func:`call_async() <mygeotab.API.call_async>`,
+:func:`get_async() <mygeotab.API.get_async>`,
+:func:`add_async() <mygeotab.API.add_async>`,
+:func:`set_async() <mygeotab.API.set_async>`,
+:func:`remove_async() <mygeotab.API.remove_async>`, and
+:func:`multi_call_async() <mygeotab.API.multi_call_async>` — accept the same arguments
+as their synchronous counterparts.
