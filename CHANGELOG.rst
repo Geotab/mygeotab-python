@@ -3,6 +3,19 @@
 Changes
 -------
 
+0.9.8 (2026-07-16)
+++++++++++++++++++
+
+**Improvements**
+
+- Security: enforce ``0700`` permissions on the session config directory and ``0600`` on the config file on every write in ``cli.py`` `#240 <https://github.com/Geotab/mygeotab-python/pull/240>`__.
+- Python: drop EOL Python 3.9; add Python 3.14; update all version contracts (``setup.py``, ``mypy.ini``, ``pyproject.toml``, classifiers) `#240 <https://github.com/Geotab/mygeotab-python/pull/240>`__.
+- Packaging: add ``mygeotab.altitude`` to the ``packages`` list in ``setup.py`` (was silently absent from installed distributions) `#240 <https://github.com/Geotab/mygeotab-python/pull/240>`__.
+- CI: split single test job into three — ``test-offline`` (matrix 3.10–3.14), ``test-live`` (unauthenticated), and ``test-integration`` (credentialed) `#240 <https://github.com/Geotab/mygeotab-python/pull/240>`__.
+- Tests: raise offline coverage from 59 % to 81 % across ``altitude``, ``api``, ``exceptions``, ``parameters``, and ``ext.entitylist`` `#240 <https://github.com/Geotab/mygeotab-python/pull/240>`__.
+- Docs: extensive fixes to ``usage.rst``, ``commandline.rst``, ``altitude.rst``, ``api.rst``, ``ext.rst``, and ``conf.py`` — updated links, corrected examples, added async and batching sections `#240 <https://github.com/Geotab/mygeotab-python/pull/240>`__.
+
+
 0.9.7 (2026-07-07)
 ++++++++++++++++++
 
