@@ -16,6 +16,7 @@ jobs:
   test-offline:
     name: "Unit tests – Python ${{ matrix.python-version }}"
     runs-on: ubuntu-22.04
+    environment: test
     strategy:
       fail-fast: false
       matrix:
@@ -45,11 +46,13 @@ jobs:
             --junitxml output/python${{ matrix.python-version }}-test-results.xml \
             tests/
       - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.14'
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./output/coverage.xml
           flags: "py${{ matrix.python-version }}"
+
       - name: Archive test results
         uses: actions/upload-artifact@v7
         with:
