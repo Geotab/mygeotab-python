@@ -37,6 +37,7 @@ setup(
     url="https://github.com/geotab/mygeotab-python",
     description="A Python client for the MyGeotab SDK",
     long_description=f"{readme} \n\n {changelog}",
+    long_description_content_type="text/x-rst",
     extras_require={"notebook": ["pandas"]},
     test_suite="tests",
     include_package_data=True,
