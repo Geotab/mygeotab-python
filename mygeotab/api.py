@@ -34,7 +34,7 @@ class API(object):
         self,
         username,
         password=None,
-        database=None,
+        database="",
         session_id=None,
         server="my.geotab.com",
         timeout=DEFAULT_TIMEOUT,
