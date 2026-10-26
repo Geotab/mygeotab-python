@@ -3332,12 +3332,12 @@
         },
         "types-pytz": {
             "hashes": [
-                "sha256:42ac44e83645bfceb46597342c8fb8ec028a1407e2feae9c5c539986eab6b57a",
-                "sha256:4364075b6867dd15b210bb8c1d29727d609917129b45600defe1d4b3eda5ecb9"
+                "sha256:1a522c2ec03aad8d4baaf97105958019ad51704b1e471c882d1c6ccea3e5e64b",
+                "sha256:9e4a893b362a8eed4e10a348c80603ade65bdb3819419e589364afafe2ea08b1"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==2026.3.1.20260727"
+            "version": "==2026.5.0.20261006"
         },
         "types-requests": {
             "hashes": [
