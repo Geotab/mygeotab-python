@@ -1814,6 +1814,14 @@
             "markers": "python_version >= '3.9'",
             "version": "==26.1.0"
         },
+        "backports-asyncio-runner": {
+            "hashes": [
+                "sha256:0da0a936a8aeb554eccb426dc55af3ba63bcdc69fa1a600b5bb305413a4477b5",
+                "sha256:a5aa7b2b7d8f8bfcaa2b57313f70792df84e32a2a746f585213373f900b42162"
+            ],
+            "markers": "python_version < '3.11' and python_version >= '3.8'",
+            "version": "==1.2.0"
+        },
         "brotli": {
             "hashes": [
                 "sha256:022426c9e99fd65d9475dce5c195526f04bb8be8907607e27e747893f6ee3e24",
@@ -3100,12 +3108,12 @@
         },
         "pytest-asyncio": {
             "hashes": [
-                "sha256:933ca923a23075a87fb7070c0ec272a6848489824d887c85c812670932835aa1",
-                "sha256:c6c0d2259945122819f171a32ecea2c349ead889ee28176caaf492143424be42"
+                "sha256:507afa78ec77c6661164ef1a2368bc7820383fd1a14b2a7f813de8b5a92949cc",
+                "sha256:e8266eb094e5ee9ffdb2068c9836f33e209ea77a970eb846933d416b5602669b"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==1.4.0"
+            "version": "==1.4.1"
         },
         "pytest-benchmark": {
             "hashes": [
