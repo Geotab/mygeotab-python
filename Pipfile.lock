@@ -3375,12 +3375,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:0f123655f44390a15ec62c9fa30b57f6dafe53014524d28b62cab1edbc303059",
-                "sha256:f435ec88f8f2319316969e37b5a1ca49496b276889124de249b422b061b492fe"
+                "sha256:1ec758bbeddf88d52f963fe663beabc2117b6aae73cf3d2902d7dd0df81bd76e",
+                "sha256:23e9bf876adca8df2285a68f76c355128b1e679b27cfec4854faf350cd7999e5"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==84.0.0.20261006"
+            "version": "==84.2.0.20261104"
         },
         "typing-extensions": {
             "hashes": [
