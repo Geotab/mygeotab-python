@@ -44,6 +44,10 @@ Installation
 
     $ pip install mygeotab
 
+Some platforms do not have a prebuilt ``brotlicffi`` wheel (for example,
+Intel macOS and Alpine Linux). Installing on these platforms may require a
+native build toolchain, including a C compiler.
+
 For the latest development version:
 
 .. code-block:: bash

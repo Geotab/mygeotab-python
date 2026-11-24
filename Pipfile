@@ -17,10 +17,21 @@ types-pytz = "*"
 types-setuptools = "*"
 ruff = "*"
 mygeotab = {path = ".", editable = true}
+aiohttp = ">=3.14.4,<4"
+brotli = {version = ">=1.2.1", markers = "platform_python_implementation == 'CPython' and sys_platform != 'android' and sys_platform != 'ios'"}
+brotlicffi = ">=1.2.1.0"
+certifi = ">=2026.10.19"
+multidict = ">=6.9.1,<7.2"
+urllib3 = ">=2.8.0"
 
 [packages]
 mygeotab = {editable = true, path = "."}
-aiohttp = "*"
+aiohttp = ">=3.14.4,<4"
+brotli = {version = ">=1.2.1", markers = "platform_python_implementation == 'CPython' and sys_platform != 'android' and sys_platform != 'ios'"}
+brotlicffi = ">=1.2.1.0"
+certifi = ">=2026.10.19"
+multidict = ">=6.9.1,<7.2"
+urllib3 = ">=2.8.0"
 
 [pipenv]
 allow_prereleases = true

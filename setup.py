@@ -46,11 +46,16 @@ setup(
     license="Apache 2.0",
     install_requires=[
         "requests",
-        "urllib3",
+        "urllib3>=2.8.0",
+        "certifi>=2026.10.19",
         "click",
         "pytz",
         "arrow",
-        "aiohttp[speedups]>=3.13.5,<4",
+        "aiohttp[speedups]>=3.14.4,<4",
+        "multidict>=6.9.1",
+        "Brotli>=1.2.1; platform_python_implementation == 'CPython' "
+        "and sys_platform != 'android' and sys_platform != 'ios'",
+        "brotlicffi>=1.2.1.0",
         "python-rapidjson",
     ],
     setup_requires=["wheel"],
